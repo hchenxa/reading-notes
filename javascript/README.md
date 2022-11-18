@@ -39,8 +39,8 @@
 
 ### 变量
 
-- var
-- let
+- var 
+- let 块级别本地变量，比var的变量作用域更小
 
 ### 数据类型
 
@@ -90,9 +90,10 @@ new Array()
 ## 函数和对象
 
 ### 三种类型的函数
-具名函数：调用函数名称时执行
-匿名函数：特定事件触发后运行
-立即调用的函数表达式：在浏览器访问时立即运行
+
+- 具名函数：调用函数名称时执行
+- 匿名函数：特定事件触发后运行
+- 立即调用的函数表达式：在浏览器访问时立即运行
 
 ```javascript
 // 实名函数，通过函数名称显式调用
@@ -139,9 +140,190 @@ console.log("the total is: ", total);
 
 ### 构建基本函数
 
+```javascript
+function findBiggestFraction() {
+    console.log("xxx");
+}
 
+findBiggestFraction();
+```
+### 参数传递
+```javascript
+function findBiggestFraction(a, b) {
+    a > b ? console.log("the biggest fraction is: ", a):console.log("the biggest fraction is: ", b)
+}
+
+var firstFraction = 'a';
+var secondFraction = 'b';
+findBiggestFraction(firstFraction, secondFraction);
+```
+### 函数返回值
+```javascript
+function findBiggestFraction(a, b) {
+    var result
+    a > b ? result = a : result = b;
+    return result
+}
+
+var firstFraction = 'a';
+var secondFraction = 'b';
+var result = findBiggestFraction(firstFraction, secondFraction);
+console.log('The result is:', result)
+```
+### 匿名函数
+
+```javascript
+var theBiggest = function(a,b) {
+    var result;
+    a > b ? result = a : result = b;
+    return result;
+}
+
+console.log(theBiggest(number1, number2));
+```
+
+### 立即调用的函数表达式
+```javascript
+var theBiggest = function(a,b) {
+    var result;
+    a > b ? result = a : result = b;
+    return result;
+}
+
+console.log(theBiggest);
+```
+上面这个匿名函数在console中的输出会是function这个函数，不会执行。
+
+如果想立即执行函数，可以使用()，例如：
+```javascript
+var theBiggest = (function(a,b)) {
+    var result;
+    a > b ? result = a : result = b;
+    return result;
+}(number1, number2)
+
+console.log(theBiggest);
+```
+按照上面的方式，theBiggest就会得到函数的返回值。
+
+### 变量作用域
+
+- 全局作用域
+- 局部作用域
+
+### let和const
+
+### 对象
+```javascript
+var test = new Object();
+test.title = 'test';
+test.name = 'hchen';
+
+console.log('The object of test is:', test);
+
+```
+或者
+```javascript
+var test = {
+    title: 'test',
+    name: 'hchen'
+}
+
+console.log('The object of test is:', test);
+```
+
+### 对象构造函数
+
+函数首字母大写来表示对象
+
+```javascript
+function Course(title, instructor, level, published, views) {
+    this.title = title
+    this.instructor = instructor
+    this.level = level
+    this.published = published
+    this.views = views
+    this.updateViews = function() {
+        return ++this.views
+    }
+}
+
+var course01 = new Course("test1", "hchenxa", 1, true, 0)
+console.log(course01)
+
+var course02 = new Course("test2", "hchenxa", 1, true, 5)
+console.log(course02)
+
+var courses= [
+    new new Course("test1", "hchenxa", 1, true, 0),
+    new Course("test2", "hchenxa", 1, true, 5)
+]
+
+console.log(courses)
+console.log(courses[1].title)
+courses[1].updateViews()
+console.log(courses[1].views)
+```
+
+### 点和括号的表示法
+
+括号可以用来处理特殊字符，比如`course["test:var"]`, 这种是句点处理不了的。
+
+
+### 闭包
+
+内部函数依赖于外部函数的变量来工作。
+
+```javascript
+function giveMeEms(pixels) {
+    var baseValue = 16;
+    function doTheMath() {
+        return pixels/baseValue;
+    }
+    return doTheMath;
+}
+
+var s = giveMeEms(12);
+var m = giveMeEms(18);
+var l = giveMeEms(24);
+var xl = giveMeems(32);
+
+console.log("s: ", s());
+console.log("m: ", m());
+console.log("l: ", l());
+console.log("xl: ", xl());
+
+```
 
 ## Javascript和DOM
+
+### DOM: 文档对象模型
+
+- BOM 浏览器对象模型
+- DOM 文档对象模型
+
+![节点树](./snapshot/tree.png)
+
+### 使用querySelector方法定位DOM中的目标元素
+
+```javascript
+// 获取匹配选择器的第一个元素
+document.querySelector(".main-nav a")
+
+// 获取匹配选择器的所有元素的数组
+document.querySelectorAll(".post-content p")
+```
+### 访问和修改元素
+
+
+### 访问和修改类
+
+### 访问和修改属性
+
+### 添加DOM元素
+
+### 将内联CSS应用到元素
+
 
 ## 事件
 

@@ -1,0 +1,76 @@
+/* 布局 */
+.main {
+    display: flex;
+    padding: 2em;
+    height: 90vh;
+    justify-content: center;
+    align-items: middle;
+}
+
+.clockbox,
+#clock {
+    width: 100%;
+}
+
+/* 钟表样式 */
+.circle {
+    fill: none;
+    /* 描边设置成黑色 */
+    stroke: #000;
+    /* 描边宽度 */
+    stroke-width: 9;
+    /* 描边斜尖限制 */
+    stroke-miterlimit: 10;
+}
+
+.mid-circle {
+    /* 是表中间的圆点，这里把它填充为黑色 */
+    fill: #000;
+}
+
+/* 小时刻度 */
+.hour-marks {
+    fill: none;
+    stroke: #000;
+    stroke-width: 9;
+    stroke-miterlimit: 10;
+}
+
+/* 时针 */
+.hour-arm {
+    fill: none;
+    stroke: #000;
+    stroke-width: 17;
+    stroke-miterlimit: 10;
+}
+
+/* 分针 */
+.minute-arm {
+    fill: none;
+    stroke: #000;
+    stroke-width: 11;
+    stroke-miterlimit: 10;
+}
+
+/* 秒针 */
+.second-arm {
+    fill: none;
+    stroke: #000;
+    stroke-width: 4;
+    stroke-miterlimit: 10;
+}
+
+/* 透明盒子，确保指针相对表盘居中 */
+.sizing-box {
+    fill: none
+}
+
+/* 下面是应用到每个表针的分组选择器 */
+/* 使所有的表针围绕相同的中心点转动 */
+/* 可选：使用transition属性设置动画效果 */
+#hour,
+#minute,
+#second {
+    transform-origin: 300px 300px;
+    transition: transform 0.5s ease-in-out;
+}

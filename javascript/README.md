@@ -516,6 +516,44 @@ THE_IMAGE.setAttribute("alt", "")
 
 当我们使用javascript将样式应用到元素上时，浏览器会访问元素的style属性，把内联CSS添加到这个元素。javascript不会写入内部或者外部的样式表，他是对style属性进行直接操作来控制元素的CSS。
 
+```javascript
+// 通过调用.style就可以查看内联CSS的属性
+
+// 比如:
+document.querySelector(".cta a").style
+// 会返回一个CSS样式列表申明对象CSSStyleDeclaration,这个对象会列出所有的内联对象属性以及当前在这个元素上应用的值。这里只能获得元素的内联样式，元素上引用的外部样式表样式或者是内部样式表定义的样式，都不会显示。因为javascript是直接访问HTML文档的这个元素和他的内容，我们要查看的样式内容会映射到元素对象的style属性。
+```
+
+修改某一个css样式：
+
+```javascript
+// 可以使用类似.style.xxx = ""的方式进行修改，比如:
+document.querySelector(".cta a").style.color = "green"
+
+// 这样，原先的元素属性里面就会在添加一个color的属性
+<style="color: green">
+```
+
+上面这种方法如果对于想修改多个css样式子在使用上会更麻烦一些，因为如果有多个css样式需要修改，就得执行多次这个命令进行修改。使用下面这种方法可能会更好一些。
+
+修改多个css样式:
+
+```javascript
+document.querySelector(".cta a").style.cssText = "padding:lem; color:green; background-color: red;"
+
+<style="pading: lem; color: green; background-color: red">
+```
+
+对CSS内联样式的操作：
+- `.hasAttribute("style");`
+- `.getAttribute("style");`
+- `.setAttribute("style", "color:red");`
+- `.removeAttribute("style");`
+
+最佳实践:
+
+内联CSS会重写应用到元素的任何CSS，在大部分情况下，最佳实践是创建CSS规则，通过使用JavaScript操作这些类，把这些规则应用到元素。
+
 ## 事件
 
 ## 循环

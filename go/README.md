@@ -1,7 +1,5 @@
 # go 语言学习笔记
 
-[TOC]
-
 ## 标识符和关键字
 
 golang里面的标识符由字母，数字和`_`组成，并且只能字母和`_`开头.
@@ -640,7 +638,6 @@ switch x.(type) {
 ```go
 import _ "github.com/xxx"
 ```
-
 ### init()初始化函数
 
 导入包的时候会自动触发内部的init()函数调用，init()函数**没有参数也没有返回值**，在程序运行时候自动被调用，不能在代码中主动调用它。
@@ -648,3 +645,138 @@ import _ "github.com/xxx"
 一个包的初始化过程是按照代码中引入的顺序来进行的，所有在该包中声明的init函数都将被串行调用并且仅调用执行一次。每一个包初始化的时候都是先执行依赖的包中声明的init函数再执行当前包中声明的init函数。确保在程序的main函数开始执行时所有的依赖包都已初始化完成。
 
 ![package](./images/package.png)
+
+## 文件操作
+
+### 文件的读取
+#### 用`os`包里面的`Read`来读取文件
+```go
+import os
+
+func main() {
+	// os.Open用来打开文件
+	file, err := os.Open("./file")
+	if err != nil {
+		os.Exit(1)
+	}
+	
+	defer file.Close()
+
+	var (
+		text make([]byte, 128)
+		content []byte
+	)
+
+    // 循环读取文件
+	for {
+        n, err := file.Read(text)
+    	if err != nil {
+            if err == io.EOF {
+        		return
+        	}
+    		fmt.Printf("failed to open the file due to %v\n", err)
+    		os.Exit(1)
+    	}
+		content.append(content,tmp[:]...)
+	}
+}
+```
+#### 使用`bufio`读取文件
+```go
+import os
+
+func main() {
+	// os.Open用来打开文件
+	file, err := os.Open("./file")
+	if err != nil {
+		os.Exit(1)
+	}
+	
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+
+    // 循环读取文件
+	for {
+        line, err := reader.ReadString('\n')
+		if err == io.EOG {
+			return
+		}
+		if err != nil {
+			os.Exit(1)
+		}
+		fmt.Printf("%v", line)
+	}
+}
+```
+#### 使用`ioutils.Readfile`读取文件
+```go
+import "io/ioutil"
+
+func main() {
+	context, err := ioutil.ReadFile("./file")
+	if err != nil {
+		return
+	}
+	fmt.Print(string(context))
+}
+```
+
+### 文件的写入
+
+#### `os.OpenFile()`函数可以以指定的模式打开文件
+
+```go
+func OpenFile(name string, flag int, perm FileMode) (*File, error) {
+
+}
+```
+- name:文件名
+- flag:以下这些类型
+
+| 模式        | 含义 |
+| ----------- | ---- |
+| os.O_WRONLY | 只写 |
+| os.O_CREATE | 创建 |
+| os.O_RDONLY | 只读 |
+| os.O_RDWR   | 读写 |
+| os.O_TRUNC  | 清空 |
+| os.O_APPEND | 追加 |
+- perm:文件权限,r(04),w(02),x(01)
+
+#### `Write`和`WriteString`
+```go
+func main() {
+	file, err := os.OpenFile("./file.txt", os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	str := "test"
+	file.Write([]byte(str))
+	file.WriteString(str)
+}
+```
+#### `bufio.NewWrite`
+```go
+func main() {
+	file, err := os.OpenFile("./file.txt", os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	writer := bufio.NewWrite(file)
+	writer.WriteString("text\n") // 将数据显写入缓存
+	writer.Flush // 将缓存内容写入文件
+}
+```
+#### `ioutil.WriteFile`
+```go
+func main() {
+	str := "test"
+	if err := ioutil.WriteFile("./file.txt", []byte(str), 0666); err != nil {
+		return
+	}
+}
+```

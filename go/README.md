@@ -161,7 +161,7 @@ s1 := `第一行
 Go 语言的字符有以下两种：
 
 uint8类型，或者叫 byte 型，代表一个ASCII码字符。
-rune类型，代表一个 UTF-8字符。
+rune类型，代表一个UTF-8字符。
 
 ### 修改字符串
 要修改字符串，需要先将其转换成[]rune或[]byte，完成后再转换为string。无论哪种转换，都会重新分配内存，并复制字节数组。
@@ -191,6 +191,13 @@ func changeString() {
 ## 流程控制
 
 ### `if` `else`
+```go
+if 条件 {
+
+} else {
+
+}
+```
 
 ### `for`
 
@@ -778,5 +785,179 @@ func main() {
 	if err := ioutil.WriteFile("./file.txt", []byte(str), 0666); err != nil {
 		return
 	}
+}
+```
+
+## `time`标准库
+
+### 时间格式化
+时间类型有一个自带方法Format进行时间格式化，使用的是Go语言诞生的时间`2006年1月2日15点04分`(20061234)
+
+### `runtime.Caller`
+```go
+func Caller(skip int) (pc uintptr, file string, line int, ok bool)
+```
+- `skip`: 上溯的栈帧数，0表示Caller的调用者（0表示当前函数，-1表示上一层函数）
+- `pc`: 调用栈的标识符
+- `file`: 文件路径
+- `line`: 文件中的行号
+- `ok`: 如果无法获得信息，ok会设置成false
+
+## 反射
+
+反射是指在程序运行期间对程序本身进行访问和修改的能力。程序在编译时，变量被转换为内存地址，变量名不会被编译器写入到可执行部分。在运行程序时，程序无法获取自身的信息。
+
+支持反射的语言可以在程序编译期间将变量的反射信息，如字段名称，类型信息，结构体信息等整合到可执行文件中，并给程序提供接口访问反射信息，这样就可以在程序运行期间获取类型的反射信息，并且有能力修改他们。
+
+### `reflect`
+
+在GO语言中，任何接口的值都可以理解为由`reflect.Type`和`reflect.Value`两部分组成，并且`reflect`包提供了`reflect.TypeOf`和`reflect.ValueOf`来获取任意对象的值和类型。
+
+### `TypeOf`
+
+`reflect.TypeOf`返回的是`reflect.Type`类型，其中包含的是原始值的类型信息。
+
+`reflect.TypeOf.Name()`和`reflect.TypeOf.Kind()`
+```go
+type Sample struct {}
+
+func reflectType(x interface{}) {
+	v:=reflect.TypeOf(x)
+
+	v.Name() // 返回的是类型的名称，这里返回的是Sample
+	v.Kind() // 返回的是类型, 这里返回的是struct
+}
+func main() {
+	var c = Sample{}
+	reflectType(c)	
+}
+```
+
+### `ValueOf`
+
+`reflect.ValueOf()`返回的是`reflect.Value`类型，其中包含了原始值的值信息。
+
+```go
+type Sample struct {
+	name string
+	age int
+}
+
+func reflectValue(x interface{}) {
+	v:=reflect.ValueOf(x)
+
+	v.Kind() // 返回的是ValueOf的类型
+}
+func main() {
+	var c = Sample{
+		name: "test",
+		age: 10,
+	}
+	reflectValue(c)	
+}
+```
+
+### 通过反射设置变量的值
+
+反射中可以通过专有的`Elem()`方法来获取指针对应的值。
+```go
+func reflectSetValue(x interface{}) {
+	// x 这里传进来的是指针
+	v:=reflect.ValueOf(x)
+	if v.Elem().Kind() == reflect.Int64 {
+  		v.Elem().SetInt(200)
+	}
+}
+```
+
+### `isNil()`和`isValid()`
+
+- `isNil()` 报告v持有的值是否为nil
+- `isValid()` 返回v是否持有值
+
+### 结构体反射
+任意值通过`reflect.TypeOf()`获取反射对象信息后，如果它的类型是结构体，可以通过反射值对象`reflect.Type`的`NumField()`和`Field()`方法获得结构成员的详细信息。
+
+## 并发
+Go语言的并发通过`goroutine`实现，`goroutine`类似于线程，属于用户态的线程，我们可以根据需要创建成千上万的`goroutine`并发工作。`goroutine`是由Go语言的运行时`runtime`调度完成的，而线程是由操作系统调度完成的。
+
+Go语言还提供了`channel`在多个`goroutine`间进行通信。
+
+### `sync.WaitGroup`
+
+- `sync.WaitGroup.Add()`
+- `sync.WaitGroup.Done()`
+- `sync.WaitGroup.Wait()`
+
+### `goroutine`和线程
+
+`goroutine`是可增长的栈，操作系统线程一般都有固定的栈内存（通常是2MB），一个`goroutine`的栈在其生命周期开始的时候只有很小的栈（典型情况是**2KB**），`goroutine`的栈可以按需增大和缩小。
+
+### `goroutine`调度
+
+`GMP`是GO语言`runtime`层面实现的，是GO语言自己实现的一套调度系统。
+
+- G:就是个`goroutine`,除了存放本`goroutine`的信息外，还有与所在P的绑定信息
+- M:是Go运行时候对操作系统的虚拟，和内核线程是映射关系，一个`goroutine`最终是要放在M上执行
+- P:管理着一组`goroutine`队列，存放了当前`goroutine`运行的上下文环境(函数指针，堆栈地址，地址边界),P会对自己管理的`goroutine`队列做一些调度(比如把占有CPU时间长的`goroutine`暂停来运行后续的`goroutine`等)，当自己的队列消费完了，就去全局的队列里取，如果全局的队列里也消费完了，会去其他的P的队列里面抢占任务。
+
+P管理着一组G挂在M上运行，当一个G长久阻塞在一个M上，`runtime`会新建一个M，阻塞G所在的P会把其他的G挂载在新的M上，当旧的G阻塞完成后会这认为其死亡的时候，回收旧的M。
+
+P的个数是通过`runtime.GOMAXPROCS`设定.
+
+m:n调度技术: 把m个`goroutine`调度到n个OS线程。特点是`goroutine`的调度是在用户态下完成的，不涉及内核态与用户态之前的切换，包括内存的分配和释放，都是在用户态维护着一块大的内存池，不直接调用系统的`malloc`函数，成本比调度OS线程低很多。另外充分利用了多核的硬件资源，近似的把若干`goroutine`均分在物理线程上，在加上本身`goroutine`的超轻量，保证了go调度方面的性能。
+
+- 一个操作系统线程对应用户态多个`goroutine`.
+- go程序可以同时使用多个操作系统线程.
+- `goroutine`和OS线程使多对多的关系, 即`m:n`.
+
+### `channel`
+
+GO语言的并发模型是CSP（Communication Sequential Processes）,提倡通过**通信共享内存**而不是通过共享内存而实现通信。
+
+GO语言的channel使一个特殊的类型，按照FIFO的规则，保证收发数据的顺序。每一个通道都是一个具体类型的导管，也就是声明channel的时候需要为其制定元素类型。
+
+```go
+var 变量名 chan 类型
+```
+`channel`是引用类型，声明后需要使用`make`函数初始化后才能使用.
+```go
+make(chan 类型, [缓冲大小])
+```
+
+`channel`的三个方法
+- 发送
+```go
+ch <- 10 // 把10发送到ch中
+```
+- 接收
+```go
+x := <- ch // 从ch中接收值并赋值给变量x
+<- ch // 从ch中接收值，忽略
+```
+- 关闭
+```go
+close(ch) // 关闭channel
+```
+
+### 单向通道
+
+适用于不同任务函数中使用通道对其发送或者接收的限制，比如只能发送或者接收。
+
+其中,`chan <- 类型`是一个只能发送的通道，可以发送但不能接受; `<- chan 类型`是一个只能接受的通道，可以接受但不能发送。
+
+### `select`多路复用
+
+在某些场景下我们需要同时从多个通道接受数据。通道在接受数据的时候，如果没有数据可以接受将发生阻塞。 Go语言内置了`select`来同时相应多个通道的操作。
+```go
+select {
+	case <- ch1:
+		...
+	case data := <- ch2:
+		...
+	case ch3 <- data:
+		...
+	default:
+		...
 }
 ```

@@ -961,3 +961,44 @@ select {
 		...
 }
 ```
+
+## 互斥锁
+
+是一种常用的控制共享资源访问的方法，能够保证同时只有一个`goroutine`可以访问共享资源. GO语言使用`Mutex`类型来实现互斥锁。
+```go
+var lock sync.Mutex
+
+func add() {
+	lock.Lock() // 加锁
+	lock.Unlock() // 解锁
+}
+```
+使用互斥锁能够保证同一时间有并且只有一个`goroutine`进入临界区，其他的`goroutine`则在等待锁；当互斥锁释放了以后，等待的`goroutine`才可以获取锁进去临界区，多个`goroutine`同时等待一个锁的时候，唤醒锁是随机的。
+
+## 读写互斥锁
+
+互斥锁是完全互斥的，但有些场景下是读多写少，当并发的去读取一个资源不涉及资源修改的时候是没有必要加锁的，这种场景下用读写锁是更好的一种选择。
+
+读写锁有两种：读锁和写锁。当一个`goroutine`获取读锁后，其他的`goroutine`如果是获取读锁会继续获得锁，如果获得写锁就会等待；当一个`goroutine`获取写锁之后，其他的`goroutine`无论事获取读锁还是写锁都会等待。
+
+读写锁示例:
+```go
+var rwlock sync.RWMutex
+
+func add() {
+	rwlock.RLock()
+	rwlock.Runlock()
+	rwlock.Lock()
+	rwlock.Unlock()
+}
+```
+
+### `sync.Once`
+
+在某些场景下，有些操作只需要做一次，比如加载配置文件，关闭一次通道之类的.
+
+Go语言中`sync`包中提供了一个针对只执行一次场景的解决方案- `sync.Once`.
+`sync.Once`只有一个`Do`方法，签名如下:
+```go
+func (o *Once) Do (f func()) {}
+```

@@ -997,8 +997,129 @@ func add() {
 
 在某些场景下，有些操作只需要做一次，比如加载配置文件，关闭一次通道之类的.
 
+多个`goroutine`并发调用函数的时候并不是并发安全的，现代的编译器和CPU可能会在保证每个`goroutine`都满足串行一致的基础上自由的重排访问内存的顺序。
+
 Go语言中`sync`包中提供了一个针对只执行一次场景的解决方案- `sync.Once`.
+
 `sync.Once`只有一个`Do`方法，签名如下:
 ```go
 func (o *Once) Do (f func()) {}
 ```
+
+### `sync.Map`
+
+Go语言内置的`map`不是并发安全的。
+
+多数用来处理多个`goroutine`并发执行的时候报错`fatal error: concurrent map writes` 
+
+Go语言内置了`sync.Map`, 同时`sync.Map`内置了`Store`, `Load`, `LoadOrStore`, `Delete`, `Range`等操作方法。
+
+比如不用单独的实现map的key的操作函数，可以使用上面这些内置函数来对map进行操作
+
+### `atomic`包
+
+当有多个goroutine操作某个全局变量的时候，会发生某些goroutine在操作的时候，其他的goroutine可能还没有完成对全局变量的修改，一般来说，可以通过添加读写锁的操作还避免这种问题，但也可以使用内置的原子操作。
+
+例如：
+```go
+var (
+  x int64
+  wg sync.WaitGroup
+)
+
+func main() {
+	wg.Add(100)
+	for i:0; i<=100; i++ {
+		go func() {
+			x++
+			wg.Done()
+		}
+	}
+	wg.Wait()
+}
+```
+上面的代码可能出现x在还没累加的时候就被其他的goroutine调用了，所以可能得到的结果不是5050
+
+options1: 通过读写锁的处理
+```go
+var (
+  x int64
+  wg sync.WaitGroup
+  lock sync.Mutex
+)
+
+func main() {
+	wg.Add(100)
+	for i:0; i<=100; i++ {
+		go func() {
+			lock.Lock()
+			x++
+			lock.Unlock()
+			wg.Done()
+		}
+	}
+	wg.Wait()
+}
+```
+option2: 通过原子操作
+```go
+var (
+  x int64
+  wg sync.WaitGroup
+)
+
+func main() {
+	wg.Add(100)
+	for i:0; i<=100; i++ {
+		go func() {
+			atomic.AddInt64(&x, 1)
+			wg.Done()
+		}
+	}
+	wg.Wait()
+}
+```
+
+## 网络编程
+
+![socket](./images/socket.png)
+
+### TCP通信
+
+#### Server
+1. 监听端口
+2. 接受客户端请求建立链接
+3. 创建goroutine处理链接
+
+参考 [TCP server](./socket/tcp/server/main.go)
+
+#### Client
+1. 建立连接
+2. 发送请求
+参考 [TCP client](./socket/tcp/client/main.go)
+
+### TCP黏包
+
+为什么会出现黏包：
+主要原因是tcp数据传递模式是流模式，在保持长连接的时候可以进行多次的收和发
+
+黏包可发生在发送端也可以发生在接收端
+1. 由Nagle算法造成的发送端的黏包： Nagle算法是一种改善网络传输效率的算法。简单的说就是当我们提交一段数据给TCP发送的时候，TCP并不是立即发送改数据，而是等待一小段时间看看在等待期间是否有其他要发送的数据，则一次吧几段数据都发送出去。
+2. 接收端接受不及时造成的接收端黏包：TCP会吧接受到的数据存在自己的缓冲区中，然后通知应用层取数据。当应用层由于某些原因不能及时吧TCP的数据取出来的时候，就会造成TCP缓冲区中存放的了几段数据。
+
+解决办法：
+出现粘包的关键在于接收方不确定将要传输的数据包的大小，因此可以通过对数据包进行封包和拆包的操作来解决这个问题。
+
+封包： 就是给数据加一段包头，这样一来数据包就分为包头和包体两部分内容了（过滤非法包的时候封包会加入“包尾”内容）。包头部分的长度是固定的，并且它存储了包体的长度，根据包头的长度固定以及包头中含有包体长度的变量就能正确的拆分出一个完整的包。
+
+参考 [TCP黏包处理](./socket/tcp/pkg/propo.go)
+
+### UDP 通信
+
+UDP（User Datagram Protocol）用户数据报协议，是OSI模型下的无链接传输协议，不需要建立链接就能直接进行数据发送和接受，是不可靠的，没有时序的通信。
+
+#### Server
+参考 [UDP server](./socket/udp/server/main.go)
+
+#### Client
+参考 [UDP client](./socket/udp/client/main.go)

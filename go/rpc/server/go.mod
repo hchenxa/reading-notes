@@ -1,4 +1,4 @@
-module github.com/hchenxa/go-rpc-server
+module github.com/hchenxa/reading-notes/go/rpc/server
 
 go 1.22.1
 

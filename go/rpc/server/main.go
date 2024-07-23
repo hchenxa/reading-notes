@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/hchenxa/go-rpc-server/pb"
-
+	"github.com/hchenxa/reading-notes/go/rpc/server/pb"
 	"google.golang.org/grpc"
 )
 

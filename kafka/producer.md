@@ -33,3 +33,56 @@
   - 如果指定了分区，就使用指定的这个分区
   - 如果没有指定分区，但设置了key,通过对key的hash值对设置的分区数进行取余得到分区
   - 如果既没有指定分区，也没有Key,则按照粘滞的方式(sticky partition)获取分区，直到当前批次的数据满了
+### 自定义分区
+实现步骤：
+1. 定义类实现Partitioner接口.
+2. 重写partition()方法.
+### 生产经验
+- 提高吞吐量
+  - 通过修改batch.size和linger.ms来提高吞吐量，比如batch.size从默认的16K增大到32K，等待时间从0ms增加到5-100ms.
+  - 发送数据时进行压缩: compression.type压缩为snappy.
+  - 提高缓冲区的大小: 从默认的32Mb增大到64Mb.
+- 数据可靠性
+![ack1](./images/ack.png)
+![ack2](./images/ack2.png)
+  - ack=0: 可靠性差，效率高
+  - ack=1: 可靠性中等，效率中等
+  - ack=-1: 可靠性高，效率低
+
+在生产环境中，ack=0很少使用;ack=1一般用于创书普通日志，允许丢个别数据；ack=-1，一般用于可靠性要求很高的场景，比如货币交易之类的。
+ 
+- 数据去重
+
+当ack=-1的时候，生产者发送过来的数据，leader和ISR队列里面的所有节点收齐数据后应答。当Leader在应答的时候挂了，则会选择一个新的Leader出来，但produer这时并没有收到leader的应答信息，所以会重新发一次消息，那新的leader可能就会有两个相同的消息。
+![数据去重](./images/数据去重.png)
+
+  - 数据传递语义
+    - 至少一次（At least Once）= ACK级别设置为-1 + 分区副本大于等于2 + ISR里应答的最小副本数量大于等于2
+    - 最多一次（At Most Once）= ACK级别设置为9
+    
+    总结：
+    - At Least Once可以保证数据不丢失，但是不能保证**数据不重复**
+    - At Most Once可以保证数据不重复，但是不能保证**数据不丢失**
+
+    精确一次（Exactly Once）：Kafka0.11版本以后，引入了：**幂等性和事务**。
+  - 幂等性
+  
+    生产者不论向Broker发送多少次重复数据，Broker端都会持久化一条数据，保证了不重复。
+    Exactly Once = 幂等性 + ACK（-1） + 分区副本数 >=2 + ISR最小副本 >=2
+
+    重复数据的判断标准：具有<PID, Partition, SeqNumber>相同主键的消息提交时，Broker只会持久化一条。其中PID是Kafka每次重启都会分配一个新的；Partition表示分区号；Sequence Number是单调自增的。所以，幂等性只能保证**在单分区单会话内不重复**。
+
+    开启参数`enable.idempotence`就能打开幂等性。
+
+  - 生产者事务
+
+    **开启事务的前提是必须先开启幂等性。**
+    ![事务](./images/事务.png)
+    
+- 数据有序
+1. 未开启幂等性
+   `max.in.flight.requests.per.connection`需要设置为1
+2. 开启幂等性
+   `max.in.flight.requests.per.connection`需要设置小于等于5
+   因为，启用幂等性以后，kafka服务端会缓存producer发来的最近5个request的元数据，所以无论如何，都可以保证最近5个request的数据都是有序的。
+![乱序](./images/乱序.png)

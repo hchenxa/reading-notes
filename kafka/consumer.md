@@ -1,6 +1,6 @@
-## Kafka消费者
+# Kafka消费者
 
-### kafka消费方式
+## kafka消费方式
 
 - pull mode
   
@@ -10,14 +10,14 @@
   
   由于broker决定消息发送速率,很难适应所有消费者的消费速率,例如推送的速度是50m/s,速度慢的消费者就没法处理消息了.
 
-### 消费者总体工作流程
+## 消费者总体工作流程
 
 - 一个消费者可以消费一个或者多个分区的消息.
 - 消费者与消费者之间是完全独立的,消费消息的时候不会产生冲突.
 - 消费者组里面的消费者不能消费同一个分区的消息,每个分区的数据智能由消费者组中的一个消费者消费.
 - 每个消费者的offset由消费者提交到topic中保存. `__consumer_offsets`.
 
-### 消费者组原理
+## 消费者组原理
 
 consomer group(CG):消费者组,有多个consomer组成,形成一个消费者组的条件,是所有的消费者的groupid相同.
 
@@ -25,7 +25,7 @@ consomer group(CG):消费者组,有多个consomer组成,形成一个消费者组
 - 消费者组之间互不影响.所有的消费者都属于某个消费者组,也就是说消费者组是逻辑上的一个订阅者.
 - 如果消费者组中的消费者数量超过了topic的分区数量,则有一部分消费者就会闲置,不会接受到任何消息.
 
-### 消费者组的初始化流程
+## 消费者组的初始化流程
 
 coordinator: 辅助实现消费者组的初始化和分区的分配
 
@@ -41,7 +41,7 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer
 - coordinator把消费计划进行下发,发送给消费者组中的每个消费者.
 - 每个消费者通过心跳机制,和coordinator保持通信,一旦通信超时(`session.timeout.ms=45s`),该消费者会被移除,并切开时触发再平衡;或者消费者处理消息的时间过长(`max.poll.interval.ms=5m`),也会触发再平衡.
 
-### 消费者组的详细消费流程
+## 消费者组的详细消费流程
 
 - 消费者组首先创建一个消费者组网络客户端`ConsumerNetworkClient`,用于和kafka集群进行交互.
 - 调用`sendFetches`方法发送初始化抓取数据
@@ -55,7 +55,7 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer
   - 经过`interceptors`拦截器.
   - 最后处理数据.
 
-### 消费者API
+## 消费者API
 
 - 主题订阅
   
@@ -73,7 +73,7 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer
 
   ```
 
-### 分区的分配以及再平衡
+## 分区的分配以及再平衡
 
 Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `CooperativeSticky`. 可以通过配置参数`partition.assignment.strategy`来修改分区的分配策略,默认策略是`Range`+`CooperativeSticky`.
 
@@ -93,7 +93,7 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
 
   `Sticky` **针对所有的topic而言的**, 首先会尽量均衡的放置分区到消费者上面,在出现同一个消费者组内消费者出现问题的时候,会尽量保持原有分配的分区不发生变化.
 
-### offsets
+## offsets
 
 - offsets默认维护位置
 
@@ -186,7 +186,7 @@ for(TopicPartition topicPartition : assignment) {
 
 如果想完成Consumer端的精准一次性消费,那么需要kafka消费端将消费过程和提交Offset的过程原子绑定.需要将kafka的offset保存到支持事物的自定义介质.
 
-### 数据积压的处理
+## 数据积压的处理
 
 - 如果kafka消费能力不足,可以考虑增加topic的分区数,并且同时提升消费者组的消费者数量.消费者数=分区数.
 - 如果是下游的数据处理不及时,可以提高每批次拉取的数量.批次拉取的数据过少使处理的数据小于生产的数据,也会造成数据积压.

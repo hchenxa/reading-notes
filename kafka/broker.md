@@ -25,4 +25,46 @@ AR = ISR + OSR
 - ISR(On-Sync Replicas): 表示和Leader保持同步的**Follower集合**。`replica.lag.time.max.ms`可以设置ISR时间，默认为30s,超过这个时间，follower会从ISR里面踢出去。
 - OSR(Out-of-Sync Replicas): 表示Follower和Leader副本同步时，延迟过多的副本。
 
+## 故障处理
+2个概念:
+1. LEO: Log End Offset: 每个副本的最后一个offset, LEO其实就是最新的offset + 1
+2. HW: High Watermark: 所有副本中最小的LEO（和木桶原理类似）
+
+### Follower故障处理
+![follower故障处理](./images/follower故障处理细节.png)
+处理流程：
+1. 当其中一个follower挂了的时候，首先ISR里面会把这个follower踢出去。
+2. 还在工作的follower和leader会继续工作接受数据，对应的LEO和HW也会相应的发生变化
+3. 等挂掉的follower恢复后，follower会先读取自己磁盘上的HW的记录，并把Log文件高于HW的部分删除掉，以防止数据未校验落盘，然后从HW开始的地方向leader进行同步，直到达到当前的高水位线的位置之后，把当前follower加入到ISR中。
+
+### Leader故障处理
+![leader故障处理](./images/leader故障处理.png)
+处理过程：
+1. 当leader挂了，也是会先从ISR中把leader踢出去，并且需要选出新的leader
+2. 为了保证数据一致性，每个follower会先把自己高于HW的部分截取掉，然后从新的leader同步数据
+
+**问题**：
+这种处理故障的方式只能保证数据的一致性，但不能保证数据不丢失或者不重复。
+
+### leaderPartition的自动平衡
+
+kafka本身会自动把Leader Partition均匀分散在各个机器上，来保证每台机器的读写吞吐量都是均匀的。但是如果某些broker宕机，会导致Leader Partition过于集中在其他少部分几台Broker上，这会导致少数几台Broker的读写请求压力过高，其他宕机的Broker重启之后都是follower partition，读写请求很低，造成集群负载不均衡。
+
+`auto.leader.rebalance.enable`， 设置成`true`。自动进行leader partition平衡。
+`leader.imbalance.per.broker.percentage`默认是10%，每个broker允许的不平衡leader的比率。如果超过这个值。controller会触发leader的平衡。
+`leader.imbalance.check.interval.seconds`默认是300秒。检查Leader负载时候平衡的间隔时间。
+
 ## 文件存储
+
+### kafka文件存储机制
+
+Topics是逻辑上的概念，而partition是物理上的概念，每个partition对于与一个log文件，该log文件中存储的就是producer生产者的数据。Producer生产的数据会被不断的追加到该log文件的末端，为防止log文件过大导致数据定位效率低下。kafka采取了分片和索引的机制，将每个Partition分为多个segment.每个segment包括: index文件，.log文件和.timeindex等文件。这些文件位于一个文件夹下，命名规则为：topic名称+分区序号，例如：first-0.
+
+log文件内容如下：
+![logs](./images/logs.png)
+
+log文件和index文件详解
+![segment](./images/segment.png)
+
+- 每个segment的大小都是1GB. 
+- index为稀疏索引，大约每往log文件写入4Kb数据，会增加一条索引。参数`log.index.interval.bytes`默认为4kb

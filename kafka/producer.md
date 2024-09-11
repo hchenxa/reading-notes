@@ -1,7 +1,7 @@
 # Kafka生产者
 
 ## 原理
-![producer](./images/producers.png)
+![producer](./images/producer/producers.png)
 工作流程大致如下：
 1. 首先在main线程中创建了一个Producer对象
 2. 调用send方法来发送数据
@@ -43,8 +43,8 @@
   - 发送数据时进行压缩: compression.type压缩为snappy.
   - 提高缓冲区的大小: 从默认的32Mb增大到64Mb.
 - 数据可靠性
-![ack1](./images/ack.png)
-![ack2](./images/ack2.png)
+![ack1](./images/producer/ack.png)
+![ack2](./images/producer/ack2.png)
   - ack=0: 可靠性差，效率高
   - ack=1: 可靠性中等，效率中等
   - ack=-1: 可靠性高，效率低
@@ -54,7 +54,7 @@
 - 数据去重
 
 当ack=-1的时候，生产者发送过来的数据，leader和ISR队列里面的所有节点收齐数据后应答。当Leader在应答的时候挂了，则会选择一个新的Leader出来，但produer这时并没有收到leader的应答信息，所以会重新发一次消息，那新的leader可能就会有两个相同的消息。
-![数据去重](./images/数据去重.png)
+![数据去重](./images/producer/数据去重.png)
 
   - 数据传递语义
     - 至少一次（At least Once）= ACK级别设置为-1 + 分区副本大于等于2 + ISR里应答的最小副本数量大于等于2
@@ -77,7 +77,7 @@
   - 生产者事务
 
     **开启事务的前提是必须先开启幂等性。**
-    ![事务](./images/事务.png)
+    ![事务](./images/producer/事务.png)
     
 - 数据有序
 1. 未开启幂等性
@@ -85,4 +85,4 @@
 2. 开启幂等性
    `max.in.flight.requests.per.connection`需要设置小于等于5
    因为，启用幂等性以后，kafka服务端会缓存producer发来的最近5个request的元数据，所以无论如何，都可以保证最近5个request的数据都是有序的。
-![乱序](./images/乱序.png)
+![乱序](./images/producer/乱序.png)

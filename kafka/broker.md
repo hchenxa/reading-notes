@@ -70,7 +70,6 @@ log文件和index文件详解
 - index为稀疏索引，大约每往log文件写入4Kb数据，会增加一条索引。参数`log.index.interval.bytes`默认为4kb
 - index文件中保存的offset为**相对**offset,这样能确保offset的值所占的空间不会过大，因此能将offset的值控制在固定的大小
 
-
 ### Kafka文件清楚
 
 - `log.retention.hours`, 最低优先级小时，默认为7天
@@ -82,6 +81,8 @@ log文件和index文件详解
 - `log.cleanup.policy=delete` 所有的数据启用删除策略
   - 基于时间：默认打开。以segment中所有记录中的**最大时间戳作为该文件时间戳**。比如一个segment中的一部分数据过期了，一部分没有，怎需要等所有的数据都过期了以后才能删除。
   - 基于大小：默认关闭。超过设置的大小，删除最早的segment. `log.retention.bytes`默认为-1，表示无穷大，不会限制大小
+
+2. compact日志压缩
 - `log.cleanup.policy=compact` 所有数据启用压缩策略
 
 相同的key只保留最新的数据
@@ -89,3 +90,15 @@ log文件和index文件详解
 压缩完的Offset可能是不连续的，当从这些offset消费消息的时候，将会拿到比这个offset大的offset对应的消息。
 
 这种策略只适合特点场景，比如消息的key是用户ID，value是用户资料，通过这种压缩策略，整个消息集里就保存了所有用户的最新资料。
+
+## 高效数据读取
+1. 本身是分布式集群，可以采用分区技术，并行度高
+2. 数据采用稀疏索引，可以快速定位要消费的数据
+3. 顺序写磁盘，写的过程是一直追加到文件的末端
+4. 页缓存和零拷贝技术
+   
+   零拷贝: Kafka的数据加工处理操作由kafka生产者和kafka消费者处理。Broker应用层不用关心存储的数据，所以就不用走应用层，传输效率高。
+   
+   PageCache: 页缓存。当上层有写操作的时候，操作系统只是将数据写入PageCache。当读操作发生时，先从PageCache中查找，如果找不到，再去磁盘中读取。实际上PageCache是尽可能多的空闲内存都当作了磁盘缓存来使用。
+
+   ![零拷贝](./images/broker/零拷贝.png)

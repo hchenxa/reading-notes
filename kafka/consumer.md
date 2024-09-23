@@ -8,14 +8,16 @@
 
 - push mode
   
-  由于broker决定消息发送速率,很难适应所有消费者的消费速率,例如推送的速度是50m/s,速度慢的消费者就没法处理消息了.
+  由于broker决定消息发送速率,很难适应所有消费者的消费速率,例如推送的速度是50m/s,速度慢的消费者就没法处理消息了.所以kafka没用采用这种方式。
 
 ## 消费者总体工作流程
 
 - 一个消费者可以消费一个或者多个分区的消息.
 - 消费者与消费者之间是完全独立的,消费消息的时候不会产生冲突.
-- 消费者组里面的消费者不能消费同一个分区的消息,每个分区的数据智能由消费者组中的一个消费者消费.
+- 消费者组里面的消费者不能消费同一个分区的消息,每个分区的数据只能由消费者组中的一个消费者消费.
 - 每个消费者的offset由消费者提交到topic中保存. `__consumer_offsets`.
+
+![工作流程](./images/consumer/工作流程.png)
 
 ## 消费者组原理
 
@@ -25,11 +27,13 @@ consomer group(CG):消费者组,有多个consomer组成,形成一个消费者组
 - 消费者组之间互不影响.所有的消费者都属于某个消费者组,也就是说消费者组是逻辑上的一个订阅者.
 - 如果消费者组中的消费者数量超过了topic的分区数量,则有一部分消费者就会闲置,不会接受到任何消息.
 
+![消费者组](./images/consumer/消费者组.png)
+
 ## 消费者组的初始化流程
 
 coordinator: 辅助实现消费者组的初始化和分区的分配
 
-coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer_offsets的分区数量）
+coordinator的节点选择 = groupid的hashcode % 50 （50是默认的`__consumer_offsets`的分区数量）
 
 例如: groupid的hashcode的值=1, 1 % 50 = 1, 那么`__consumer_offsets` 主题的1号分区在哪个broker上,就选择这个节点的coordinator作为这个消费者组的leader, 消费者组下的所有的消费者提交offsets的时候就往这个分区去提交offset.
 
@@ -39,12 +43,14 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer
 - consumer leader负责定制一个消费方案,来决定消费者中的消费者怎么对分区进行消费.
 - consumer leader把计划发送给coordinator.
 - coordinator把消费计划进行下发,发送给消费者组中的每个消费者.
-- 每个消费者通过心跳机制,和coordinator保持通信,一旦通信超时(`session.timeout.ms=45s`),该消费者会被移除,并切开时触发再平衡;或者消费者处理消息的时间过长(`max.poll.interval.ms=5m`),也会触发再平衡.
+- 每个消费者通过每3秒的心跳机制,和coordinator保持通信,一旦通信超时(`session.timeout.ms=45s`),该消费者会被移除,并切开时触发再平衡;
+- 或者消费者处理消息的时间过长(`max.poll.interval.ms=5m`),也会触发再平衡.
+![消费者组初始化](./images/consumer/消费者组初始化.png)
 
 ## 消费者组的详细消费流程
 
-- 消费者组首先创建一个消费者组网络客户端`ConsumerNetworkClient`,用于和kafka集群进行交互.
-- 调用`sendFetches`方法发送初始化抓取数据
+- 消费者组首先创建一个消费者组网络连接客户端`ConsumerNetworkClient`,用于和kafka集群进行交互.
+- 调用`sendFetches`方法发送抓取数据初始化
   - `fetch.min.bytes`,每批次最小抓取大小,默认1字节.
   - `fetch.max.wait.ms`,一批数据最小值为达到的超时时间,默认`500ms`.
   - `fetch.max.bytes`,每批次最大抓取的大小,默认`50Mbi`.
@@ -54,6 +60,8 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的__consumer
   - `parseRecord`,反序列化从`queue`中来回来的数据.
   - 经过`interceptors`拦截器.
   - 最后处理数据.
+
+![消费者组消费流程](./images/consumer/消费者组消费流程.png)
 
 ## 消费者API
 

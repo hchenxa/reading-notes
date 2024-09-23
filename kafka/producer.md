@@ -85,4 +85,5 @@
 2. 开启幂等性
    `max.in.flight.requests.per.connection`需要设置小于等于5
    因为，启用幂等性以后，kafka服务端会缓存producer发来的最近5个request的元数据，所以无论如何，都可以保证最近5个request的数据都是有序的。
+   
 ![乱序](./images/producer/乱序.png)

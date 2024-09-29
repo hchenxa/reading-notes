@@ -83,7 +83,7 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的`__consume
 
 ## 分区的分配以及再平衡
 
-Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `CooperativeSticky`. 可以通过配置参数`partition.assignment.strategy`来修改分区的分配策略,默认策略是`Range`+`CooperativeSticky`.
+Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `CooperativeSticky`. 可以通过配置参数`partition.assignment.strategy`来修改分区的分配策略,默认策略是`Range`+`CooperativeSticky`. kafka可以同时使用多个分区分配策略。
 
 - `Range`
   
@@ -91,11 +91,13 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
 
   例如,有7个分区,3个消费者,排序后的分区会是,0,1,2,3,4,5,6; 消费者排序完是c0, c1, c2. 通过分区数除以消费者数来决定每个消费者应该消费几个分区.如果除不尽,那么前面几个消费者将会多消费一个分区.
 
-问题,如果多个topic, 容易造成数据倾斜,就是说某个消费者会比其他消费者多消费N个Topic的数据.
+问题,如果多个topic, 容易造成**数据倾斜**,就是说某个消费者会比其他消费者多消费N个Topic的数据.
+![range](./images/consumer/range.png)
 
 - `RoundRobin`
  
   `RoundRobin` **针对所有的topic而言的**, 首先采用的是轮询分区策略,是吧所有的partition和所有的consumer都列出来,然后按照hashcode进行排序,最后通过轮询算法来分配partition给各个消费者.
+![roundrobin](./images/consumer/roundrobin.png)
 
 - `Sticky`
 
@@ -107,7 +109,7 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
 
 从Kafka0.9版本开始以后,consumer默认把offsets保存在kafka的一个内置的topic中,该topic为`__consumer_offsets` ,在0.9之前,consumer默认将offsets保存在zookeeper中.
 
-`__consumer_offsets`主题里面采用key和value的方式存储数据.Key是group.id+topic+分区号,value是当前offsets的值.每隔一段时间,Kafka内部会对这个topic进行compact, 也就是每个group.id+topic+分区号保留最新的数据.
+`__consumer_offsets`主题里面采用key和value的方式存储数据.Key是`group.id+topic+分区号`,value是当前offsets的值.每隔一段时间,Kafka内部会对这个topic进行compact, 也就是每个`group.id+topic+分区号`保留最新的数据.
 
 在配置文件`config/consumer.properties`中添加配置`exclude.internal.topies=false`, 默认是`true`,表示不能消费系统主题.为了查看消费系统主题数据,所以该参数修改为`false`.
 
@@ -153,6 +155,7 @@ while (assignment.size() == 0) {
 }
 
 for (TopicPartition topicPartition : assignment) {
+  // 从offset 100的地方开始消费
   kafkaConsumer.seek(topicPartition, offset: 100);
 }
 
@@ -178,11 +181,13 @@ for(TopicPartition topicPartition : assignment) {
   topicPartitionLongHashMap.put(topicPartition, System.currentTimeMillis() - 1 * 24 * 3600 * 1000);
 }
 
+// 把时间转换为对应的offset,调用kafkaConsumer.offsetsForTimes.
 Map<TopicPartition, OffsetAndTimestamp> topicPartitionOffsetAndTimestampMap = kafkaConsumer.offsetsForTimes(topicPartitionLongHashMap)
 
 // 指定消费的offset
 for(TopicPartition topicPartition : assignment) {
   OffsetAndTimestamp offsetAndTimestamp = topicPartitionOffsetAndTimestampMap.get(topicPartition);
+
   kafkaConsumer.seek(topicPartition, offsetAndTimestamp.offset());
 }
 ```
@@ -192,9 +197,17 @@ for(TopicPartition topicPartition : assignment) {
 1) 漏消费: 先提交了offset后消费,有可能会造成数据的漏消费.比如手动设置了offset提交,当Offset提交的时候,数据还在内存中没有落盘,此时刚好消费者线程被kill掉,那么offset已经提交,但是数据未处理,导致这部分内存中的数据丢失.
 2) 重复消费: 已经消费了数据,但是可能offset没提交. 自动提交offset会引起.
 
+[!漏消费和重复消费](./images/consumer/漏消费和重复消费.png)
+
 如果想完成Consumer端的精准一次性消费,那么需要kafka消费端将消费过程和提交Offset的过程原子绑定.需要将kafka的offset保存到支持事物的自定义介质.
+
+[!消费者事务](./images/consumer/消费者事务.png)
 
 ## 数据积压的处理
 
-- 如果kafka消费能力不足,可以考虑增加topic的分区数,并且同时提升消费者组的消费者数量.消费者数=分区数.
+消费者如何提高吞吐量？
+
+- 如果kafka消费能力不足,可以考虑增加topic的分区数,并且同时提升消费者组的消费者数量.消费者数==分区数.
 - 如果是下游的数据处理不及时,可以提高每批次拉取的数量.批次拉取的数据过少使处理的数据小于生产的数据,也会造成数据积压.
+
+![数据积压](./images/consumer/数据积压问题.png)

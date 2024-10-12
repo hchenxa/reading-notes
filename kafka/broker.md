@@ -46,12 +46,12 @@ AR = ISR + OSR
 **问题**：
 这种处理故障的方式只能保证数据的一致性，但不能保证数据不丢失或者不重复。
 
-### leaderPartition的自动平衡
+### leader Partition的自动平衡
 
 kafka本身会自动把Leader Partition均匀分散在各个机器上，来保证每台机器的读写吞吐量都是均匀的。但是如果某些broker宕机，会导致Leader Partition过于集中在其他少部分几台Broker上，这会导致少数几台Broker的读写请求压力过高，其他宕机的Broker重启之后都是follower partition，读写请求很低，造成集群负载不均衡。
 
 `auto.leader.rebalance.enable`， 设置成`true`。自动进行leader partition平衡。
-`leader.imbalance.per.broker.percentage`默认是10%，每个broker允许的不平衡leader的比率。如果超过这个值。controller会触发leader的平衡。
+`leader.imbalance.per.broker.percentage`默认是`10%`，每个broker允许的不平衡leader的比率。如果超过这个值。controller会触发leader的平衡。
 `leader.imbalance.check.interval.seconds`默认是300秒。检查Leader负载时候平衡的间隔时间。
 
 ## 文件存储
@@ -70,7 +70,7 @@ log文件和index文件详解
 - index为稀疏索引，大约每往log文件写入4Kb数据，会增加一条索引。参数`log.index.interval.bytes`默认为4kb
 - index文件中保存的offset为**相对**offset,这样能确保offset的值所占的空间不会过大，因此能将offset的值控制在固定的大小
 
-### Kafka文件清楚
+### Kafka文件清除
 
 - `log.retention.hours`, 最低优先级小时，默认为7天
 
@@ -98,7 +98,8 @@ log文件和index文件详解
 4. 页缓存和零拷贝技术
    
    零拷贝: Kafka的数据加工处理操作由kafka生产者和kafka消费者处理。Broker应用层不用关心存储的数据，所以就不用走应用层，传输效率高。
-   
+
    PageCache: 页缓存。当上层有写操作的时候，操作系统只是将数据写入PageCache。当读操作发生时，先从PageCache中查找，如果找不到，再去磁盘中读取。实际上PageCache是尽可能多的空闲内存都当作了磁盘缓存来使用。
 
-   ![零拷贝](./images/broker/零拷贝.png)
+  ![零拷贝](./images/broker/零拷贝.png)
+

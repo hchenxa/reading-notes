@@ -33,7 +33,7 @@ consomer group(CG):消费者组,有多个consomer组成,形成一个消费者组
 
 coordinator: 辅助实现消费者组的初始化和分区的分配
 
-coordinator的节点选择 = groupid的hashcode % 50 （50是默认的`__consumer_offsets`的分区数量）
+coordinator的节点选择 = groupid的hashcode % 50 (50是默认的`__consumer_offsets`的分区数量)
 
 例如: groupid的hashcode的值=1, 1 % 50 = 1, 那么`__consumer_offsets` 主题的1号分区在哪个broker上,就选择这个节点的coordinator作为这个消费者组的leader, 消费者组下的所有的消费者提交offsets的时候就往这个分区去提交offset.
 
@@ -86,22 +86,32 @@ coordinator的节点选择 = groupid的hashcode % 50 （50是默认的`__consume
 Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `CooperativeSticky`. 可以通过配置参数`partition.assignment.strategy`来修改分区的分配策略,默认策略是`Range`+`CooperativeSticky`. kafka可以同时使用多个分区分配策略。
 
 - `Range`
-  
+
   `Range` **是对每一个topic而言的**,首先对同一个topic里面的分区按照序号进行排序,并且对消费者按照字母顺序进行排序.
 
-  例如,有7个分区,3个消费者,排序后的分区会是,0,1,2,3,4,5,6; 消费者排序完是c0, c1, c2. 通过分区数除以消费者数来决定每个消费者应该消费几个分区.如果除不尽,那么前面几个消费者将会多消费一个分区.
+  例如,有7个分区,3个消费者,排序后的分区会是0,1,2,3,4,5,6; 消费者排序完是c0, c1, c2. 通过分区数除以消费者数来决定每个消费者应该消费几个分区.如果除不尽,那么前面几个消费者将会多消费一个分区.
 
-问题,如果多个topic, 容易造成**数据倾斜**,就是说某个消费者会比其他消费者多消费N个Topic的数据.
+  问题,如果多个topic, 容易造成**数据倾斜**,就是说某个消费者会比其他消费者多消费N个Topic的数据.
 ![range](./images/consumer/range.png)
 
+  `Range`的再平衡
+
+  当某个消费者组的消费者挂了,比如上图所示的consumer0挂了,在45秒未超时的情况下,数据还是会尝试发给consumer0;如果超过45秒,则其他消费者开始消费它的数据,所有consumer0上的数据**会全部放到某一个**的consumer上进行消费. 比如consumer1;当再次发送数据的时候,新的数据会按照range的方式重新分别发送到当前存活的消费者.
+
+**分区数只能增加不能减少**
+
 - `RoundRobin`
- 
+
   `RoundRobin` **针对所有的topic而言的**, 首先采用的是轮询分区策略,是吧所有的partition和所有的consumer都列出来,然后按照hashcode进行排序,最后通过轮询算法来分配partition给各个消费者.
 ![roundrobin](./images/consumer/roundrobin.png)
 
+  `RoundRobin`的再平衡
+
+  当某个消费者组的消费者挂了,比如上图的consumer1挂了,在45秒未超时的情况下,数据会**尽量平均**的发送给其余consumer;45秒以后在发送的数据,会重新通过轮询算法分配给消费者.
+
 - `Sticky`
 
-  `Sticky` **针对所有的topic而言的**, 首先会尽量均衡的放置分区到消费者上面,在出现同一个消费者组内消费者出现问题的时候,会尽量保持原有分配的分区不发生变化.
+  `Sticky` **针对所有的topic而言的**, 首先会尽量均衡的放置分区到消费者上面,在出现同一个消费者组内消费者出现问题的时候,会**尽量保持原有分配的分区不发生变化**.
 
 ## offsets
 
@@ -147,6 +157,7 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
 // 指定位置进行消费
 Set<TopicPartition> assignment = kafkaConsumer.assignment();
 
+// 不能直接指定，需要等待分区完成之后制定
 // 保证分区分配方案制定完毕
 
 while (assignment.size() == 0) {
@@ -155,7 +166,7 @@ while (assignment.size() == 0) {
 }
 
 for (TopicPartition topicPartition : assignment) {
-  // 从offset 100的地方开始消费
+  // 从 offset 100的地方开始消费
   kafkaConsumer.seek(topicPartition, offset: 100);
 }
 
@@ -197,11 +208,13 @@ for(TopicPartition topicPartition : assignment) {
 1) 漏消费: 先提交了offset后消费,有可能会造成数据的漏消费.比如手动设置了offset提交,当Offset提交的时候,数据还在内存中没有落盘,此时刚好消费者线程被kill掉,那么offset已经提交,但是数据未处理,导致这部分内存中的数据丢失.
 2) 重复消费: 已经消费了数据,但是可能offset没提交. 自动提交offset会引起.
 
-[!漏消费和重复消费](./images/consumer/漏消费和重复消费.png)
+![漏消费和重复消费](./images/consumer/漏消费和重复消费.png)
+
+- 精准一次性消费
 
 如果想完成Consumer端的精准一次性消费,那么需要kafka消费端将消费过程和提交Offset的过程原子绑定.需要将kafka的offset保存到支持事物的自定义介质.
 
-[!消费者事务](./images/consumer/消费者事务.png)
+![消费者事务](./images/consumer/消费者事务.png)
 
 ## 数据积压的处理
 

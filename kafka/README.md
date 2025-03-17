@@ -95,7 +95,33 @@ Note:
 ### 消费者
 
 ### 总体
-
+1. 提高吞吐量
+   1. 提高生产者吞吐量
+      1. buffer.memory: 默认是32m，可以增加到64m
+      2. batch.size: 默认是16k,如果太小，会导致频繁的网络请求,吞吐量下降;如果太大，会导致消息需要等待很久才能发出去，会增加网络延时.
+      3. linger.ms: 默认是0,意思就是消息会立即被发送.一般设置在5-100毫秒。
+      4. compression.type: 默认是none.使用压缩可以减小数据量，提高吞吐量。但是会加大CPU在生产端的消耗.
+   2. 增加分区
+   3. 提高消费者吞吐量
+      1. fetch.max.bytes大小，默认是50m
+      2. max.poll.records大小，默认是500条
+   4. 增加下游消费者的消费能力
+2. 数据精准一次
+   1. 生产者角度
+      1. acks设置为-1
+      2. 幂等性(`enable.idempotence = true`) + 事务
+   2. broker角度
+      1. 分区副本大于等于2(`--replication-factor 2`)
+      2. ISR里应答的最小副本数量大于等于2(`min.insync.replicas = 2`)
+   3. 消费者角度
+      1. 事务 + 手动提交offset(`enable.auto.commit = false`)
+      2. 消费者输出的目的地必须支持事务(MySQL等)
+3. 合理设置分区数
+4. 单条日志大于1m
+   1. `message.max.bytes`: 默认为1m,broker端接收每个批次消息的最大值
+   2. `max.request.size`: 默认为1m,生产者发往broker每个请求消息最大值.针对topic级别设置消息体的大小
+   3. `replica.fetch.max.bytes`: 默认为1m,副本同步数据,每个批次消息最大值
+   4. `fetch.max.bytes`: 默认50m,消费者获取服务器一批消息最大的字节数.如果服务器端一批次的数据大于该值仍然可以拉取回来这批数据,因此,这不是一个绝对最大值.一批次的大小受`message.max.bytes`或者`max.message.bytes`的影响
 ## 源码解析
 ### 生产者源码
 ### 消费者源码

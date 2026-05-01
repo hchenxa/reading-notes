@@ -23,7 +23,7 @@ permalink: /kafka/consumer/
 - 消费者组里面的消费者不能消费同一个分区的消息,每个分区的数据只能由消费者组中的一个消费者消费.
 - 每个消费者的offset由消费者提交到topic中保存. `__consumer_offsets`.
 
-![工作流程](./images/consumer/工作流程.png)
+![工作流程]({{ site.baseurl }}/kafka/images/consumer/工作流程.png)
 
 ## 消费者组原理
 
@@ -33,7 +33,7 @@ consomer group(CG):消费者组,有多个consomer组成,形成一个消费者组
 - 消费者组之间互不影响.所有的消费者都属于某个消费者组,也就是说消费者组是逻辑上的一个订阅者.
 - 如果消费者组中的消费者数量超过了topic的分区数量,则有一部分消费者就会闲置,不会接受到任何消息.
 
-![消费者组](./images/consumer/消费者组.png)
+![消费者组]({{ site.baseurl }}/kafka/images/consumer/消费者组.png)
 
 ## 消费者组的初始化流程
 
@@ -51,7 +51,7 @@ coordinator的节点选择 = groupid的hashcode % 50 (50是默认的`__consumer_
 - coordinator把消费计划进行下发,发送给消费者组中的每个消费者.
 - 每个消费者通过每3秒的心跳机制,和coordinator保持通信,一旦通信超时(`session.timeout.ms=45s`),该消费者会被移除,并切开时触发再平衡;
 - 或者消费者处理消息的时间过长(`max.poll.interval.ms=5m`),也会触发再平衡.
-![消费者组初始化](./images/consumer/消费者组初始化.png)
+![消费者组初始化]({{ site.baseurl }}/kafka/images/consumer/消费者组初始化.png)
 
 ## 消费者组的详细消费流程
 
@@ -67,7 +67,7 @@ coordinator的节点选择 = groupid的hashcode % 50 (50是默认的`__consumer_
   - 经过`interceptors`拦截器.
   - 最后处理数据.
 
-![消费者组消费流程](./images/consumer/消费者组消费流程.png)
+![消费者组消费流程]({{ site.baseurl }}/kafka/images/consumer/消费者组消费流程.png)
 
 ## 消费者API
 
@@ -98,7 +98,7 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
   例如,有7个分区,3个消费者,排序后的分区会是0,1,2,3,4,5,6; 消费者排序完是c0, c1, c2. 通过分区数除以消费者数来决定每个消费者应该消费几个分区.如果除不尽,那么前面几个消费者将会多消费一个分区.
 
   问题,如果多个topic, 容易造成**数据倾斜**,就是说某个消费者会比其他消费者多消费N个Topic的数据.
-![range](./images/consumer/range.png)
+![range]({{ site.baseurl }}/kafka/images/consumer/range.png)
 
   `Range`的再平衡
 
@@ -109,7 +109,7 @@ Kafka有4种主流的分区分配策略: `Range`, `RoundRobin`, `Sticky`, `Coope
 - `RoundRobin`
 
   `RoundRobin` **针对所有的topic而言的**, 首先采用的是轮询分区策略,是吧所有的partition和所有的consumer都列出来,然后按照hashcode进行排序,最后通过轮询算法来分配partition给各个消费者.
-![roundrobin](./images/consumer/roundrobin.png)
+![roundrobin]({{ site.baseurl }}/kafka/images/consumer/roundrobin.png)
 
   `RoundRobin`的再平衡
 
@@ -214,13 +214,13 @@ for(TopicPartition topicPartition : assignment) {
 1) 漏消费: 先提交了offset后消费,有可能会造成数据的漏消费.比如手动设置了offset提交,当Offset提交的时候,数据还在内存中没有落盘,此时刚好消费者线程被kill掉,那么offset已经提交,但是数据未处理,导致这部分内存中的数据丢失.
 2) 重复消费: 已经消费了数据,但是可能offset没提交. 自动提交offset会引起.
 
-![漏消费和重复消费](./images/consumer/漏消费和重复消费.png)
+![漏消费和重复消费]({{ site.baseurl }}/kafka/images/consumer/漏消费和重复消费.png)
 
 - 精准一次性消费
 
 如果想完成Consumer端的精准一次性消费,那么需要kafka消费端将消费过程和提交Offset的过程原子绑定.需要将kafka的offset保存到支持事物的自定义介质.
 
-![消费者事务](./images/consumer/消费者事务.png)
+![消费者事务]({{ site.baseurl }}/kafka/images/consumer/消费者事务.png)
 
 ## 数据积压的处理
 
@@ -229,4 +229,4 @@ for(TopicPartition topicPartition : assignment) {
 - 如果kafka消费能力不足,可以考虑增加topic的分区数,并且同时提升消费者组的消费者数量.消费者数==分区数.
 - 如果是下游的数据处理不及时,可以提高每批次拉取的数量.批次拉取的数据过少使处理的数据小于生产的数据,也会造成数据积压.
 
-![数据积压](./images/consumer/数据积压问题.png)
+![数据积压]({{ site.baseurl }}/kafka/images/consumer/数据积压问题.png)

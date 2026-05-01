@@ -2,6 +2,7 @@
 title: Eagle
 parent: Kafka
 nav_order: 5
+permalink: /kafka/Eagle/
 ---
 
 ## Kafka-Eagle 监控

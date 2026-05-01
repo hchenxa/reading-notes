@@ -2,6 +2,7 @@
 title: Producer
 parent: Kafka
 nav_order: 1
+permalink: /kafka/producer/
 ---
 
 # Kafka 生产者

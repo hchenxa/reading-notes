@@ -2,6 +2,7 @@
 title: Kafka
 nav_order: 3
 has_children: true
+permalink: /kafka/
 ---
 
 # Kafka 学习笔记
@@ -38,23 +39,23 @@ has_children: true
 #### 命令行
 ...
 ### 生产者
-[producer](./producer.md)
+[producer]({{ site.baseurl }}/kafka/producer/)
 ### broker
-[broker](./broker.md)
+[broker]({{ site.baseurl }}/kafka/broker/)
 ### 消费者
-[consumer](./consumer.md)
+[consumer]({{ site.baseurl }}/kafka/consumer/)
 ### Eagle监控
-[Eagle](./Eagle.md)
+[Eagle]({{ site.baseurl }}/kafka/Eagle/)
 ### kraft模式
-[kfaft](./kraft.md)
+[kraft]({{ site.baseurl }}/kafka/kraft/)
 
 ## 外部系统集成
 ### Flume集成
-[Flume](./Flume.md)
+[Flume]({{ site.baseurl }}/kafka/Flume/)
 ### Flink集成
-[Flink](./Flink.md)
+[Flink]({{ site.baseurl }}/kafka/Flink/)
 ### SprintBoot集成
-[SprintBoot](./SprintBoot.md)
+[SprintBoot]({{ site.baseurl }}/kafka/SprintBoot/)
 ### Spark集成
 
 ## 生产调优手册

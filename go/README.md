@@ -2,6 +2,7 @@
 title: Go
 nav_order: 2
 has_children: true
+permalink: /go/
 ---
 
 # Go 语言学习笔记

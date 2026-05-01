@@ -2,6 +2,7 @@
 title: Broker
 parent: Kafka
 nav_order: 2
+permalink: /kafka/broker/
 ---
 
 # Broker

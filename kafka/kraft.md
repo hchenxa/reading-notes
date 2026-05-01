@@ -2,6 +2,7 @@
 title: KRaft
 parent: Kafka
 nav_order: 4
+permalink: /kafka/kraft/
 ---
 
 ## KRaft 模式

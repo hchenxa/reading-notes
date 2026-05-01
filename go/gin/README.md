@@ -2,6 +2,7 @@
 title: Gin
 parent: Go
 nav_order: 1
+permalink: /go/gin/
 ---
 
 # Gin 框架的使用

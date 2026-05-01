@@ -1,6 +1,7 @@
 ---
 title: AI
 nav_order: 6
+permalink: /AI/
 ---
 
 # AI 学习笔记

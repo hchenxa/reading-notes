@@ -12,9 +12,9 @@ This is a collection of my learning notes on various technologies.
 
 | Topic | Description |
 |-------|-------------|
-| [Go]({% link go/README.md %}) | Go language fundamentals, Gin, GORM |
-| [Kafka]({% link kafka/README.md %}) | Kafka architecture, producer, consumer, broker |
-| [Python]({% link python/README.md %}) | Python basics, data types, functions |
-| [JavaScript]({% link javascript/README.md %}) | JavaScript fundamentals, DOM, events |
-| [AI]({% link AI/README.md %}) | AI/ML concepts, LoRA, fine-tuning |
-| [Ansible]({% link ansible/README.md %}) | Ansible automation |
+| [Go]({{ site.baseurl }}/go/) | Go language fundamentals, Gin, GORM |
+| [Kafka]({{ site.baseurl }}/kafka/) | Kafka architecture, producer, consumer, broker |
+| [Python]({{ site.baseurl }}/python/) | Python basics, data types, functions |
+| [JavaScript]({{ site.baseurl }}/javascript/) | JavaScript fundamentals, DOM, events |
+| [AI]({{ site.baseurl }}/AI/) | AI/ML concepts, LoRA, fine-tuning |
+| [Ansible]({{ site.baseurl }}/ansible/) | Ansible automation |

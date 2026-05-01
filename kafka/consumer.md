@@ -2,6 +2,7 @@
 title: Consumer
 parent: Kafka
 nav_order: 3
+permalink: /kafka/consumer/
 ---
 
 # Kafka 消费者

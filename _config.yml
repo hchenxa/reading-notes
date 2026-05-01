@@ -24,15 +24,6 @@ defaults:
       layout: "default"
 
 exclude:
-  - "*.go"
-  - "*.py"
-  - "*.js"
-  - "*.sum"
-  - "*.mod"
-  - "*.sh"
-  - "*.html"
-  - "*.css"
-  - "*.cfg"
   - go/gin/templates/
   - go/rpc/
   - go/socket/

@@ -1,6 +1,6 @@
 title: Reading Notes
 description: hchen's learning notes
-theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs@v0.10.0
 
 url: "https://hchenxa.github.io"
 baseurl: "/reading-notes"
@@ -38,4 +38,5 @@ exclude:
   - kind/
   - node_modules/
 
-plugins: []
+plugins:
+  - jekyll-remote-theme

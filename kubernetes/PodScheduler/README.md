@@ -1,3 +1,9 @@
+---
+title: Pod 调度
+nav_exclude: true
+permalink: /kubernetes/pod-scheduler/
+---
+
 # 宏观层面：跨组件的 Pod 调度生命周期
 
 从你提交一个 Pod 的 YAML 文件，到它最终在某个节点上跑起来，源码层面的核心交互链路如下：

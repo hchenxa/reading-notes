@@ -19,3 +19,5 @@ This is a collection of my learning notes on various technologies.
 | [JavaScript]({{ site.baseurl }}/javascript/) | JavaScript fundamentals, DOM, events |
 | [AI]({{ site.baseurl }}/AI/) | AI/ML concepts, LoRA, fine-tuning |
 | [Ansible]({{ site.baseurl }}/ansible/) | Ansible automation |
+| [Appium]({{ site.baseurl }}/appium/) | Appium mobile testing framework |
+| [Kubernetes]({{ site.baseurl }}/kubernetes/) | Kubernetes internals, Pod scheduling |

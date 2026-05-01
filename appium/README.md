@@ -1,3 +1,9 @@
+---
+title: Appium
+nav_order: 7
+permalink: /appium/
+---
+
 # Appium
 
 
@@ -54,8 +60,9 @@ MacOS上有时候会安装到Downloads目录下，可以手动拷贝到或者配
 
 ## 安装Python client
 ```bash
-pip install Appium-Python-Client
+pip install Appium-Python-Client==2.11.1
 ```
+**NOTE：2.X的版本和3.X的版本的差别比较大**
 
 ## 在macOS上启动模拟器
 ```bash

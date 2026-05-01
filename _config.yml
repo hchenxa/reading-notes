@@ -39,5 +39,7 @@ exclude:
   - javascript/project/
   - kind/
   - node_modules/
+  - .venv/
+  - appium/sample/
   - Gemfile
   - Gemfile.lock

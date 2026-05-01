@@ -1,1 +1,23 @@
-// intentionally empty - using theme defaults
+// Override theme's centering layout on wide screens
+// Make sidebar fixed width and content fill the rest
+@media (min-width: 50rem) {
+  .side-bar {
+    width: 16.5rem !important;
+    min-width: 16.5rem !important;
+  }
+}
+
+@media (min-width: 66.5rem) {
+  .side-bar {
+    width: 16.5rem !important;
+    min-width: 16.5rem !important;
+  }
+
+  .side-bar + .main {
+    margin-left: 16.5rem !important;
+  }
+
+  .main-content-wrap {
+    max-width: 100%;
+  }
+}

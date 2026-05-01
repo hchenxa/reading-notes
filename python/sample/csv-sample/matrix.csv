@@ -1,0 +1,26 @@
+Epic: https://issues.redhat.com/browse/ACM-12165,,,,,,,,,,
+,,,,,,,,,,
+Regression Test,,,,,,,,,,
+Priority/Tier,Full Regression / Automation Only (F/A),GlobalHub Control plane,GlobalHub Control plane Ready?,Regional hubs,BYO,FIPS,Owner,Test Status,task link,Note
+1,A,ACM 2.11 on OCP 4.15,No,ACM 2.11.0 on OCP 4.15,No,No,Yaheng Liu,Done,https://issues.redhat.com/browse/ACM-12166,Backup(ocp4.15)&restore(ocp4.16) verify
+2,A,ACM 2.10.x on OCP 4.15,No,ACM 2.10.x on OCP 4.15,Yes,No,Yaheng Liu,Done,https://issues.redhat.com/browse/ACM-12167,
+1,F,ACM 2.11 on OCP 4.16,No,ACM 2.11 on OCP 4.16,No,Yes,Yaheng Liu,Done,https://issues.redhat.com/browse/ACM-12168,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+Installation Test,,,,,,,,,,
+Priority/Tier,Full Regression / Automation Only (F/A),GlobalHub Control plane,Control plane Ready?,Regional hubs,BYO,FIPS,Owner,Test Status,,Note
+2,A,ACM 2.9.x on OCP 4.13,No,ACM 2.9.x on OCP 4.13,No,Yes,Hui Chen,Done,https://issues.redhat.com/browse/ACM-12492,
+,,,,,,,,,,
+,,,,,,,,,,
+Upgrade Test,,,,,,,,,,
+Priority/Tier,Full Regression / Automation Only (F/A),GlobalHub Control plane,Control plane Ready?,Regional hubs,BYO,FIPS,Owner,Test Status,,Note
+2,A,"ACM 2.10.x on OCP 4.15 ->
+ACM 2.11 on OCP 4.15",No,"ACM 2.10.x on OCP 4.14 ->
+ACM 2.11 on OCP 4.15 ",No,No,Yaheng Liu,Done,https://issues.redhat.com/browse/ACM-12390,GLO Upgrade from GLO 1.1.1 -> GLO 1.2.0
+,,,,,,,,,,
+,,,,,,,,,,
+PostPublish,,,,,,,,,,
+Priority/Tier,Full Regression / Automation Only (F/A),GlobalHub Control plane,Control plane Ready?,Regional hubs,BYO,FIPS,Owner,Test Status,,Note
+1,A,ACM 2.11 on OCP 4.16,No,ACM 2.11 on OCP 4.16,No,No,Yaheng Liu,Done,https://issues.redhat.com/browse/ACM-12490,

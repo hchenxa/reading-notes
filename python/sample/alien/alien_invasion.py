@@ -29,7 +29,7 @@ class AlienInvasion:
         # self.settings.screen_height = self.screen.get_rect().height
         # self.settings.screen_width = self.screen.get_rect().width
         pygame.display.set_caption("Alien Invasion")
-        
+
         self.game_active = False
         self.play_button = Button(self, "Play")
         # 创建一个用于存储游戏统计信息的实例
@@ -105,7 +105,7 @@ class AlienInvasion:
         if collisions:
             # 为了出了collisions里面有多个值的情况，意思是一个子弹可能击中多个aliens
             for aliens in collisions.values():
-                self.stats.score += len(aliens) * 10000
+                self.stats.score += len(aliens) * 100
 
             self.sb.prep_score()
 
@@ -125,7 +125,7 @@ class AlienInvasion:
             current_x += 2 * alien_width
         # current_x = alien_width
         # current_y += 3 * alien_height
-            
+
     def _create_alien(self, x_position, y_position):
         new_alien = Alien(self)
         new_alien.x = x_position
@@ -163,7 +163,7 @@ class AlienInvasion:
     def _ship_hit(self):
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
-            
+
             # 清空机器人和子弹
             self.bullets.empty()
             self.aliens.empty()

@@ -20,6 +20,6 @@ class Settings:
         # alien 速度
         self.alien_speed = 1.0
         # fleet_drop_speed 表示向下移动的速度
-        self.fleet_drop_speed = 2
+        self.fleet_drop_speed = 10
         # fleet_direction = 1 表示向右移动，-1表示向左移动
         self.fleet_direction = 1

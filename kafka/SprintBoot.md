@@ -1,7 +1,6 @@
 ---
 title: Spring Boot
-parent: Kafka
-nav_order: 8
+nav_exclude: true
 permalink: /kafka/SprintBoot/
 ---
 

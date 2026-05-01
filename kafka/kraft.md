@@ -1,7 +1,6 @@
 ---
 title: KRaft
-parent: Kafka
-nav_order: 4
+nav_exclude: true
 permalink: /kafka/kraft/
 ---
 

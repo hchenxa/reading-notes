@@ -1,11 +1,19 @@
 ---
 title: Go
 nav_order: 2
-has_children: true
 permalink: /go/
 ---
 
 # Go 语言学习笔记
+
+## 目录索引
+
+| 主题 | 说明 |
+|------|------|
+| [Gin]({{ site.baseurl }}/go/gin/) | Gin Web 框架的使用 |
+| [GORM]({{ site.baseurl }}/go/gorm/) | GORM ORM 库的使用 |
+
+---
 
 ## 标识符和关键字
 

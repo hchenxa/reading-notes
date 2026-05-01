@@ -1,7 +1,6 @@
 ---
 title: Broker
-parent: Kafka
-nav_order: 2
+nav_exclude: true
 permalink: /kafka/broker/
 ---
 

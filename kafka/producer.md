@@ -1,7 +1,6 @@
 ---
 title: Producer
-parent: Kafka
-nav_order: 1
+nav_exclude: true
 permalink: /kafka/producer/
 ---
 

@@ -1,11 +1,25 @@
 ---
 title: Kafka
 nav_order: 3
-has_children: true
 permalink: /kafka/
 ---
 
 # Kafka 学习笔记
+
+## 目录索引
+
+| 主题 | 说明 |
+|------|------|
+| [Producer]({{ site.baseurl }}/kafka/producer/) | 生产者原理与配置 |
+| [Broker]({{ site.baseurl }}/kafka/broker/) | Broker 工作流程 |
+| [Consumer]({{ site.baseurl }}/kafka/consumer/) | 消费者与消费方式 |
+| [KRaft]({{ site.baseurl }}/kafka/kraft/) | KRaft 模式 |
+| [Eagle]({{ site.baseurl }}/kafka/Eagle/) | Kafka-Eagle 监控 |
+| [Flume]({{ site.baseurl }}/kafka/Flume/) | Flume 集成 |
+| [Flink]({{ site.baseurl }}/kafka/Flink/) | Flink 集成 |
+| [Spring Boot]({{ site.baseurl }}/kafka/SprintBoot/) | Spring Boot 集成 |
+
+---
 
 ## 入门
 ### 概述

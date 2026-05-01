@@ -1,7 +1,6 @@
 ---
 title: Eagle
-parent: Kafka
-nav_order: 5
+nav_exclude: true
 permalink: /kafka/Eagle/
 ---
 

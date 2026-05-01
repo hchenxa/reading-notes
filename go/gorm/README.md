@@ -1,7 +1,6 @@
 ---
 title: GORM
-parent: Go
-nav_order: 2
+nav_exclude: true
 permalink: /go/gorm/
 ---
 

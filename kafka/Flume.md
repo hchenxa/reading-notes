@@ -1,7 +1,6 @@
 ---
 title: Flume
-parent: Kafka
-nav_order: 6
+nav_exclude: true
 permalink: /kafka/Flume/
 ---
 

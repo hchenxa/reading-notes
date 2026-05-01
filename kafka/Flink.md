@@ -1,7 +1,6 @@
 ---
 title: Flink
-parent: Kafka
-nav_order: 7
+nav_exclude: true
 permalink: /kafka/Flink/
 ---
 

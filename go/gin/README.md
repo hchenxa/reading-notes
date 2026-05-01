@@ -1,7 +1,6 @@
 ---
 title: Gin
-parent: Go
-nav_order: 1
+nav_exclude: true
 permalink: /go/gin/
 ---
 

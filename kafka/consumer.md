@@ -1,7 +1,6 @@
 ---
 title: Consumer
-parent: Kafka
-nav_order: 3
+nav_exclude: true
 permalink: /kafka/consumer/
 ---
 

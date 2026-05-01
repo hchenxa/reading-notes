@@ -1,3 +1,8 @@
+---
+title: Ansible
+nav_order: 7
+---
+
 # Ansible
 
 ![架构图](./ansible-arch.png)

@@ -1,3 +1,9 @@
+---
+title: Broker
+parent: Kafka
+nav_order: 2
+---
+
 # Broker
 
 ## 工作流程

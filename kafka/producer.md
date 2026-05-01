@@ -1,4 +1,10 @@
-# Kafka生产者
+---
+title: Producer
+parent: Kafka
+nav_order: 1
+---
+
+# Kafka 生产者
 
 ## 原理
 ![producer](./images/producer/producers.png)

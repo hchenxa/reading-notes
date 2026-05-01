@@ -1,4 +1,10 @@
-# Gin框架的使用
+---
+title: Gin
+parent: Go
+nav_order: 1
+---
+
+# Gin 框架的使用
 
 ## 安装
 

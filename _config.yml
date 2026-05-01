@@ -1,1 +1,42 @@
-theme: jekyll-theme-cayman
+title: Reading Notes
+description: hchen's learning notes
+remote_theme: just-the-docs/just-the-docs@v0.10.0
+
+url: ""
+
+color_scheme: light
+
+search_enabled: true
+search.heading_level: 3
+
+nav_sort: case_insensitive
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+heading_anchors: true
+
+exclude:
+  - "*.go"
+  - "*.py"
+  - "*.js"
+  - "*.sum"
+  - "*.mod"
+  - "*.sh"
+  - "*.html"
+  - "*.css"
+  - "*.cfg"
+  - go/gin/templates/
+  - go/rpc/
+  - go/socket/
+  - go/tips/
+  - python/sample/
+  - python/hello_world.py
+  - javascript/example/
+  - javascript/project/
+  - kind/
+  - node_modules/
+  - vendor/
+
+plugins:
+  - jekyll-remote-theme

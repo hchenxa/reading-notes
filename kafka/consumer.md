@@ -1,4 +1,10 @@
-# Kafka消费者
+---
+title: Consumer
+parent: Kafka
+nav_order: 3
+---
+
+# Kafka 消费者
 
 ## kafka消费方式
 

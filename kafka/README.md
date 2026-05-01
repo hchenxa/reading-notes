@@ -1,4 +1,10 @@
-# Kafka学习笔记
+---
+title: Kafka
+nav_order: 3
+has_children: true
+---
+
+# Kafka 学习笔记
 
 ## 入门
 ### 概述

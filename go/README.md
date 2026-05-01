@@ -1,4 +1,10 @@
-# go 语言学习笔记
+---
+title: Go
+nav_order: 2
+has_children: true
+---
+
+# Go 语言学习笔记
 
 ## 标识符和关键字
 

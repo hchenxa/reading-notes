@@ -1,4 +1,10 @@
-## Kraft模式
+---
+title: KRaft
+parent: Kafka
+nav_order: 4
+---
+
+## KRaft 模式
 
 - kafka不再依赖于外部框架(zookeeper)，而是能够独立运行。
 - controller管理集群时，不再需要从zookeeper中先读取数据，集群性能上升。

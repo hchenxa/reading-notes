@@ -1,4 +1,9 @@
-# JavaScript基础培训
+---
+title: JavaScript
+nav_order: 5
+---
+
+# JavaScript 基础培训
 
 ## 基础知识
 

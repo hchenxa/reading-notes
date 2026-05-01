@@ -1,4 +1,9 @@
-# python
+---
+title: Python
+nav_order: 4
+---
+
+# Python
 
 
 ## 数据类型

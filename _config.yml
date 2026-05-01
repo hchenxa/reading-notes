@@ -37,6 +37,5 @@ exclude:
   - javascript/project/
   - kind/
   - node_modules/
-  - vendor/
 
 plugins: []

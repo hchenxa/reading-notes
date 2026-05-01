@@ -1,16 +1,1 @@
-// Resize handle on sidebar edge
-.sidebar-resize-handle {
-  position: absolute;
-  top: 0;
-  right: -3px;
-  width: 6px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 100;
-  background: transparent;
-
-  &:hover,
-  &.dragging {
-    background: rgba(0, 0, 0, 0.12);
-  }
-}
+// intentionally empty - using theme defaults

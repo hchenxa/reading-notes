@@ -1,0 +1,37 @@
+// Wider sidebar
+.side-bar {
+  width: 300px;
+  min-width: 200px;
+  max-width: 500px;
+  position: relative;
+  flex-shrink: 0;
+  transition: none;
+
+  @media (min-width: 66.5rem) {
+    width: var(--sidebar-width, 300px);
+  }
+}
+
+// Resize handle
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 100;
+  background: transparent;
+
+  &:hover,
+  &.dragging {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Adjust main content to respect sidebar width
+@media (min-width: 66.5rem) {
+  .main {
+    margin-left: var(--sidebar-width, 300px);
+  }
+}

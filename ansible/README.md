@@ -6,6 +6,17 @@ permalink: /ansible/
 
 # Ansible
 
+## 目录索引
+
+| 主题 | 说明 |
+|------|------|
+| [安装](#安装) | 安装说明 |
+| [配置](#配置) | ansible.cfg、hosts、变量 |
+| [常用模块](#常用模块) | command、copy、yum、service 等 |
+| [Playbook](#playbook) | handlers、tags、变量、roles |
+
+---
+
 ![架构图](./ansible-arch.png)
 
 ## 安装

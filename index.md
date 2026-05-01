@@ -1,6 +1,7 @@
 ---
 title: Home
 layout: default
+permalink: /
 nav_order: 1
 ---
 

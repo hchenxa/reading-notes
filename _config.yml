@@ -2,7 +2,8 @@ title: Reading Notes
 description: hchen's learning notes
 remote_theme: just-the-docs/just-the-docs@v0.10.0
 
-url: ""
+url: "https://hchenxa.github.io"
+baseurl: "/reading-notes"
 
 color_scheme: light
 

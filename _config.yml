@@ -8,7 +8,12 @@ baseurl: "/reading-notes"
 color_scheme: light
 
 search_enabled: true
-search.heading_level: 3
+search:
+  heading_level: 3
+  previews: 2
+  preview_words_before: 3
+  preview_words_after: 3
+  tokenizer_separator: /[\s/]+/
 
 nav_sort: case_insensitive
 

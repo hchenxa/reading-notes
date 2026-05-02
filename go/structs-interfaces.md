@@ -1,9 +1,3 @@
----
-title: 结构体与接口
-nav_exclude: true
-permalink: /go/structs-interfaces/
----
-
 # 结构体与接口
 
 ## 结构体
@@ -192,4 +186,4 @@ import _ "github.com/xxx"
 
 一个包的初始化过程是按照代码中引入的顺序来进行的，所有在该包中声明的init函数都将被串行调用并且仅调用执行一次。每一个包初始化的时候都是先执行依赖的包中声明的init函数再执行当前包中声明的init函数。确保在程序的main函数开始执行时所有的依赖包都已初始化完成。
 
-![package]({{ site.baseurl }}/go/images/package.png)
+![package](./images/package.png)

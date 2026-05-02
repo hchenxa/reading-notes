@@ -1,9 +1,3 @@
----
-title: JavaScript
-nav_order: 5
-permalink: /javascript/
----
-
 # JavaScript 基础培训
 
 ## 目录索引

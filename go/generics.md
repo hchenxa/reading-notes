@@ -1,9 +1,3 @@
----
-title: 泛型
-nav_exclude: true
-permalink: /go/generics/
----
-
 # 泛型
 Go 1.18增加了对泛型的支持，允许程序员在强类型程序设计语言中便携代码时使用一些以后才需要指定的类型。
 

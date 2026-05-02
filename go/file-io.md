@@ -1,9 +1,3 @@
----
-title: 文件操作与标准库
-nav_exclude: true
-permalink: /go/file-io/
----
-
 # 文件操作与标准库
 
 ## 文件操作

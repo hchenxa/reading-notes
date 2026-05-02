@@ -1,9 +1,3 @@
----
-title: Ansible
-nav_order: 7
-permalink: /ansible/
----
-
 # Ansible
 
 ## 目录索引

@@ -1,9 +1,3 @@
----
-title: Gin
-nav_exclude: true
-permalink: /go/gin/
----
-
 # Gin 框架的使用
 
 ## 安装

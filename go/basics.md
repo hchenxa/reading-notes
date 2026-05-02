@@ -1,9 +1,3 @@
----
-title: 基础语法
-nav_exclude: true
-permalink: /go/basics/
----
-
 # Go 基础语法
 
 ## 标识符和关键字

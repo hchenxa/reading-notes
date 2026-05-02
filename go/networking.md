@@ -1,14 +1,8 @@
----
-title: 网络编程与Context
-nav_exclude: true
-permalink: /go/networking/
----
-
 # 网络编程与Context
 
 ## 网络编程
 
-![socket]({{ site.baseurl }}/go/images/socket.png)
+![socket](./images/socket.png)
 
 ### TCP通信
 

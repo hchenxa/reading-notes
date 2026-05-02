@@ -1,9 +1,3 @@
----
-title: 并发编程
-nav_exclude: true
-permalink: /go/concurrency/
----
-
 # 并发编程
 
 ## 并发

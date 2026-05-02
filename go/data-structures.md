@@ -1,9 +1,3 @@
----
-title: 复合数据类型
-nav_exclude: true
-permalink: /go/data-structures/
----
-
 # 复合数据类型
 
 ## 数组Array

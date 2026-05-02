@@ -21,31 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
-      - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}" --verbose
-        env:
-          JEKYLL_ENV: production
-          JEKYLL_LOG_LEVEL: debug
-
-      - name: Verify theme in output
-        run: |
-          echo "=== Check _site/index.html ==="
-          head -20 _site/index.html
-          echo "=== Check if sidebar exists ==="
-          grep -c "side-bar\|site-nav" _site/index.html || echo "No sidebar found"
+      - name: Generate sidebar
+        run: bash generate-sidebar.sh
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
 
   deploy:
     environment:

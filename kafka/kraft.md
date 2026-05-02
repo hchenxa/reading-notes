@@ -1,9 +1,3 @@
----
-title: KRaft
-nav_exclude: true
-permalink: /kafka/kraft/
----
-
 ## KRaft 模式
 
 - kafka不再依赖于外部框架(zookeeper)，而是能够独立运行。

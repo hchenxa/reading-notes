@@ -1,0 +1,5 @@
+node_modules/
+.venv/
+_sidebar.md
+_site/
+.DS_Store

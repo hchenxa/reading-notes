@@ -1,23 +1,17 @@
----
-title: Kafka
-nav_order: 3
-permalink: /kafka/
----
-
 # Kafka 学习笔记
 
 ## 目录索引
 
 | 主题 | 说明 |
 |------|------|
-| [Producer]({{ site.baseurl }}/kafka/producer/) | 生产者原理与配置 |
-| [Broker]({{ site.baseurl }}/kafka/broker/) | Broker 工作流程 |
-| [Consumer]({{ site.baseurl }}/kafka/consumer/) | 消费者与消费方式 |
-| [KRaft]({{ site.baseurl }}/kafka/kraft/) | KRaft 模式 |
-| [Eagle]({{ site.baseurl }}/kafka/Eagle/) | Kafka-Eagle 监控 |
-| [Flume]({{ site.baseurl }}/kafka/Flume/) | Flume 集成 |
-| [Flink]({{ site.baseurl }}/kafka/Flink/) | Flink 集成 |
-| [Spring Boot]({{ site.baseurl }}/kafka/SprintBoot/) | Spring Boot 集成 |
+| [Producer](producer/) | 生产者原理与配置 |
+| [Broker](broker/) | Broker 工作流程 |
+| [Consumer](consumer/) | 消费者与消费方式 |
+| [KRaft](kraft/) | KRaft 模式 |
+| [Eagle](Eagle/) | Kafka-Eagle 监控 |
+| [Flume](Flume/) | Flume 集成 |
+| [Flink](Flink/) | Flink 集成 |
+| [Spring Boot](SprintBoot/) | Spring Boot 集成 |
 
 ---
 
@@ -53,23 +47,23 @@ permalink: /kafka/
 #### 命令行
 ...
 ### 生产者
-[producer]({{ site.baseurl }}/kafka/producer/)
+[producer](producer/)
 ### broker
-[broker]({{ site.baseurl }}/kafka/broker/)
+[broker](broker/)
 ### 消费者
-[consumer]({{ site.baseurl }}/kafka/consumer/)
+[consumer](consumer/)
 ### Eagle监控
-[Eagle]({{ site.baseurl }}/kafka/Eagle/)
+[Eagle](Eagle/)
 ### kraft模式
-[kraft]({{ site.baseurl }}/kafka/kraft/)
+[kraft](kraft/)
 
 ## 外部系统集成
 ### Flume集成
-[Flume]({{ site.baseurl }}/kafka/Flume/)
+[Flume](Flume/)
 ### Flink集成
-[Flink]({{ site.baseurl }}/kafka/Flink/)
+[Flink](Flink/)
 ### SprintBoot集成
-[SprintBoot]({{ site.baseurl }}/kafka/SprintBoot/)
+[SprintBoot](SprintBoot/)
 ### Spark集成
 
 ## 生产调优手册

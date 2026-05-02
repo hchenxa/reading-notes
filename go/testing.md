@@ -1,9 +1,3 @@
----
-title: 单元测试与调试
-nav_exclude: true
-permalink: /go/testing/
----
-
 # 单元测试与调试
 
 ## 单元测试

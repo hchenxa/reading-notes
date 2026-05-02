@@ -1,9 +1,3 @@
----
-title: Python
-nav_order: 4
-permalink: /python/
----
-
 # Python
 
 ## 目录索引

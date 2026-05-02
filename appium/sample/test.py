@@ -1,19 +1,33 @@
 from time import sleep
 
 from appium import webdriver
-from appium.options.android import UiAutomator2Options
+
+# from appium.options.android import UiAutomator2Options
 # from appium.webdriver.common.appiumby import AppiumBy
 
-options = UiAutomator2Options()
-options.platform_name = 'Android'
-options.device_name = 'Pixel_7_API_33'
-options.automation_name = 'UiAutomator2'
+# below configuration is for client v3 version
+# options = UiAutomator2Options()
+# options.platform_name = 'Android'
+# options.device_name = 'Pixel_7_API_33'
+# options.automation_name = 'UiAutomator2'
 
-options.app_package = 'com.google.android.dialer'
-options.app_activity = 'com.google.android.dialer.extensions.GoogleDialtactsActivity'
+# options.app_package = 'com.google.android.dialer'
+# options.app_activity = 'com.google.android.dialer.extensions.GoogleDialtactsActivity'
+
+desired_caps = {
+    'deviceName': 'xxxx',
+    'platformName': 'Android',
+    'appPackage': '',
+    'appActivity': '',
+    'automationName': 'UiAutomator2'
+}
 
 appium_server_url = 'http://127.0.0.1:4723'
-driver = webdriver.Remote(command_executor=appium_server_url, options=options)
+driver = webdriver.Remote(command_executor=appium_server_url,
+                          desired_capabilities=desired_caps)
+
+
+# driver = webdriver.Remote(command_executor=appium_server_url, options=options)
 
 try:
     # 1. 定义数字与 Keycode 的映射关系 (Keycode 7 代表数字0，8代表1，以此类推)

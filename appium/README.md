@@ -105,6 +105,11 @@ List of devices attached
 emulator-5554	device
 ```
 
+获取手机版本信息
+```bash
+hchenxa@huichen1-mac ~ % adb shell getprop ro.build.version.release
+```
+
 实时抓取当前操作
 
 ```bash

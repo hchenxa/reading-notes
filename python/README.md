@@ -19,6 +19,64 @@ msg = "hello world"
 - 不能包括空格
 - 不用使用关键字
 
+浅拷贝和深拷贝。
+
+普通的赋值是数据完全共享，修改变量也会修改原变量数据
+
+浅拷贝是数据半共享，修改变量数据不会影响原来的数据, 调用`copy.copy()`来进行浅拷贝.
+
+```python
+copy.copy()
+```
+
+深拷贝不仅拷贝内部元素，好包括对象在内，调用`copy.deepcopy()`来进行深拷贝.
+
+```python
+copy.deepcopy()
+```
+
+举个例子：
+```python
+
+>>> li = [1,2,3,[4,5,6]]
+>>> li1 = li
+>>> li2 = copy.copy(li)
+>>> li3 = copy.deepcopy(li)
+>>> id(li)
+4335077696
+>>> id(li1)
+4335077696      #可以看到这块的内存地址和原变量li是一样的
+>>> id(li2)
+4337386112     #内存地址发生了变化
+>>> id(li3)
+4337161088       #内存地址发生了变化
+>>> li.append(7)
+>>> print(li)
+[1, 2, 3, [4, 5, 6], 7]
+>>> print(li1)
+[1, 2, 3, [4, 5, 6], 7]
+>>> print(li2)
+[1, 2, 3, [4, 5, 6]]
+>>> print(li3)
+[1, 2, 3, [4, 5, 6]]
+
+>>> print(li2[3])
+[4, 5, 6]
+>>> print(li3[3])
+[4, 5, 6]
+
+>>> li.append(7)
+>>> print(li2[3])
+[4, 5, 6]
+>>> print(li3[3])
+[4, 5, 6]
+>>> li[3].append(8)
+>>> print(li2[3])      #浅拷贝里面的值发生了变化
+[4, 5, 6, 8]
+>>> print(li3[3])      #深拷贝的值没有变化
+[4, 5, 6]
+```
+
 ### 格式化小技巧
 f字符串。f是format的简写
 
@@ -29,6 +87,26 @@ msg = f"{name.title()}"
 msg = f"hello, {name.title()}"
 ```
 变量在格式化的时候需要使用{}
+
+格式化输出的时候还可以尝试使用`sep`，比如：
+
+```python
+>>> print("今天", "明天", "后天")
+今天 明天 后天
+```
+我们可以看到默认的输出中间的间隔用的是空格，可以使用`sep`来修改输出，比如:
+
+```python
+>>> print("今天", "明天", "后天", sep=",")
+今天,明天,后天
+```
+
+print后面还可以加上`end`来作为结束，比如:
+
+```python
+>>> print("今天", "明天", "后天", end="###\n")
+今天 明天 后天###
+```
 
 ### 列表
 #### append, insert
@@ -123,12 +201,11 @@ for <>:
 while 循环:
 ```python
 while True:
-    print() ----------> 这是个死循环
+    print() #----------> 这是个死循环
 ```
 
 break/continue:
 ```python
-
 while num < 5:
     num++
     if num == 4:
@@ -151,7 +228,7 @@ while num < 5:
 def func_name():
     # func block
 
-func_name() ------> 函数调用
+func_name() #------> 函数调用
 ```
 python定义函数和调用的时候可以指定参数名(关键字实参),比如
 ```python
@@ -192,14 +269,22 @@ print_models(unprinted_designs[:], completed_models):
 可变参数传递:
 ```python
 def make_pizze(*toppings):
-    print(toppings)_
+    print(toppings)
 ```
 行参`*toppings`中的星号让python创建一个名为toppings的元祖
 
 可变关键字参数传递:
 ```python
 def make_pizze(**toppings):
-    print(toppings)_
+    print(toppings)
 ```
-行参`**toppings`中的星号让python创建一个名为toppings的字典
+行参`**toppings`中的星号让python创建一个名为`toppings`的字典
 
+## 查看内置函数
+
+```python
+>>> import builtins
+>>> dir(builtins)
+['ArithmeticError', 'AssertionError', 'AttributeError', 'BaseException', 'BaseExceptionGroup', 'BlockingIOError', 'BrokenPipeError', 'BufferError', 'BytesWarning', 'ChildProcessError', 'ConnectionAbortedError', 'ConnectionError', 'ConnectionRefusedError', 'ConnectionResetError', 'DeprecationWarning', 'EOFError', 'Ellipsis', 'EncodingWarning', 'EnvironmentError', 'Exception', 'ExceptionGroup', 'False', 'FileExistsError', 'FileNotFoundError', 'FloatingPointError', 'FutureWarning', 'GeneratorExit', 'IOError', 'ImportError', 'ImportWarning', 'IndentationError', 'IndexError', 'InterruptedError', 'IsADirectoryError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'ModuleNotFoundError', 'NameError', 'None', 'NotADirectoryError', 'NotImplemented', 'NotImplementedError', 'OSError', 'OverflowError', 'PendingDeprecationWarning', 'PermissionError', 'ProcessLookupError', 'RecursionError', 'ReferenceError', 'ResourceWarning', 'RuntimeError', 'RuntimeWarning', 'StopAsyncIteration', 'StopIteration', 'SyntaxError', 'SyntaxWarning', 'SystemError', 'SystemExit', 'TabError', 'TimeoutError', 'True', 'TypeError', 'UnboundLocalError', 'UnicodeDecodeError', 'UnicodeEncodeError', 'UnicodeError', 'UnicodeTranslateError', 'UnicodeWarning', 'UserWarning', 'ValueError', 'Warning', 'ZeroDivisionError', '__build_class__', '__debug__', '__doc__', '__import__', '__loader__', '__name__', '__package__', '__spec__', 'abs', 'aiter', 'all', 'anext', 'any', 'ascii', 'bin', 'bool', 'breakpoint', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'copyright', 'credits', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'exit', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance', 'issubclass', 'iter', 'len', 'license', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'quit', 'range', 'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip']
+>>> 
+```

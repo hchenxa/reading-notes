@@ -95,11 +95,37 @@ EOF
 
 ### 5. 验证
 
+> `kubectl run` **没有** `--runtime-class` 参数,必须用 manifest。
+> 镜像必须显式 `imagePullPolicy: IfNotPresent`:`latest` 标签默认
+> `Always`,kubelet 每次都会去 registry 检查,节点网络不通时即使镜像已
+> load 进节点也会 `ImagePullBackOff`。
+
 ```sh
-kubectl run gvisor-test --image=busybox --restart=Never --runtime-class=gvisor --command -- sleep 3600
-kubectl get pod gvisor-test -o jsonpath='{.spec.runtimeClassName}'
-kubectl exec gvisor-test -- dmesg | head -1    # 输出 gVisor 内核横幅
-podman exec agent-sandbox-control-plane ps aux | grep -E 'runsc|containerd-shim'  # 不是 runc
+kubectl apply -f - <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gvisor-test
+spec:
+  runtimeClassName: gvisor
+  restartPolicy: Never
+  containers:
+  - name: test
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "3600"]
+EOF
+kubectl wait --for=condition=Ready pod/gvisor-test --timeout=90s
+```
+
+三个判据全部满足才算真在 gVisor 里(2026-08 实测输出):
+
+```sh
+kubectl exec gvisor-test -- dmesg | head -1        # [   0.000000] Starting gVisor...
+kubectl exec gvisor-test -- cat /proc/version      # Linux version 4.19.0-gvisor ...
+podman exec agent-sandbox-control-plane ps aux | grep -E 'runsc|containerd-shim'
+# 期望:containerd-shim-runsc-v1 → runsc-gofer → runsc-sandbox 进程栈
+# 对照:普通 pod 是 containerd-shim-runc-v2
 ```
 
 ## 四、方案 B:可复现(自定义节点镜像)
@@ -141,6 +167,30 @@ pod 同一机制。
 
 > ⚠️ gVisor/Kata 运行时下,`kubectl port-forward` 直连沙箱 pod 不兼容,
 > 需要通过 Sandbox Router 访问(见仓库 gvisor-isolation 文档)。
+
+**快速验证集成**(不依赖外网镜像,2026-08 实测通过):最小 Sandbox +
+已加载的 busybox,确认 controller 把它调度到 gVisor 运行时:
+
+```sh
+kubectl apply -f - <<'EOF'
+apiVersion: agents.x-k8s.io/v1beta1
+kind: Sandbox
+metadata:
+  name: gvisor-sandbox-test
+spec:
+  podTemplate:
+    spec:
+      runtimeClassName: gvisor
+      containers:
+      - name: main
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sleep", "3600"]
+EOF
+kubectl get sandbox gvisor-sandbox-test                       # Ready=True (DependenciesReady)
+kubectl get pod gvisor-sandbox-test -o jsonpath='{.spec.runtimeClassName}'  # gvisor
+kubectl exec gvisor-sandbox-test -- cat /proc/version         # 4.19.0-gvisor
+```
 
 ## 六、排障(本环境实操踩坑实录)
 
@@ -190,7 +240,17 @@ kind 在**创建集群时**把宿主机的 `HTTP(S)_PROXY` 快照进节点的 sy
 解法:不带代理变量重建集群(`env -u HTTP_PROXY ... kind create cluster`),
 或宿主机拉镜像后 `kind load`。
 
-### 6.6 如何确认 pod 真的在 gVisor 里
+### 6.6 镜像已 load 进节点,pod 却 ImagePullBackOff
+
+**`latest` 标签陷阱**:`imagePullPolicy` 对 `latest` 标签默认是 `Always`,
+kubelet 每次启动都会去 registry 检查,节点网络不通 → HEAD 超时 →
+`ImagePullBackOff`,哪怕镜像明明已经 `kind load` 进节点了。修复:显式
+`imagePullPolicy: IfNotPresent`(或引用非 latest 标签)。
+
+另外注意:`kubectl run` 没有 `--runtime-class` 参数(报 `unknown flag`),
+验证 pod 必须用 manifest 方式创建。
+
+### 6.7 如何确认 pod 真的在 gVisor 里
 
 1. `kubectl get pod <pod> -o jsonpath='{.spec.runtimeClassName}'` → `gvisor`
 2. pod 内 `dmesg | head -1` 显示 gVisor 内核横幅;`/proc/version` 与宿主不同

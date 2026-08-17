@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# Copyright 2025 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# enable-gvisor-kind — enable gVisor (runsc) on a running kind cluster.
+#
+# Downloads runsc and containerd-shim-runsc-v1 (verified against the official
+# sha512, with retries — proxies occasionally serve truncated binaries),
+# installs them into every node of the cluster, registers the runtime with
+# containerd, and creates the RuntimeClass. Safe to re-run: a working runsc
+# install and an existing containerd config are detected and left untouched.
+#
+# Usage:
+#   ./dev/tools/enable-gvisor-kind [--cluster NAME] [--engine docker|podman]
+#                                  [--runtimeclass NAME] [--force]
+#
+# Environment:
+#   CONTAINER_ENGINE  container engine to use (docker or podman); auto-detected
+#
+# See docs/gvisor-kind-setup.md for the full guide and troubleshooting.
+
+set -euo pipefail
+
+CLUSTER="${CLUSTER:-agent-sandbox}"
+ENGINE="${CONTAINER_ENGINE:-}"
+RUNTIMECLASS="gvisor"
+HANDLER="runsc"  # must match the runtime name registered with containerd
+BASE_URL="https://storage.googleapis.com/gvisor/releases/release/latest"
+FORCE=0
+
+die() { echo "error: $*" >&2; exit 1; }
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+Enable gVisor (runsc) on a running kind cluster.
+
+Options:
+  -c, --cluster NAME       Kind cluster name (default: agent-sandbox)
+  -e, --engine NAME        Container engine: docker or podman
+                           (default: CONTAINER_ENGINE env, else auto-detect)
+  -r, --runtimeclass NAME  RuntimeClass name to create (default: gvisor)
+  -f, --force              Re-download and reinstall even if runsc works
+  -h, --help               Show this help and exit
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -c|--cluster) CLUSTER="$2"; shift 2 ;;
+        -e|--engine) ENGINE="$2"; shift 2 ;;
+        -r|--runtimeclass) RUNTIMECLASS="$2"; shift 2 ;;
+        -f|--force) FORCE=1; shift ;;
+        -h|--help) usage; exit 0 ;;
+        *) die "unknown option: $1 (see --help)" ;;
+    esac
+done
+
+# --- pick the checksum tool: sha512sum (Linux) vs shasum -a 512 (macOS) ---
+if command -v sha512sum >/dev/null 2>&1; then
+    SHA_CMD=(sha512sum)
+else
+    SHA_CMD=(shasum -a 512)
+fi
+
+# --- detect the container engine: pick the one hosting the cluster's nodes ---
+detect_engine() {
+    if command -v docker >/dev/null 2>&1 \
+        && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${CLUSTER}-"; then
+        echo docker
+    elif command -v podman >/dev/null 2>&1 \
+        && podman ps --format '{{.Names}}' 2>/dev/null | grep -q "^${CLUSTER}-"; then
+        echo podman
+    else
+        die "no kind node containers found for cluster '${CLUSTER}' with docker or podman (is it running?)"
+    fi
+}
+if [[ -z "$ENGINE" ]]; then
+    ENGINE="$(detect_engine)"
+fi
+case "$ENGINE" in
+    docker|podman) ;;
+    *) die "unsupported container engine: $ENGINE (choose docker or podman)" ;;
+esac
+echo "==> using container engine: $ENGINE"
+
+# --- discover the cluster's nodes ---
+NODES=()
+while IFS= read -r node; do
+    NODES+=("$node")
+done < <("$ENGINE" ps --format '{{.Names}}' 2>/dev/null | grep "^${CLUSTER}-" || true)
+if [[ ${#NODES[@]} -eq 0 ]]; then
+    die "no kind node containers found for cluster '${CLUSTER}' (is it running?)"
+fi
+echo "==> cluster '${CLUSTER}' nodes: ${NODES[*]}"
+
+# --- download + verify a release artifact (with retries) ---
+# The .sha512 files record the artifact's original file name, so the local
+# file must keep it: sha512sum -c looks up that name.
+download_verified() {
+    local name="$1" dest="$2" tries="${3:-5}" attempt
+    for attempt in $(seq 1 "$tries"); do
+        if curl -fsSL --max-time 300 -o "$dest" "$BASE_URL/$ARCH_DIR/$name" \
+            && curl -fsSL --max-time 60 -o "$dest.sha512" "$BASE_URL/$ARCH_DIR/$name.sha512" \
+            && (cd "$(dirname "$dest")" && "${SHA_CMD[@]}" -c "$(basename "$dest").sha512" >/dev/null 2>&1); then
+            echo "    downloaded $name (sha512 verified)"
+            return 0
+        fi
+        echo "    $name: download failed checksum verification (attempt $attempt/$tries), retrying..."
+        sleep 2
+    done
+    die "failed to download a verified $name from $BASE_URL/$ARCH_DIR/ (use --force to retry)"
+}
+
+# --- install gVisor on a single node ---
+install_on_node() {
+    local node="$1" arch="$2"
+
+    echo "==> [$node] installing gVisor ($arch)"
+
+    if [[ "$FORCE" -eq 0 ]] && "$ENGINE" exec "$node" runsc --version >/dev/null 2>&1; then
+        echo "    runsc already installed and working; skipping binary install (--force to reinstall)"
+    else
+        "$ENGINE" cp "$TMP_DIR/runsc" "$node:/usr/local/bin/runsc"
+        "$ENGINE" cp "$TMP_DIR/containerd-shim-runsc-v1" "$node:/usr/local/bin/containerd-shim-runsc-v1"
+        "$ENGINE" exec "$node" chmod +x /usr/local/bin/runsc /usr/local/bin/containerd-shim-runsc-v1
+        echo "    binaries copied into node"
+    fi
+
+    # ptrace platform requires kernel.yama.ptrace_scope = 0
+    local scope
+    scope="$("$ENGINE" exec "$node" sysctl -n kernel.yama.ptrace_scope 2>/dev/null || echo "1")"
+    if [[ "$scope" != "0" ]]; then
+        echo "    setting kernel.yama.ptrace_scope=0"
+        "$ENGINE" exec "$node" sysctl -w kernel.yama.ptrace_scope=0
+    fi
+
+    # register the runtime with containerd (idempotent) and restart
+    if "$ENGINE" exec "$node" grep -q 'runtimes.runsc' /etc/containerd/config.toml; then
+        echo "    containerd already configured for runsc"
+    else
+        echo "    registering runsc runtime with containerd and restarting it (node pods will restart)"
+        "$ENGINE" exec "$node" sh -c 'cat >> /etc/containerd/config.toml <<EOF
+
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
+  runtime_type = "io.containerd.runsc.v1"
+EOF
+systemctl restart containerd'
+    fi
+}
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+# --- per-architecture download (nodes are expected to share one arch) ---
+for node in "${NODES[@]}"; do
+    ARCH_DIR="$("$ENGINE" exec "$node" uname -m)"
+    case "$ARCH_DIR" in
+        aarch64|arm64) ARCH_DIR="aarch64" ;;
+        x86_64|amd64) ARCH_DIR="x86_64" ;;
+        *) die "node '$node' has unsupported architecture: $ARCH_DIR" ;;
+    esac
+    break
+done
+echo "==> node architecture: $ARCH_DIR"
+
+if [[ "$FORCE" -eq 0 ]] && "$ENGINE" exec "${NODES[0]}" runsc --version >/dev/null 2>&1; then
+    echo "==> runsc already works on the first node; skipping download (--force to re-download)"
+else
+    echo "==> downloading runsc + containerd-shim-runsc-v1 ($ARCH_DIR)"
+    download_verified "runsc" "$TMP_DIR/runsc"
+    download_verified "containerd-shim-runsc-v1" "$TMP_DIR/containerd-shim-runsc-v1"
+fi
+
+for node in "${NODES[@]}"; do
+    install_on_node "$node" "$ARCH_DIR"
+done
+
+# --- RuntimeClass (idempotent) ---
+echo "==> creating RuntimeClass '$RUNTIMECLASS' (handler: $HANDLER)"
+kubectl apply -f - <<EOF
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: $RUNTIMECLASS
+handler: $HANDLER
+EOF
+
+# --- verify ---
+echo "==> verification"
+for node in "${NODES[@]}"; do
+    echo -n "    $node: "
+    "$ENGINE" exec "$node" runsc --version | head -1
+done
+kubectl get runtimeclass "$RUNTIMECLASS"
+
+cat <<EOF
+
+Done. gVisor is enabled. To confirm a workload actually runs inside gVisor,
+deploy a pod with spec.runtimeClassName: $RUNTIMECLASS and check:
+
+  kubectl exec <pod> -- cat /proc/version   # expect "Linux version ... -gvisor"
+  kubectl exec <pod> -- dmesg | head -1     # expect "Starting gVisor..."
+
+See docs/gvisor-kind-setup.md for the agent-sandbox integration and
+troubleshooting. Note: node-local installs are lost on cluster recreation;
+bake the binaries into a custom kindest/node image for a repeatable setup.
+EOF

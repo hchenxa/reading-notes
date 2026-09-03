@@ -1,0 +1,8 @@
+# 生成的证书物料(含 lab CA/服务器/客户端私钥,全部可 regenerate.sh 重建)
+certs/out/
+
+# 场景运行产物(输出可重跑,对照文档使用)
+out/
+
+# 渲染出的 nginx 配置(由模板+fragments 生成)
+nginx/nginx.conf.gen*

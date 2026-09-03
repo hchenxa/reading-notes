@@ -32,11 +32,11 @@
 
 对比单向 TLS 1.2 握手,mTLS 只是多了两个环节——但方向完全反转:
 
-STEP 01:客户端发 ClientHello(与单向一致,带 SNI、密套列表)
-STEP 02:服务器发 ServerHello + 证书链,**额外发一个 CertificateRequest**("请你也出示证书")
-STEP 03:客户端验证服务器证书;**客户端出示自己的证书链**(Certificate 消息)
-STEP 04:**客户端用私钥对握手摘要签名**(CertificateVerify 消息),证明"我确实持有这张证书对应的私钥"
-STEP 05:双方完成密钥交换,开始加密通信
+- STEP 01:客户端发 ClientHello(与单向一致,带 SNI、密套列表)
+- STEP 02:服务器发 ServerHello + 证书链,**额外发一个 CertificateRequest**("请你也出示证书")
+- STEP 03:客户端验证服务器证书;**客户端出示自己的证书链**(Certificate 消息)
+- STEP 04:**客户端用私钥对握手摘要签名**(CertificateVerify 消息),证明"我确实持有这张证书对应的私钥"
+- STEP 05:双方完成密钥交换,开始加密通信
 
 > 绿色提示:第 04 步是 mTLS 的灵魂——Certificate 本身可以伪造(证书是公开的),但**CertificateVerify 必须用私钥签名**,服务器验证签名后,才能确定"持证人在场"。这是"证明我是我"的密码学落地。
 

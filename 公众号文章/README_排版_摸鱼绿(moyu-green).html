@@ -1,0 +1,1041 @@
+<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+
+  <!-- 1. 封面 cover-breaking（无右侧图片版） -->
+  <section style="margin:0 0 32px;background:#fff;border:1.5px solid rgba(5,150,105,0.15);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);width:100%;">
+    <section style="padding:32px 28px 28px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+        <span style="width:6px;height:6px;background:#059669;border-radius:50%;"><span leaf=""><br></span></span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:3px;color:#059669;"><span leaf="">TUTORIAL · SANDBOX</span></span>
+        <section style="flex:1;height:1px;overflow:hidden;background:linear-gradient(to right,rgba(5,150,105,0.12),transparent);"><span leaf=""><br></span></section>
+        <span style="font-size:10px;color:#D1D5DB;font-weight:600;"><span leaf="">2026.08</span></span>
+      </section>
+      <section>
+        <p style="font-size:15px;color:#D1D5DB;margin:0 0 6px;text-decoration:line-through;letter-spacing:0.5px;">
+          <span leaf="">沙箱隔离必须靠真虚拟机？</span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#111827;margin:0;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">没有 KVM，</span>
+          <span style="color:#059669;"><span leaf="">纯用户态内核</span></span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#059669;margin:0 0 16px;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">也能做出真沙箱</span>
+        </p>
+        <section style="width:48px;height:3px;background:linear-gradient(to right,#059669,#34D399);border-radius:2px;margin-bottom:12px;">
+          <span leaf=""><br></span>
+        </section>
+        <p style="font-size:13px;color:#9CA3AF;margin:0;line-height:1.7;letter-spacing:0.5px;">
+          <span leaf="">ptrace 平台 · 无需重建集群 · 方案 A/B · 排障实录</span>
+        </p>
+      </section>
+    </section>
+    <section style="background:linear-gradient(135deg,#059669,#10B981);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:12px;color:rgba(255,255,255,0.9);margin:0;font-weight:600;letter-spacing:0.5px;">
+        <span leaf="">gVisor × kind 实操笔记</span>
+      </p>
+      <section style="display:flex;gap:4px;">
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">TUTORIAL</span></span>
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">K8S</span></span>
+      </section>
+    </section>
+  </section>
+
+  <!-- 2. 目录 toc-scroll -->
+  <section style="margin:0 20px 32px;">
+    <section style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <p style="font-size:10px;color:#9CA3AF;margin:0;text-transform:uppercase;letter-spacing:2px;font-weight:600;">
+        <span leaf="">📦 3 Parts + Conclusion</span>
+      </p>
+      <p style="font-size:10px;color:#9CA3AF;margin:0;">
+        <span leaf="">👉 滑动</span>
+      </p>
+    </section>
+    <section style="overflow-x:scroll;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:8px;">
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:linear-gradient(135deg,#059669,#10B981);border-radius:12px;padding:12px;margin-right:8px;">
+        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 01</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#fff;margin:0 0 3px;">
+          <span leaf="">纯用户态内核</span>
+        </p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.7);margin:0;">
+          <span leaf="">为什么 kind 可行</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 02</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">快速路径</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">装进运行中的节点</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 03</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">排障实录</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">七个坑一次讲清</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART ///</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">备选方案与参考</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- 3. 开头引言（环境信息卡） -->
+  <section style="padding:0 20px;">
+    <section style="padding:6px 0 4px;margin-bottom:24px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:#059669;"><span leaf="">✦ 实操环境</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0 0 6px;line-height:1.7;">
+        <span leaf="">macOS（Apple Silicon，aarch64）+ </span>
+        <strong style="color:#059669;"><span leaf="">Podman Machine</span></strong>
+        <span leaf=""> + kind 集群（</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">agent-sandbox-control-plane</span></span>
+        <span leaf="">，containerd v2.3.1），</span>
+        <strong style="color:#059669;"><span leaf="">runsc release-20260810.0</span></strong>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">对应英文版仓库文档：</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">k8s-agent-sandbox/docs/gvisor-kind-setup.md</span></span>
+      </p>
+    </section>
+  </section>
+
+  <!-- 4. 第一章 -->
+  <section style="margin-top:16px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">01</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">gVisor 是什么，为什么 kind 上可行</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">WHAT IS GVISOR</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">纯用户态内核</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">应用的系统调用被拦截，由 gVisor 自己实现的 Linux 内核（userspace）处理，</span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">容器不直接接触宿主机内核</span></span>
+        <span leaf="">。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">与 Kata 的关键区别</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <strong style="color:#059669;"><span leaf="">不需要 KVM/硬件虚拟化</span></strong>
+        <span leaf="">。Kata 每个 pod 起一个真 VM，必须有 /dev/kvm，所以 kind 节点容器里跑不了（Kata 的 guest-agent 握手在容器化节点内无法完成）；gVisor 默认用 </span>
+        <strong style="color:#059669;"><span leaf="">ptrace 平台</span></strong>
+        <span leaf="">，只要 Linux 环境即可——因此 </span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">macOS 上也能用</span></span>
+        <span leaf="">：runsc 跑在承载容器的 Linux VM（Podman Machine / Docker Desktop）里。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">runsc 是 Linux 二进制</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">必须装进集群</span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">节点容器内部</span></span>
+        <span leaf="">，不是在 macOS 宿主上直接跑。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- 5. 第二章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">02</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">前置条件检查</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PREREQUISITES</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 架构 —— 决定下载哪个 runsc 版本</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane uname -m　　　# aarch64 / x86_64</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># ptrace 平台要求 yama ptrace_scope = 0</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane sysctl kernel.yama.ptrace_scope</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># containerd 版本（kind 新版节点是 2.x）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane containerd --version</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">实测本机节点</span></span>
+      <span leaf="">：架构 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">aarch64</span></span>
+      <span leaf=""> ✓，</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ptrace_scope = 0</span></span>
+      <span leaf=""> ✓，containerd </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">2.3.1</span></span>
+      <span leaf=""> ✓</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">若 ptrace_scope 不是 0</span></span>
+      <span leaf="">：</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">podman exec &lt;node&gt; sysctl -w kernel.yama.ptrace_scope=0</span></span>
+    </p>
+  </section>
+
+  <!-- 6. 第三章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">03</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">方案 A：装进运行中的 kind 节点（快速路径）</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PLAN A · QUICK PATH</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 01</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">下载 runsc + containerd shim（务必校验！）</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">gVisor 发布桶按架构分目录：</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">https://storage.googleapis.com/gvisor/releases/release/latest/&lt;arch&gt;/</span></span>
+        <span leaf="">，其中 &lt;arch&gt; ∈ {</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">aarch64</span></span>
+        <span leaf="">, </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">x86_64</span></span>
+        <span leaf="">}——</span>
+        <span style="background:linear-gradient(120deg,#FDE68A 0%,rgba(255,255,255,0) 100%);padding:0 4px;border-radius:2px;font-weight:600;color:#111827;"><span leaf="">新版已不是 runsc_arm64 后缀，而是 aarch64/runsc 子目录！</span></span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">BASE=https://storage.googleapis.com/gvisor/releases/release/latest/aarch64</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -fsSL -o runsc "$BASE/runsc"</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -fsSL -o containerd-shim-runsc-v1 "$BASE/containerd-shim-runsc-v1"</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 校验（文件名必须与 .sha512 内记录的名字完全一致！）</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -fsSL -o runsc.sha512 "$BASE/runsc.sha512"</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -fsSL -o shim.sha512 "$BASE/containerd-shim-runsc-v1.sha512"</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">sha512sum -c runsc.sha512</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">sha512sum -c shim.sha512</span></p>
+        </section>
+      </section>
+      <section style="padding:6px 0 4px;margin-bottom:24px;">
+        <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+          <span style="color:#059669;"><span leaf="">✦ 体积参考</span></span>
+        </p>
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+          <span leaf="">aarch64 runsc 约 98MB，shim 约 41MB。</span>
+          <strong style="color:#059669;"><span leaf="">几 MB 的 runsc 必是坏文件。</span></strong>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 02</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">传入节点</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman cp runsc agent-sandbox-control-plane:/usr/local/bin/runsc</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman cp containerd-shim-runsc-v1 agent-sandbox-control-plane:/usr/local/bin/containerd-shim-runsc-v1</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane chmod +x /usr/local/bin/runsc /usr/local/bin/containerd-shim-runsc-v1</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 冒烟测试</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane runsc --version</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 期望输出：runsc version release-20260810.0</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 03</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">containerd 注册 runsc runtime + 重启</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane sh -c '</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　printf "\n[plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runsc]\n　　runtime_type = \"io.containerd.runsc.v1\"\n" &gt;&gt; /etc/containerd/config.toml</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　systemctl restart containerd'</span></p>
+        </section>
+      </section>
+      <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+          <span leaf="">用追加方式改配置，不要覆盖 kind 原生的 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">config.toml</span></span>
+          <span leaf="">；containerd 2.x 如果整个重写文件要用 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">version = 3</span></span>
+          <span leaf=""> 头。重启 containerd 会短暂重建节点上的 pod。</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 04</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">创建 RuntimeClass</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">handler 必须与 containerd 里注册的 runtime 名（</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">runsc</span></span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">完全一致</span></span>
+        <span leaf="">：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl apply -f - &lt;&lt;'EOF'</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">apiVersion: node.k8s.io/v1</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kind: RuntimeClass</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">metadata:</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　name: gvisor</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">handler: runsc</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">EOF</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 05</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">验证</span>
+        </h4>
+      </section>
+      <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:12px;text-align:justify;">
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl run</span></span>
+          <span leaf=""> </span>
+          <span style="border-bottom:2px solid #FECACA;"><span leaf="">没有</span></span>
+          <span leaf=""> </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">--runtime-class</span></span>
+          <span leaf=""> 参数，必须用 manifest。</span>
+        </p>
+      </section>
+      <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:20px;text-align:justify;">
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+          <span leaf="">镜像必须显式 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">imagePullPolicy: IfNotPresent</span></span>
+          <span leaf="">：</span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">latest</span></span>
+          <span leaf=""> 标签默认 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">Always</span></span>
+          <span leaf="">，kubelet 每次都会去 registry 检查，节点网络不通时即使镜像已 load 进节点也会 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ImagePullBackOff</span></span>
+          <span leaf="">。</span>
+        </p>
+      </section>
+      <section style="margin:0 0 16px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl apply -f - &lt;&lt;'EOF'</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">apiVersion: v1</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kind: Pod</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">metadata:</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　name: gvisor-test</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">spec:</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　runtimeClassName: gvisor</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　restartPolicy: Never</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　containers:</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　- name: test</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　image: busybox</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　imagePullPolicy: IfNotPresent</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　command: ["sleep", "3600"]</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">EOF</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl wait --for=condition=Ready pod/gvisor-test --timeout=90s</span></p>
+        </section>
+      </section>
+      <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">三个判据全部满足</span></span>
+        <span leaf="">才算真在 gVisor 里（2026-08 实测输出）：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl exec gvisor-test -- dmesg | head -1　　　# [　　0.000000] Starting gVisor...</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl exec gvisor-test -- cat /proc/version　　 # Linux version 4.19.0-gvisor ...</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">podman exec agent-sandbox-control-plane ps aux | grep -E 'runsc|containerd-shim'</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 期望：containerd-shim-runsc-v1 → runsc-gofer → runsc-sandbox 进程栈</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 对照：普通 pod 是 containerd-shim-runc-v2</span></p>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <!-- 7. 第四章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">04</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">方案 B：可复现（自定义节点镜像）</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PLAN B · REPRODUCIBLE</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">运行中节点里装的二进制，</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">重建集群就没了</span></span>
+      <span leaf="">。可复现做法：</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:8px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">Dockerfile</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">按节点架构构建，如 Apple Silicon 用 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">docker build --platform linux/arm64</span></span>
+      <span leaf="">：</span>
+    </p>
+    <section style="margin:0 0 24px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">dockerfile</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">FROM kindest/node:v1.31.0</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">COPY runsc /usr/local/bin/runsc</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">COPY containerd-shim-runsc-v1 /usr/local/bin/containerd-shim-runsc-v1</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">RUN chmod +x /usr/local/bin/runsc /usr/local/bin/containerd-shim-runsc-v1 \</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　&amp;&amp; sysctl -w kernel.yama.ptrace_scope=0</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">kind-config.yaml</span></span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">yaml</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kind: Cluster</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">apiVersion: kind.x-k8s.io/v1alpha4</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">nodes:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">- role: control-plane</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　image: gvisor-kind-node:latest</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">containerdConfigPatches:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">- |-</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　runtime_type = "io.containerd.runsc.v1"</span></p>
+      </section>
+    </section>
+  </section>
+
+  <!-- 8. 第五章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">05</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">与 agent-sandbox 集成</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">INTEGRATION</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl apply -k examples/vscode-sandbox/overlays/gvisor</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">原理：Sandbox 的 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">podTemplate.spec.runtimeClassName: gvisor</span></span>
+      <span leaf=""> 即可，</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">和普通 pod 同一机制</span></span>
+      <span leaf="">。</span>
+    </p>
+
+    <section style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;margin-bottom:20px;">
+      <p style="font-size:13px;color:#92400E;margin:0;font-weight:700;">
+        <span leaf="">⚠️ gVisor/Kata 运行时下，</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl port-forward</span></span>
+        <span leaf=""> 直连沙箱 pod 不兼容，需要通过 Sandbox Router 访问（见仓库 gvisor-isolation 文档）。</span>
+      </p>
+    </section>
+
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:#059669;"><span leaf="">✦ 快速验证集成</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">不依赖外网镜像</span></span>
+        <span leaf="">，2026-08 实测通过：最小 Sandbox + 已加载的 busybox，确认 controller 把它调度到 gVisor 运行时：</span>
+      </p>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">sh</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl apply -f - &lt;&lt;'EOF'</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">apiVersion: agents.x-k8s.io/v1beta1</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kind: Sandbox</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">metadata:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　name: gvisor-sandbox-test</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">spec:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　podTemplate:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　spec:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　runtimeClassName: gvisor</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　containers:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　- name: main</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　image: busybox</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　imagePullPolicy: IfNotPresent</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　command: ["sleep", "3600"]</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">EOF</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get sandbox gvisor-sandbox-test　　　　　　　　　　 # Ready=True (DependenciesReady)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get pod gvisor-sandbox-test -o jsonpath='{.spec.runtimeClassName}'　# gvisor</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl exec gvisor-sandbox-test -- cat /proc/version　　　# 4.19.0-gvisor</span></p>
+      </section>
+    </section>
+  </section>
+
+  <!-- 9. 第六章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">06</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">排障（本环境实操踩坑实录）</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">TROUBLESHOOTING</span>
+        </p>
+      </section>
+    </section>
+
+    <!-- 6.1 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">下载失败 / 校验不匹配</span></span>
+    </p>
+
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！坑 A：kind 节点连不上 Google 系域名 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">症状：节点内 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">curl</span></span>
+        <span leaf=""> 秒退（Could not connect / i/o timeout），宿主机同命令正常。原因：节点流量走的出口对 GCP（</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">storage.googleapis.com</span></span>
+        <span leaf="">、</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">*.docker.pkg.dev</span></span>
+        <span leaf="">）不通。解法：在宿主机（或任何能访问的机器）下载 → sha512 校验 → </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">podman cp</span></span>
+        <span leaf=""> 传进节点。</span>
+      </p>
+    </section>
+
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！坑 B：代理吐损坏内容 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">症状：HTTP 200 但文件体积异常（如 runsc 只有 3.4MB）、sha512 对不上。代理流式传输时可能返回残缺响应。解法：重下 + 校验，或 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">curl --noproxy '*'</span></span>
+        <span leaf=""> 直连试试。</span>
+      </p>
+    </section>
+
+    <section style="padding:6px 0 4px;margin-bottom:24px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！坑 C：sha512sum -c 报 “No such file or directory” 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">这是</span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">文件名坑</span></span>
+        <span leaf="">不是下载问题：</span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">sha512sum -c</span></span>
+        <span leaf=""> 会找 .sha512 文件内部记录的那个文件名，必须和本地文件名一致（比如校验文件里写 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">containerd-shim-runsc-v1</span></span>
+        <span leaf="">，本地文件就不能叫 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">shim</span></span>
+        <span leaf="">）。本次实操在这里误判了很久。</span>
+      </p>
+    </section>
+
+    <!-- 6.2 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">runsc 启动 Segmentation fault</span></span>
+    </p>
+    <section style="padding:6px 0 4px;margin-bottom:24px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！踩坑提示 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">二进制损坏</span></span>
+        <span leaf="">（截断/代理污染）。重下并校验；健康 runsc 是几十 MB 的 ELF，</span>
+        <span style="color:rgb(136,136,136);font-weight:bold;"><span leaf="">几 MB 必是坏的</span></span>
+        <span leaf="">。</span>
+      </p>
+    </section>
+
+    <!-- 6.3 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">pod 卡在 ContainerCreating</span></span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">handler 与 runtime 名不匹配</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">RuntimeClass 的 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">handler</span></span>
+        <span leaf=""> 与 containerd runtime 名必须都是 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">runsc</span></span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">节点里二进制缺失</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">podman exec &lt;node&gt; runsc --version</span></span>
+        <span leaf=""> 验证；重建集群后节点内安装会丢失（用方案 B）</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">containerd 没加载新配置</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">改完必须 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">systemctl restart containerd</span></span>
+        <span leaf="">，看 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl describe pod</span></span>
+        <span leaf=""> 的 Events 和 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">journalctl -u containerd</span></span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">ptrace_scope 不是 0</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">gVisor ptrace 平台</span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">无法 attach</span></span>
+      </p>
+    </section>
+
+    <!-- 6.4 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">containerd 2.x 兼容性</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">kind 新版本节点是 containerd 2.x。gVisor shim 与 containerd 2.0 曾有兼容问题（症状：</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl delete</span></span>
+      <span leaf=""> 卡死、pod 无法销毁），</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">containerd 2.1+ 已修复</span></span>
+      <span leaf="">（见 containerd/containerd#11708、#11091）。本机 2.3.1 无此问题。</span>
+    </p>
+
+    <!-- 6.5 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">镜像拉取失败（与 gVisor 无关的 kind 网络坑）</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">kind 在</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">创建集群时</span></span>
+      <span leaf="">把宿主机的 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">HTTP(S)_PROXY</span></span>
+      <span leaf=""> 快照进节点的 systemd。如果代理只监听宿主机回环（如 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">127.0.0.1:7890</span></span>
+      <span leaf="">），</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">节点内是死代理</span></span>
+      <span leaf="">，任何外网镜像拉取报：</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused</span></span>
+      <span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">解法：</span>
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">不带代理变量重建集群</span></span>
+      <span leaf="">（</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">env -u HTTP_PROXY ... kind create cluster</span></span>
+      <span leaf="">），或宿主机拉镜像后 </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kind load</span></span>
+      <span leaf="">。</span>
+    </p>
+
+    <!-- 6.6 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">镜像已 load 进节点，pod 却 ImagePullBackOff</span></span>
+    </p>
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！latest 标签陷阱 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">imagePullPolicy</span></span>
+        <span leaf=""> 对 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">latest</span></span>
+        <span leaf=""> 标签默认是 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">Always</span></span>
+        <span leaf="">，kubelet 每次启动都会去 registry 检查，节点网络不通 → HEAD 超时 → </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ImagePullBackOff</span></span>
+        <span leaf="">，哪怕镜像明明已经 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kind load</span></span>
+        <span leaf=""> 进节点了。修复：显式 </span>
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">imagePullPolicy: IfNotPresent</span></span>
+        <span leaf="">（或引用非 latest 标签）。</span>
+      </p>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">另外注意：</span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl run</span></span>
+      <span leaf=""> </span>
+      <span style="border-bottom:2px solid #FECACA;"><span leaf="">没有</span></span>
+      <span leaf=""> </span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">--runtime-class</span></span>
+      <span leaf=""> 参数（报 unknown flag），验证 pod 必须用 manifest 方式创建。</span>
+    </p>
+
+    <!-- 6.7 -->
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">如何确认 pod 真的在 gVisor 里</span></span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl get pod &lt;pod&gt; -o jsonpath='{.spec.runtimeClassName}'</span></span>
+          <span leaf=""> → </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">gvisor</span></span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">pod 内 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">dmesg | head -1</span></span>
+          <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">显示 gVisor 内核横幅</span></span>
+          <span leaf="">；</span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">/proc/version</span></span>
+          <span leaf=""> 与宿主不同</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">节点上 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ps aux | grep runsc</span></span>
+          <span leaf=""> 看到 gVisor shim，而不是 </span>
+          <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">containerd-shim-runc-*</span></span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- 10. 第七章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">07</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">备选方案</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">ALTERNATIVES</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">minikube</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">minikube addons enable gvisor</span></span>
+        <span leaf=""> 一条命令（官方 quickstart 路径）</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">GKE Sandbox</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">托管节点池</span>
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">自带 gVisor</span></span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">Kata</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">需要真 KVM，</span>
+        <span style="border-bottom:2px solid #FECACA;"><span leaf="">macOS 本地不可行</span></span>
+        <span leaf="">（需 AKS/云 VM/裸金属，见仓库 kata-aks 示例）</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- 11. 第八章 参考链接（LAST） -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">///</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">LAST</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">参考链接</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">REFERENCES</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">gVisor 官方</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">https://gvisor.dev/</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">containerd quick start</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">https://gvisor.dev/docs/user_guide/containerd/quick_start/</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">发布桶</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">https://storage.googleapis.com/gvisor/releases/release/latest/</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">containerd shim 兼容问题</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">https://github.com/containerd/containerd/issues/11708</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">agent-sandbox gVisor 集成</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">https://agent-sandbox.sigs.k8s.io/docs/use-cases/gvisor-isolation/</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- 12. 作者签名（占位，用户自填） -->
+  <section style="padding:0 20px;">
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">我是 {{作者名}}，{{一句话简介，如：热衷于分享 AI 观察与干货}}。</span>
+    </p>
+  </section>
+
+  <!-- 13. 互动三连 footer-cta -->
+  <section style="background:radial-gradient(circle at center,#F9FAFB 0%,#FFFFFF 100%);border:1px solid #E5E7EB;border-radius:16px;padding:32px 20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin:0 0 24px;">
+    <p style="font-size:13px;font-weight:bold;color:#111827;margin-bottom:20px;line-height:1.6;">
+      <span leaf="">既然看到这里了，如果觉得有用，随手点个赞、在看、转发三连吧。</span>
+    </p>
+    <section style="display:flex;justify-content:center;gap:24px;margin-bottom:16px;">
+      <section style="text-align:center;cursor:pointer;color:#4B5563;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">点赞</span></span>
+      </section>
+      <section style="text-align:center;cursor:pointer;color:#4B5563;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">在看</span></span>
+      </section>
+      <section style="text-align:center;cursor:pointer;color:#059669;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#ECFDF5;border-radius:12px;box-shadow:0 2px 4px rgba(5,150,105,0.15);border:1px solid #A7F3D0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-4a8 8 0 0 1 8-8h8"></path><polyline points="16 2 20 6 16 10"></polyline></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">转发</span></span>
+      </section>
+    </section>
+    <p style="font-size:10px;color:#9CA3AF;letter-spacing:1px;margin:0;">
+      <span leaf="">THANKS FOR READING</span>
+    </p>
+  </section>
+
+</section>

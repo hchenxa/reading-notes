@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mTLS-从单向信任到双向互认_排版_摸鱼绿(moyu-green) · 公众号排版预览</title>
+<style>
+  body{margin:0;background:#eef0f2;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-text-size-adjust:100%;}
+  .gzh-toolbar{position:fixed;top:0;left:0;right:0;height:54px;background:#ffffff;box-shadow:0 1px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:99;}
+  .gzh-hint{font-size:13px;color:#6b7280;line-height:1.4;}
+  .gzh-hint b{color:#111827;}
+  .gzh-copy{background:#059669;color:#fff;border:0;border-radius:9px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(5,150,105,.28);white-space:nowrap;transition:transform .08s,background .15s;}
+  .gzh-copy:hover{background:#047857;}
+  .gzh-copy:active{transform:translateY(1px);}
+  .gzh-toast{position:fixed;top:66px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:88vw;text-align:center;}
+  .gzh-toast.show{opacity:1;}
+  .gzh-stage{max-width:700px;margin:78px auto 64px;padding:0 8px;}
+  @media(max-width:520px){.gzh-hint{max-width:150px;}}
+</style>
+</head>
+<body>
+<div class="gzh-toolbar">
+  <span class="gzh-hint">👇 下方是排版效果 · 点右侧 <b>复制</b> 直接粘到公众号</span>
+  <button class="gzh-copy" id="gzhCopyBtn" onclick="gzhCopy()">📋 复制到公众号</button>
+</div>
+<div class="gzh-toast" id="gzhToast"></div>
+<div class="gzh-stage">
+  <div id="gzh-content">
+<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+
+  <!-- ============ 封面 ============ -->
+  <section style="margin:0 0 32px;background:#fff;border:1.5px solid rgba(5,150,105,0.15);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);width:100%;">
+    <section style="padding:32px 28px 28px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+        <span style="width:6px;height:6px;background:#059669;border-radius:50%;"><span leaf=""><br></span></span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:3px;color:#059669;"><span leaf="">TUTORIAL · 服务安全</span></span>
+        <section style="flex:1;height:1px;overflow:hidden;background:linear-gradient(to right,rgba(5,150,105,0.12),transparent);"><span leaf=""><br></span></section>
+        <span style="font-size:10px;color:#D1D5DB;font-weight:600;"><span leaf="">2026.09</span></span>
+      </section>
+      <section>
+        <p style="font-size:15px;color:#D1D5DB;margin:0 0 6px;text-decoration:line-through;letter-spacing:0.5px;">
+          <span leaf="">证书验证了服务器，就够了？</span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#111827;margin:0;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">敲门的人，</span>
+          <span style="color:#059669;"><span leaf="">是真是假？</span></span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#059669;margin:0 0 16px;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">mTLS 双向互认</span>
+        </p>
+        <section style="width:48px;height:3px;background:linear-gradient(to right,#059669,#34D399);border-radius:2px;margin-bottom:12px;">
+          <span leaf=""><br></span>
+        </section>
+        <p style="font-size:13px;color:#9CA3AF;margin:0;line-height:1.7;letter-spacing:0.5px;">
+          <span leaf="">握手差异 · nginx 实操 · 网格与零信任</span>
+        </p>
+      </section>
+    </section>
+    <section style="background:linear-gradient(135deg,#059669,#10B981);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:12px;color:rgba(255,255,255,0.9);margin:0;font-weight:600;letter-spacing:0.5px;">
+        <span leaf="">代理 × TLS 系列 · 第 3 篇</span>
+      </p>
+      <section style="display:flex;gap:4px;">
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">MUTUAL</span></span>
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">TLS</span></span>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 目录 ============ -->
+  <section style="margin:0 20px 32px;">
+    <section style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <p style="font-size:10px;color:#9CA3AF;margin:0;text-transform:uppercase;letter-spacing:2px;font-weight:600;">
+        <span leaf="">📦 3 Parts + Conclusion</span>
+      </p>
+      <p style="font-size:10px;color:#9CA3AF;margin:0;">
+        <span leaf="">👉 滑动</span>
+      </p>
+    </section>
+    <section style="overflow-x:scroll;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:8px;">
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:linear-gradient(135deg,#059669,#10B981);border-radius:12px;padding:12px;margin-right:8px;">
+        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 01</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#fff;margin:0 0 3px;">
+          <span leaf="">信任模型</span>
+        </p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.7);margin:0;">
+          <span leaf="">单向为什么失灵</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 02</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">动手跑通</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">nginx 双向认证</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 03</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">架构实践</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">网格与零信任</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART ///</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">系列导航</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 开头引言 ============ -->
+  <section style="margin:0 20px 32px;">
+    <section style="background:#FFF;border:1px dashed #BBF7D0;border-radius:8px;padding:14px 16px;margin-bottom:24px;text-align:center;">
+      <p style="font-size:12px;color:#9CA3AF;margin:0 0 6px;line-height:1.5;">
+        <span leaf="">单向 TLS 验证“服务器是不是真的”，mTLS 追问的是</span>
+      </p>
+      <p style="margin:0;line-height:1.6;">
+        <span style="font-size:15px;color:#059669;font-weight:bold;border-bottom:3px solid #FDE68A;padding-bottom:2px;"><span leaf="">“敲门的人，是不是自己人”</span></span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这篇从信任模型讲到握手差异，再到 nginx 双向认证从零跑通——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">看完你就能自己搭一套服务间认证</span></span><span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">延续系列风格：原理讲透、配置可跑、坑全给到。</span>
+    </p>
+  </section>
+
+  <!-- ============ 01 单向信任 ============ -->
+  <section style="margin-top:16px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">01</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">单向信任：浏览器时代的设计</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">ONE-WAY TRUST</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">为什么平时“只有服务器出示证书”</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">你天天访问 HTTPS 网站，都是服务器出示证书、浏览器验证——为什么客户端不用证明自己？因为浏览器时代的设计假设是：</span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">服务器是稀缺的、固定的：全世界就一个 example.com，它必须证明“我是 example.com”</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">客户端是海量的、匿名的：任何浏览器用户都允许访问公开网页，不需要（也不应该）暴露身份</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">信任锚是系统预置的：浏览器内置几百个受信根 CA，验证服务器的链</span>
+        </p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这套设计服务于“任何人访问公开网站”，非常成功——但它默认了一个前提：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">服务器需要被验证，客户端不需要</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">这个模型在服务间对话时失灵</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">当对话双方变成“服务 A ↔ 服务 B”，单向信任的漏洞立刻显现：</span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">服务 A 作为客户端访问 B 时，它验证了 B 的证书——但 B 无法验证调用它的是不是真的 A</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span style="border-bottom:2px solid #FECACA;"><span leaf="">谁都能调用你的内部 API</span></span><span leaf="">：只要证书合法（或直接在内网），服务 B 无法区分“真 A”和“伪装成 A 的攻击者”</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">审计需求：出了事故，你无法证明“哪个服务在什么时间调用了什么”</span>
+        </p>
+      </section>
+    </section>
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">关键认知：单向 TLS 验证的是“连接的另一端有合法证书”，而</span><strong style="color:#059669;"><span leaf="">任何一端都能拿到一张合法证书</span></strong><span leaf="">——它证明不了“调用者是谁”。mTLS 补上的正是这一环：让连接的两端互相证明身份。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 02 握手差异 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">02</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">mTLS 握手：多了哪两步</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">HANDSHAKE DELTA</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">握手差异对比</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">对比单向 TLS 1.2 握手，mTLS 只是多了两个环节——但方向完全反转：</span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 01</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">ClientHello（与单向一致）</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">客户端发 ClientHello，带 SNI 和密套列表。</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 02</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">服务器加发 CertificateRequest</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">服务器发 ServerHello + 证书链，额外发一个 CertificateRequest——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">“请你也出示证书”</span></span><span leaf="">。</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">✓</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">双向验证服务器证书（与单向一致）</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">客户端验证服务器证书链。</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#059669;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">NEW</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">客户端出示自己的证书</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">客户端发 Certificate 消息，出示自己的证书链。</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#059669;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">NEW</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">CertificateVerify：用私钥签名</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">客户端用私钥对握手摘要签名，服务器验证签名——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">证明“持证人在场”</span></span><span leaf="">。</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 05</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">密钥交换，开始加密通信</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">双方完成密钥交换，进入业务数据阶段。</span>
+      </p>
+    </section>
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:#059669;"><span leaf="">✦ 灵魂一步</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">CertificateVerify 是 mTLS 的灵魂——证书本身是公开的、可以伪造，但签名必须用私钥。服务器验证签名后，才能确定“持证人在场”。这是“证明我是我”的密码学落地。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">验证路径：从单向到双向</span></span>
+    </p>
+    <section style="background:#F9FAFB;border:1px solid #F3F4F6;border-radius:12px;padding:16px 12px;margin-bottom:24px;">
+      <p style="font-size:12px;font-weight:700;color:#374151;margin:0 0 10px;line-height:1.7;"><span leaf="">单向 TLS：客户端 ——验证——&gt； 服务器证书 ——链到——&gt； 客户端信任的根 CA</span></p>
+      <p style="font-size:12px;font-weight:700;color:#059669;margin:0;line-height:1.9;"><span leaf="">mTLS：客户端 ——验证——&gt； 服务器证书 ——链到——&gt； 客户端信任的根 CA</span></p>
+      <p style="font-size:12px;font-weight:700;color:#059669;margin:0;line-height:1.9;"><span leaf="">　　　　服务器 ——验证——&gt； 客户端证书 ——链到——&gt； 服务器信任的根 CA</span></p>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">注意一个细节：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">双方可以信任不同的 CA</span></span><span leaf="">——内部服务信任公司内部 CA 签发的客户端证书，同时仍信任公共 CA 签发的服务器证书，两端各有各的信任锚。</span>
+    </p>
+  </section>
+
+  <!-- ============ 03 为什么需要 mTLS ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">03</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">为什么服务间需要 mTLS</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">WHY MTLS</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">三个真实场景</span></span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">B2B / 内部 API</span></span><span leaf="">：支付网关、用户中心这类敏感服务，只接受持有合法客户端证书的调用方——比 API Key 更安全，私钥不随代码走，无法被日志泄露</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">微服务集群</span></span><span leaf="">：服务间调用频繁，用户名密码/Token 的接入与审计成本高——证书即身份</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">物联网 / 设备认证</span></span><span leaf="">：设备出厂预置证书，平台用 mTLS 区分“这台设备”和“仿冒设备”</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">mTLS 与 API Key 的对比</span></span>
+    </p>
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">维度</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">API Key</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">mTLS</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;font-weight:700;"><span leaf="">泄露风险</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">明文头，日志/截图/前端都可能泄露</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">私钥不出设备</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;font-weight:700;"><span leaf="">冒充难度</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">偷到 Key 即可冒充</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">需要私钥</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;font-weight:700;"><span leaf="">轮换成本</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">改配置</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">换证书（可短生命周期）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;font-weight:700;"><span leaf="">审计</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">无标准</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">证书 CN/SAN 可审计</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section style="background:#FFF;border:1px dashed #BBF7D0;border-radius:8px;padding:14px 16px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0;line-height:1.6;">
+        <span style="font-size:15px;color:#059669;font-weight:bold;border-bottom:3px solid #FDE68A;padding-bottom:2px;"><span leaf="">API Key 是“进门报口令”，mTLS 是“进门刷身份证还按指纹”——口令能抄，指纹不能</span></span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 04 动手实操 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">04</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">动手：nginx 双向认证从零跑通</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">HANDS-ON</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这一节完整搭一套：内部 CA → 服务端证书 → 客户端证书 → nginx 双向校验 → curl 验证“不带证书被拒、带证书放行”。</span>
+    </p>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 01</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">创建内部 CA</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 1. 生成 CA 私钥</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl genrsa -out ca.key 2048</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 2. 自签 CA 根证书(有效期 10 年)</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl req -x509 -new -key ca.key -days 3650 \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -subj "/CN=Internal Root CA" -out ca.crt</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 02</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">签发服务端证书（带 SAN）</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 1. 服务端密钥对 + CSR</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl genrsa -out server.key 2048</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl req -new -key server.key \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -subj "/CN=example.com" -out server.csr</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 2. CA 签名,必须带 SAN(现代客户端只看 SAN)</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -CAcreateserial -days 365 -out server.crt \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -extfile &lt;(echo "subjectAltName=DNS:example.com,DNS:localhost,IP:127.0.0.1")</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 03</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">签发客户端证书</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">关键点：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">客户端身份写在 CN 里——证书即身份</span></span><span leaf="">：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl genrsa -out client.key 2048</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl req -new -key client.key \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -subj "/CN=client-01/OU=payment-service" -out client.csr</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key \</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　 -CAcreateserial -days 365 -out client.crt</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 04</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">nginx 开启双向认证</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">nginx</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">server {</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　listen　　　 8443 ssl;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　server_name　example.com;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ssl_certificate　　 /etc/nginx/certs/server.crt;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ssl_certificate_key /etc/nginx/certs/server.key;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　# ===== mTLS 核心:客户端证书校验 =====</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ssl_client_certificate /etc/nginx/certs/ca.crt;　# 信任的 CA</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ssl_verify_client　　　on;　 # 强制校验:拿不出证书直接拒</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ssl_verify_depth　　　 2;　 # 允许的证书链深度</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　location / {</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　# 把客户端身份透传给后端应用</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　proxy_set_header X-Client-CN　　 $ssl_client_s_dn;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　proxy_set_header X-Client-Verify $ssl_client_verify;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　proxy_pass http://127.0.0.1:8080;</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　}</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 05</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">验证双向认证生效</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 1. 不带客户端证书 → 握手被拒</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -k https://127.0.0.1:8443/</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># HTTP/2 400 ... client certificate required ← 服务器:请出示证件</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 2. 带客户端证书 → 放行</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -k --cert client.crt --key client.key https://127.0.0.1:8443/</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 200 OK</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 3. 带"别人 CA 签的"证书 → 还是被拒(信任链断裂)</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">curl -k --cert other-ca.crt --key other.key https://127.0.0.1:8443/</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 400 ... failed to verify client certificate</span></p>
+        </section>
+      </section>
+      <section style="padding:6px 0 4px;margin-bottom:16px;">
+        <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+          <span style="color:rgb(255,76,0);"><span leaf="">！踩坑提示 🕳</span></span>
+        </p>
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+          <span style="color:rgb(136,136,136);font-weight:bold;"><span leaf="">nginx 校验的是“证书链能否追溯到 ssl_client_certificate 里的 CA”，不是“证书没过期”那么简单——签发客户端证书的 CA 必须与服务器配置的 CA 一致，否则必然 400。</span></span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 06</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">服务器如何知道“谁在敲门”</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">nginx 暴露了三个变量，后端应用靠它们做授权：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">nginx 变量</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">$ssl_client_verify　 # SUCCESS / FAILED / NONE</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">$ssl_client_s_dn　　 # 客户端证书 Subject,如 /CN=client-01/OU=payment-service</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">$ssl_client_i_dn　　 # 签发该证书的 CA</span></p>
+        </section>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">后端拿到 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">X-Client-CN</span></span><span leaf="">，按 CN 前缀做授权（如 payment-service 才能调支付接口）——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">这就是“证书即身份”的应用层落地</span></span><span leaf="">。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 05 内部 PKI ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">05</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">内部 PKI：为 mTLS 造一个信任锚</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">INTERNAL PKI</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">mTLS 的强度不取决于 TLS 本身，而取决于</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">你信任的 CA 有多可靠</span></span><span leaf="">：</span>
+    </p>
+    <section style="background:#F9FAFB;border:1px solid #F3F4F6;border-radius:12px;padding:16px 14px;margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:700;color:#111827;margin:0 0 4px;line-height:1.8;"><span leaf="">根 CA（离线保管，几乎不签叶子）</span></p>
+      <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 4px;line-height:1.8;"><span leaf="">　└── 中间 CA A（服务器证书签发）</span></p>
+      <p style="font-size:13px;font-weight:700;color:#374151;margin:0;line-height:1.8;"><span leaf="">　└── 中间 CA B（客户端证书签发）　← 按用途拆分，吊销/轮换互不影响</span></p>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">拆分的三个理由：</span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">隔离风险：一个中间 CA 私钥泄露，只吊销它的证书，根 CA 不用动</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">职责分离：签发服务器证书和客户端证书可以走不同的审批流程</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">短期证书成为可能：中间 CA 只签 24h/7d 的证书——证书越短，吊销需求越小，轮换自动化越简单</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">证书轮换的哲学：短命证书是解药</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">单向 TLS 的证书可以一年一换，吊销体系（CRL/OCSP）能兜底。但 mTLS 的客户端证书有个现实困境：</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">被吊销的证书，在 CRL 更新前还能用（吊销滞后）</span></span><span leaf="">。于是行业共识变成：</span>
+    </p>
+    <section style="background:#FFF;border:1px dashed #BBF7D0;border-radius:8px;padding:14px 16px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0;line-height:1.6;">
+        <span style="font-size:15px;color:#059669;font-weight:bold;border-bottom:3px solid #FDE68A;padding-bottom:2px;"><span leaf="">与其设计完美的吊销，不如让证书短命——24 小时一签，泄露了也只用防一天</span></span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 06 架构实践 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">06</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">架构实践：网格、网关与零信任</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">ARCHITECTURE</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">微服务网格：Sidecar 之间的 mTLS</span></span>
+    </p>
+    <section style="background:#F9FAFB;border:1px solid #F3F4F6;border-radius:12px;padding:16px 12px;margin-bottom:8px;">
+      <section style="display:flex;align-items:center;justify-content:center;">
+        <section style="text-align:center;padding:8px 10px;background:#fff;border:1px solid #E5E7EB;border-radius:8px;flex-shrink:0;">
+          <p style="margin:0;font-size:11px;font-weight:800;color:#111827;"><span leaf="">Pod A</span></p>
+          <p style="margin:0;font-size:9px;color:#9CA3AF;"><span leaf="">Sidecar</span></p>
+        </section>
+        <span style="font-size:13px;color:#059669;font-weight:900;margin:0 5px;"><span leaf="">—mTLS→</span></span>
+        <section style="text-align:center;padding:8px 10px;background:#fff;border:1px solid #E5E7EB;border-radius:8px;flex-shrink:0;">
+          <p style="margin:0;font-size:11px;font-weight:800;color:#111827;"><span leaf="">Pod B</span></p>
+          <p style="margin:0;font-size:9px;color:#9CA3AF;"><span leaf="">Sidecar</span></p>
+        </section>
+      </section>
+    </section>
+    <p style="font-size:13px;color:#4B5563;margin:0 0 14px;line-height:1.7;text-align:justify;">
+      <span leaf="">Istio 这类网格把 mTLS 变成默认：每个 Pod 的 Sidecar 持有短期证书，服务代码完全无感知；STRICT 模式下明文流量直接拒绝——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">横向移动被阻断</span></span><span leaf="">：攻破 Pod A，想访问 Pod B 必须过 B 的 Sidecar 这关，而 A 的证书只授权给 A 的身份。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">API 网关与 B2B：同端口双模式</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">网关对外可以同时面向两类调用方：浏览器走普通 TLS，合作方/内部系统走 mTLS。nginx 用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ssl_verify_client optional</span></span><span leaf=""> 实现“同端口双模式”：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">nginx</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">ssl_client_certificate /etc/nginx/certs/ca.crt;</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">ssl_verify_client　　　optional;　 # 有证书就校验,没有也放行到应用层</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 应用层按 $ssl_client_verify 分流:SUCCESS → B2B 逻辑;NONE → 公开逻辑</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">零信任里的位置</span></span>
+    </p>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">零信任的核心假设是“内网不等于可信”。mTLS 是零信任的传输层基石：每次调用都要证明身份，不因为“我们在同一个内网”就放行。但记住：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">mTLS 只解决“谁在调用”</span></span><span leaf="">，调用权限要由授权策略（SPIFFE 联邦、RBAC）继续管。</span>
+    </p>
+  </section>
+
+  <!-- ============ 07 运维与坑 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">07</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">运维与坑</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PITFALLS</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑一：证书轮换断了线上</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">客户端证书到期后，所有调用方一起 400——</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">mTLS 的轮换必须两端协调</span></span><span leaf="">：先给所有调用方发新证书并灰度切换，再等旧证书自然过期，不能一刀切。</span>
+    </p>
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑二：忘记 SAN</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">服务端证书没有 SAN，现代客户端直接拒绝——生成时的 -extfile 那行不能省。</span>
+    </p>
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑三：吊销滞后</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">CRL 更新周期内，被盗客户端证书依然有效。缓解：短生命周期证书 + 及时上报 + 吊销列表高频更新。</span>
+    </p>
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑四：把客户端私钥塞进代码仓库</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">客户端证书是身份凭证，私钥泄露等于身份泄露——必须走密钥管理（KMS/HSM）或加密存储，绝不能进 git、不能进镜像层、不能进日志。</span>
+    </p>
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑五：双向验证开了，后端没接身份</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">nginx 校验了证书，但后端不读 $ssl_client_s_dn 做授权——那 mTLS 就只是个“昂贵的连接加密”。身份要一直传到应用层才有意义。</span>
+    </p>
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">坑六：测试环境也用“真 CA”</span></span>
+    </p>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">测试证书应由测试用的独立 CA 签发，和生产的 CA 严格分开——防止测试证书在生产被意外信任。</span>
+    </p>
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:#059669;"><span leaf="">✦ 排障三板斧</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">curl -vk 看握手失败在哪一步；openssl verify -CAfile ca.crt client.crt 验证证书链；nginx 日志里看 $ssl_client_verify 是 SUCCESS 还是 FAILED。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 08 身份体系 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">08</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">与身份体系的配合</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">IDENTITY</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">mTLS ≠ 用户身份</span></span>
+    </p>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">mTLS 证明的是“这台设备/这个服务持有一张由可信 CA 签发的证书”，不等于“这个人类用户是谁”。Web 场景里用户身份仍靠 OIDC/SSO，设备身份才靠 mTLS——两者是叠加关系，不是替代关系。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">SPIFFE：服务身份的事实标准</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">SPIFFE 定义了服务身份的标准格式：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">SPIFFE ID</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">spiffe://trust-domain/ns/namespace/sa/service-account</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　└─ 信任域 ─┘　 └──────── 路径 = 身份声明 ────────┘</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">X.509-SVID 是它的证书载体——证书里的 SAN 直接编码 SPIFFE ID。Istio、Consul 都遵循它。设计启示：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">证书的 CN/SAN 不只是名字，是机器可读的身份声明</span></span><span leaf="">，值得认真设计你的命名规范。</span>
+    </p>
+  </section>
+
+  <!-- ============ 写在最后 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">///</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">LAST</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">WRAP UP</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">mTLS 的完整故事是一条线：</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">单向 TLS 验证“服务器是真的”→ 服务间场景需要“调用者是真的”→ 握手多出两步 → 证书变成身份凭证 → 身份凭证需要自己的 PKI → PKI 需要短命证书与自动化 → 网格把这一切变成默认。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">记住三个判断句：</span><strong style="color:#059669;"><span leaf="">mTLS 解决“谁在敲门”，不解决“能敲哪扇门”</span></strong><span leaf="">；客户端私钥 = 身份本身，泄露等同沦陷；证书越短命，mTLS 越好运维。</span>
+    </p>
+
+    <!-- 系列导航 -->
+    <section style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:800;color:#059669;"><span leaf="">📚 代理 × TLS 系列</span></p>
+      <p style="margin:0 0 8px;font-size:13px;color:#374151;line-height:1.8;">
+        <span style="display:inline-block;background:#059669;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px;"><span leaf="">01</span></span>
+        <strong style="color:#059669;"><span leaf="">正向代理与反向代理详解</span></strong><span leaf="">——代理流向基础，谁站在哪一边</span>
+      </p>
+      <p style="margin:0 0 8px;font-size:13px;color:#374151;line-height:1.8;">
+        <span style="display:inline-block;background:#059669;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px;"><span leaf="">02</span></span>
+        <strong style="color:#059669;"><span leaf="">代理×TLS 深潜：私钥与三兄弟</span></strong><span leaf="">——termination / passthrough / bridging，从握手到抓包</span>
+      </p>
+      <p style="margin:0 0 8px;font-size:13px;color:#374151;line-height:1.8;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px;"><span leaf="">03</span></span>
+        <strong style="color:#111827;"><span leaf="">本篇：mTLS：从单向信任到双向互认</span></strong><span leaf="">——服务间认证，证书即身份</span>
+      </p>
+      <p style="margin:0;font-size:13px;color:#374151;line-height:1.8;">
+        <span style="display:inline-block;background:#059669;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px;"><span leaf="">04</span></span>
+        <strong style="color:#059669;"><span leaf="">证书的那些事：从 CSR 到过期</span></strong><span leaf="">——PKI 体系、签发流程与生命周期运维（下一篇）</span>
+      </p>
+    </section>
+
+    <p style="font-size:14px;margin-bottom:20px;text-align:center;color:#059669;font-weight:700;letter-spacing:1px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;padding:12px 0;">
+      <span leaf="">证书变成身份的那一刻，管理证书就变成了管理身份</span>
+    </p>
+  </section>
+
+  <!-- ============ 签名 + 三连 ============ -->
+  <section style="margin:0 20px 24px;">
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">我是 </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">{{作者名}}</span></span><span leaf="">，{{一句话简介}}。</span>
+    </p>
+  </section>
+  <section style="margin:0 20px 24px;">
+    <section style="background:radial-gradient(circle at center,#F9FAFB 0%,#FFFFFF 100%);border:1px solid #E5E7EB;border-radius:16px;padding:32px 20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin:0 0 24px;">
+      <p style="font-size:13px;font-weight:bold;color:#111827;margin-bottom:20px;line-height:1.6;">
+        <span leaf="">既然看到这里了，如果觉得有用，随手点个赞、在看、转发三连吧。</span>
+      </p>
+      <section style="display:flex;justify-content:center;gap:24px;margin-bottom:16px;">
+        <section style="text-align:center;cursor:pointer;color:#4B5563;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">点赞</span></span>
+        </section>
+        <section style="text-align:center;cursor:pointer;color:#4B5563;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">在看</span></span>
+        </section>
+        <section style="text-align:center;cursor:pointer;color:#059669;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#ECFDF5;border-radius:12px;box-shadow:0 2px 4px rgba(5,150,105,0.15);border:1px solid #A7F3D0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-4a8 8 0 0 1 8-8h8"></path><polyline points="16 2 20 6 16 10"></polyline></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">转发</span></span>
+        </section>
+      </section>
+      <p style="font-size:10px;color:#9CA3AF;letter-spacing:1px;margin:0;">
+        <span leaf="">THANKS FOR READING</span>
+      </p>
+    </section>
+  </section>
+
+</section>
+  </div>
+</div>
+<script>
+  function gzhShowToast(msg){
+    var t=document.getElementById('gzhToast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer=setTimeout(function(){t.classList.remove('show');},2800);
+  }
+  function gzhCopy(){
+    var el=document.getElementById('gzh-content');
+    // 选中渲染后的富文本节点并复制（等价于手动 Ctrl+A / Ctrl+C，保留全部样式）
+    var range=document.createRange();
+    range.selectNodeContents(el);
+    var sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    var ok=false;
+    try{ok=document.execCommand('copy');}catch(e){ok=false;}
+    sel.removeAllRanges();
+    var btn=document.getElementById('gzhCopyBtn');
+    if(ok){
+      gzhShowToast('✅ 已复制！去公众号编辑器按 Ctrl/⌘+V 粘贴即可');
+      var old=btn.textContent;btn.textContent='✅ 已复制';
+      setTimeout(function(){btn.textContent=old;},2200);
+    }else{
+      gzhShowToast('⚠ 自动复制失败，请手动全选(Ctrl/⌘+A)再复制(Ctrl/⌘+C)');
+    }
+  }
+</script>
+</body>
+</html>

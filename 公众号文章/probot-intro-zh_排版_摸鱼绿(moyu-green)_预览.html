@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>probot-intro-zh_排版_摸鱼绿(moyu-green) · 公众号排版预览</title>
+<style>
+  body{margin:0;background:#eef0f2;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-text-size-adjust:100%;}
+  .gzh-toolbar{position:fixed;top:0;left:0;right:0;height:54px;background:#ffffff;box-shadow:0 1px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:99;}
+  .gzh-hint{font-size:13px;color:#6b7280;line-height:1.4;}
+  .gzh-hint b{color:#111827;}
+  .gzh-copy{background:#059669;color:#fff;border:0;border-radius:9px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(5,150,105,.28);white-space:nowrap;transition:transform .08s,background .15s;}
+  .gzh-copy:hover{background:#047857;}
+  .gzh-copy:active{transform:translateY(1px);}
+  .gzh-toast{position:fixed;top:66px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:88vw;text-align:center;}
+  .gzh-toast.show{opacity:1;}
+  .gzh-stage{max-width:700px;margin:78px auto 64px;padding:0 8px;}
+  @media(max-width:520px){.gzh-hint{max-width:150px;}}
+</style>
+</head>
+<body>
+<div class="gzh-toolbar">
+  <span class="gzh-hint">👇 下方是排版效果 · 点右侧 <b>复制</b> 直接粘到公众号</span>
+  <button class="gzh-copy" id="gzhCopyBtn" onclick="gzhCopy()">📋 复制到公众号</button>
+</div>
+<div class="gzh-toast" id="gzhToast"></div>
+<div class="gzh-stage">
+  <div id="gzh-content">
+<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+
+  <!-- ============ 1. 封面 cover-breaking（无右侧图片版） ============ -->
+  <section style="margin:0 0 32px;background:#fff;border:1.5px solid rgba(5,150,105,0.15);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);width:100%;">
+    <section style="padding:32px 28px 28px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+        <span style="width:6px;height:6px;background:#059669;border-radius:50%;"><span leaf=""><br></span></span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:3px;color:#059669;"><span leaf="">TUTORIAL · NODE.JS</span></span>
+        <section style="flex:1;height:1px;overflow:hidden;background:linear-gradient(to right,rgba(5,150,105,0.12),transparent);"><span leaf=""><br></span></section>
+        <span style="font-size:10px;color:#D1D5DB;font-weight:600;"><span leaf="">2026.08</span></span>
+      </section>
+      <section>
+        <p style="font-size:15px;color:#D1D5DB;margin:0 0 6px;text-decoration:line-through;letter-spacing:0.5px;">
+          <span leaf="">写机器人 = 自己搭 webhook 服务？</span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#111827;margin:0;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">GitHub 自动化，</span>
+          <span style="color:#059669;"><span leaf="">一行 app.on()</span></span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#059669;margin:0 0 16px;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">就够了</span>
+        </p>
+        <section style="width:48px;height:3px;background:linear-gradient(to right,#059669,#34D399);border-radius:2px;margin-bottom:12px;">
+          <span leaf=""><br></span>
+        </section>
+        <p style="font-size:13px;color:#9CA3AF;margin:0;line-height:1.7;letter-spacing:0.5px;">
+          <span leaf="">事件驱动 · Context · Octokit · 实战模式</span>
+        </p>
+      </section>
+    </section>
+    <section style="background:linear-gradient(135deg,#059669,#10B981);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:12px;color:rgba(255,255,255,0.9);margin:0;font-weight:600;letter-spacing:0.5px;">
+        <span leaf="">PROBOT × SAN-CI</span>
+      </p>
+      <section style="display:flex;gap:4px;">
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">GITHUB APP</span></span>
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">V14</span></span>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 2. 目录 toc-scroll（3 个精选看点 + 写在最后） ============ -->
+  <section style="margin:0 20px 32px;">
+    <section style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <p style="font-size:10px;color:#9CA3AF;margin:0;text-transform:uppercase;letter-spacing:2px;font-weight:600;">
+        <span leaf="">📦 3 Parts + Conclusion</span>
+      </p>
+      <p style="font-size:10px;color:#9CA3AF;margin:0;">
+        <span leaf="">👉 滑动</span>
+      </p>
+    </section>
+    <section style="overflow-x:scroll;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:8px;">
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:linear-gradient(135deg,#059669,#10B981);border-radius:12px;padding:12px;margin-right:8px;">
+        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 01</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#fff;margin:0 0 3px;">
+          <span leaf="">快速开始</span>
+        </p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.7);margin:0;">
+          <span leaf="">5 分钟跑起来</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 02</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">核心 API 详解</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">app、context、octokit</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 03</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">实战模式</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">命令 · 状态机 · Check Run</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART ///</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">资源与小结</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 3. 开头引言 oneliner-card ============ -->
+  <section style="margin:0 20px 24px;background:#FFF;border:1px dashed #BBF7D0;border-radius:8px;padding:14px 16px;text-align:center;">
+    <p style="font-size:12px;color:#9CA3AF;margin:0 0 6px;line-height:1.5;">
+      <span leaf="">本文介绍 Probot v14 的核心概念与完整 API</span>
+    </p>
+    <p style="margin:0;line-height:1.6;">
+      <span style="font-size:15px;color:#059669;font-weight:bold;border-bottom:3px solid #FDE68A;padding-bottom:2px;"><span leaf="">你只写「当事件 X 发生时，做什么」，剩下 90% 交给框架</span></span>
+    </p>
+  </section>
+
+  <!-- ============ 4. 前言 ============ -->
+  <section style="padding:0 20px;margin-bottom:8px;">
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">文中示例部分取自一个真实项目 </span><strong style="color:#059669;"><span leaf="">san-ci</span></strong><span leaf="">（一个组织级 CI/CD GitHub App），帮助你理解这些 API 在</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">实际业务里怎么组合</span></span><span leaf="">。</span>
+    </p>
+  </section>
+
+  <!-- ============ 5. PART 01 Probot 是什么？ ============ -->
+  <section style="margin-top:16px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">01</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">Probot 是什么？</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">WHAT IS PROBOT</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">Probot 是一个用 Node.js 构建 </span><strong style="color:#059669;"><span leaf="">GitHub App</span></strong><span leaf=""> 的框架。它的核心理念：<span style="background:linear-gradient(120deg,#FDE68A 0%,rgba(255,255,255,0) 100%);padding:0 4px;border-radius:2px;font-weight:600;color:#111827;"><span leaf="">GitHub 上的事件驱动你的代码</span></span>。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">当你安装一个 GitHub App 到仓库或组织后，GitHub 会把所有你订阅的事件</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">以 webhook 的形式推送</span></span><span leaf="">到你的服务器。Probot 负责处理这条链路里</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">所有枯燥的工程问题</span></span><span leaf="">：</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">签名校验</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">接收并校验 webhook 签名（HMAC，确保请求真的来自 GitHub）</span>
+      </p>
+    </section>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">认证与令牌</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">用 App 私钥签发 JWT、换取安装令牌，并以 App 身份调用 GitHub API</span>
+      </p>
+    </section>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">事件封装</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">把原始 JSON payload 封装成好用的 context 对象交给你的处理函数</span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">内置服务器</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">内置一个 HTTP 服务器，并自带日志、健康检查、静态页面</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">你只需要写一件事：<span style="color:#111827;font-weight:bold;border-bottom:3px solid #FDE68A;"><span leaf="">「当事件 X 发生时，做什么」</span></span>。整个框架的核心 API 也就一句话：<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.on(event, handler)</span></span>。</span>
+    </p>
+  </section>
+
+  <!-- ============ 6. PART 02 工作原理 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">02</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">工作原理</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">HOW IT WORKS</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="background:#F9FAFB;padding:16px;border-radius:12px;border:1px solid #F3F4F6;margin-bottom:24px;">
+      <section style="display:flex;align-items:stretch;justify-content:center;gap:6px;">
+        <section style="flex:1;text-align:center;padding:10px 8px;background:linear-gradient(135deg,#059669,#10B981);border-radius:8px;">
+          <p style="font-size:13px;font-weight:800;color:#fff;margin:0 0 3px;">
+            <span leaf="">GitHub 推送 webhook</span>
+          </p>
+          <p style="font-size:10px;color:rgba(255,255,255,0.8);margin:0;line-height:1.5;">
+            <span leaf="">事件到达，Probot 校验签名</span>
+          </p>
+        </section>
+        <section style="display:flex;align-items:center;color:#D1D5DB;font-size:14px;padding:0 4px;">
+          <span leaf="">→</span>
+        </section>
+        <section style="flex:1;text-align:center;padding:10px 8px;background:#fff;border:1px solid #E5E7EB;border-radius:8px;">
+          <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+            <span leaf="">app.on 事件路由</span>
+          </p>
+          <p style="font-size:10px;color:#9CA3AF;margin:0;line-height:1.5;">
+            <span leaf="">订阅的事件进入对应 handler</span>
+          </p>
+        </section>
+        <section style="display:flex;align-items:center;color:#D1D5DB;font-size:14px;padding:0 4px;">
+          <span leaf="">→</span>
+        </section>
+        <section style="flex:1;text-align:center;padding:10px 8px;background:#fff;border:1px solid #A7F3D0;border-radius:8px;">
+          <p style="font-size:13px;font-weight:800;color:#059669;margin:0 0 3px;">
+            <span leaf="">context.octokit 写回</span>
+          </p>
+          <p style="font-size:10px;color:#9CA3AF;margin:0;line-height:1.5;">
+            <span leaf="">自动认证，调用 GitHub API</span>
+          </p>
+        </section>
+      </section>
+      <p style="font-size:12px;color:#9CA3AF;text-align:center;margin:12px 0 0;letter-spacing:0.5px;">
+        <span leaf="">入口：module.exports = (app) =&gt; { … } · 动作：context.octokit 读写 GitHub</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">入口</span></span><span leaf="">：</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">module.exports = (app) =&gt; { … }</span></span><span leaf="">，你的 App 就是一个接收 Probot 实例的函数</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">事件</span></span><span leaf="">：</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.on()</span></span><span leaf=""> 订阅 GitHub webhook 事件</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">动作</span></span><span leaf="">：handler 里用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.octokit</span></span><span leaf=""> 调用 GitHub API，写回状态</span>
+    </p>
+  </section>
+
+  <!-- ============ 7. PART 03 快速开始 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">03</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">快速开始</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">QUICK START</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 01</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">注册一个 GitHub App</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">到 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">github.com/settings/apps/new</span></span><span leaf=""> 注册一个 App：</span>
+      </p>
+      <section style="margin-bottom:14px;">
+        <p style="margin:0 0 6px;">
+          <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">Webhook URL</span></span>
+        </p>
+        <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+          <span leaf="">指向你的服务器（如 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">https://your-host/api/github/webhooks</span></span><span leaf="">）</span>
+        </p>
+      </section>
+      <section style="margin-bottom:14px;">
+        <p style="margin:0 0 6px;">
+          <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">Webhook secret</span></span>
+        </p>
+        <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+          <span leaf="">任意随机字符串，用于签名校验</span>
+        </p>
+      </section>
+      <section style="margin-bottom:14px;">
+        <p style="margin:0 0 6px;">
+          <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">Permissions</span></span>
+        </p>
+        <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+          <span leaf="">按需勾选（</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">issues: write</span></span><span leaf="">、</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_requests: write</span></span><span leaf="">、</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">checks: write</span></span><span leaf=""> 等）</span>
+        </p>
+      </section>
+      <section style="margin-bottom:24px;">
+        <p style="margin:0 0 6px;">
+          <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">Subscribe to events</span></span>
+        </p>
+        <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+          <span leaf="">勾选你要处理的事件</span>
+        </p>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">注册完成后</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">生成私钥</span></span><span leaf="">（</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">.pem</span></span><span leaf=""> 文件），记下 App ID 和 secret。</span>
+      </p>
+      <section style="padding:6px 0 4px;margin-bottom:16px;">
+        <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+          <span style="color:rgb(255,76,0);"><span leaf="">！踩坑提示 🕳</span></span>
+        </p>
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+          <span style="color:rgb(136,136,136);font-weight:bold;"><span leaf="">改 app.yml ≠ 订阅事件。最终生效的是 GitHub App 设置页：改完必须同步去设置页勾选事件与权限，否则事件永远不会投递（san-ci 为 workflow_run 踩过这个坑）。</span></span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 02</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">创建项目</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#F6F8FA;border:1px solid #E5E7EB;border-left:3px solid #059669;">
+        <section style="padding:7px 14px;border-bottom:1px solid #E5E7EB;">
+          <span style="font-size:12px;color:#9CA3AF;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">npx create-probot-app　　# 官方脚手架，交互式生成项目</span></p>
+        </section>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">或者手动搭：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#F6F8FA;border:1px solid #E5E7EB;border-left:3px solid #059669;">
+        <section style="padding:7px 14px;border-bottom:1px solid #E5E7EB;">
+          <span style="font-size:12px;color:#9CA3AF;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">npm install probot</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">mkdir src &amp;&amp; touch src/index.js</span></p>
+        </section>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">最小 App：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+        <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+          <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">module.exports = (app) =&gt; {</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　app.log.info('Bot started')</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　app.on('issues.opened', async (context) =&gt; {</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　const issue = context.payload.issue</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　await context.octokit.rest.issues.createComment({</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　...context.repo(),</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　issue_number: issue.number,</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　body: 'Thanks for opening this issue!'</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　})</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　})</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+        </section>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">启动：</span>
+      </p>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#F6F8FA;border:1px solid #E5E7EB;border-left:3px solid #059669;">
+        <section style="padding:7px 14px;border-bottom:1px solid #E5E7EB;">
+          <span style="font-size:12px;color:#9CA3AF;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">npx probot run ./src/index.js</span></p>
+        </section>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 03</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">配置环境变量并运行</span>
+        </h4>
+      </section>
+      <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#F6F8FA;border:1px solid #E5E7EB;border-left:3px solid #059669;">
+        <section style="padding:7px 14px;border-bottom:1px solid #E5E7EB;">
+          <span style="font-size:12px;color:#9CA3AF;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+        </section>
+        <section style="padding:11px 14px;">
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">export APP_ID=12345</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">export PRIVATE_KEY_PATH=/path/to/your-app-key.pem</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">export WEBHOOK_SECRET=your-secret</span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf=""></span></p>
+          <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">npx probot run ./src/index.js</span></p>
+        </section>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">v14 默认监听 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">3000</span></span><span leaf=""> 端口，webhook 路径为 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/api/github/webhooks</span></span><span leaf="">。也可以都用环境变量（见文末速查表）。</span>
+      </p>
+      <section style="padding:6px 0 4px;margin-bottom:16px;">
+        <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+          <span style="color:#059669;"><span leaf="">✦ 首次运行免配置</span></span>
+        </p>
+        <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+          <span leaf="">第一次运行没有凭据时，probot run 会进入 setup 模式：自动帮你注册 App、生成私钥、写入 .env，并把 webhook 指向一个 smee.io 代理（本地开发用）——开箱即用。</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 8. PART 04 核心 API 详解 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">04</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">核心 API 详解</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">CORE API</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">Probot 实例（app）</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">你的模块收到一个 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">Probot</span></span><span leaf=""> 类实例。v14 的方法如下：</span>
+    </p>
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">方法 / 属性</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">说明</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.on(event, handler)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">订阅事件。event 可以是字符串、字符串数组，支持通配符（<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">'pull_request.*'</span></span> 匹配该事件所有 action，<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">'*'</span></span> 匹配所有事件）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.onAny(handler)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">订阅所有事件，常用于打日志、统计</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.onError(handler)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">订阅处理异常，统一错误处理</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.load(appFn)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">加载另一个 App 函数（支持数组），可组合多个 bot</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.receive({ name, payload })</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">手动投递一个事件（测试用，不起服务器）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.auth(installationId)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">返回某个安装的认证客户端，主动发 API（不在 webhook 上下文里时用）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.webhooks</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">底层 webhook 处理器（@octokit/webhooks 实例）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.log</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">全局日志器</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.ready()</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">等待初始化完成</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.getNodeMiddleware()</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">把 webhook 处理转成标准 Node 中间件，可挂到任意 HTTP 服务器</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.version</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Probot 版本号</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// 同一个 handler 处理多个事件</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.on(['pull_request.opened', 'pull_request.synchronize'], async (context) =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// 新开 PR 和推新提交都重新评估 CI 门禁</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　await handleRebaseAndGate(context, context.payload.pull_request)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// 通配符：订阅 pull_request 的所有 action</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.on('pull_request.*', async (context) =&gt; { /* ... */ })</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// 统一错误处理</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.onError(async (error) =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　app.log.error({ err: error }, 'Webhook handler failed')</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">Context（context）</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">每个 handler 收到一个 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">Context</span></span><span leaf=""> 实例，它把你需要的几乎一切都打包好了：</span>
+    </p>
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">成员</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">说明</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.payload</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">GitHub 发来的原始 webhook JSON（<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">payload.pull_request</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">payload.comment</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">payload.review</span></span>…）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.octokit</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">已认证的 Octokit 客户端（按当前安装自动换令牌，并自动带 x-github-delivery 请求头便于排查）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.log</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">带事件上下文的子日志器</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.name</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">事件名（如 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_request</span></span>）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.id</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">webhook delivery ID</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.isBot</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">只读属性，事件操作者是否是 bot</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.repo(obj?)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">返回 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">{ owner, repo }</span></span>，可合并参数</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.issue(obj?)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">返回 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">{ owner, repo, issue_number }</span></span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.pullRequest(obj?)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">返回 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">{ owner, repo, pull_number }</span></span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.config(file, default?)</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">读取仓库 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">.github/&lt;file&gt;</span></span> 的 YAML 配置（见下）</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">参数构造器</span></strong><span leaf="">是写起来最顺手的 API，直接喂给 REST 调用：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.on('issues.opened', async (context) =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const params = context.issue({ body: 'Hello!' })</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// =&gt; { owner: 'octocat', repo: 'hello-world', issue_number: 1347, body: 'Hello!' }</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　await context.octokit.rest.issues.createComment(params)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf=""><strong style="color:#059669;"><span leaf="">context.config()</span></strong> 让用户可以用仓库里的 YAML 文件配置你的 bot（只从默认分支读取，安全）：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">yaml</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># .github/config.yml（用户仓库）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">close: true</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">comment: Check the specs on the rotary girder.</span></p>
+      </section>
+    </section>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// 没有配置文件时用默认值</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">const config = await context.config('config.yml', { close: false })</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">if (config.close) {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　await context.octokit.rest.issues.update(context.issue({ state: 'closed' }))</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">context.octokit —— 完整的 GitHub REST API</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">context.octokit 是 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">@octokit/rest</span></span><span leaf=""> 的完整实例，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">几百个端点全覆盖</span></span><span leaf="">：<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.octokit.rest.issues.*</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pulls.*</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">checks.*</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">repos.*</span></span>……另外还内置：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// 遍历组织下所有 open PR</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">const openPrs = await context.octokit.paginate(</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　context.octokit.rest.pulls.list,</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　{ owner, repo, state: 'open', per_page: 100 }</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">)</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">另外还内置分页遍历：</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">context.octokit.paginate()</span></span><span leaf=""> 自动翻页、遍历所有结果；同时支持</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">可插拔插件体系</span></span><span leaf="">，比如 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">octokit-plugin-config</span></span>（context.config 的底层）、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">octokit-plugin-create-pull-request</span></span> 等。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">Probot 构造函数</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">不经过 CLI 也可以直接编程使用，测试和嵌入场景很常用：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">const { Probot } = require('probot')</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">const probot = new Probot({</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　appId: 12345,</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　privateKey: '-----BEGIN RSA PRIVATE KEY-----...',</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　secret: 'webhook-secret',</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　githubToken: 'ghp_...',　// 测试模式：用个人令牌代替 App 认证</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// Octokit: MyCustomOctokit,　// 自定义 Octokit 类（加插件）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// baseUrl: 'https://ghe.example.com/api/v3',　// GitHub Enterprise</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">probot.load(appFn)　// 加载你的 App</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">probot.receive({ name: 'pull_request', payload })　// 投递事件</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">注意构造时 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">githubToken</span></span><span leaf=""> 和 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">appId/privateKey</span></span><span leaf=""><span style="border-bottom:2px solid #FECACA;"><span leaf="">二选一</span></span>——测试环境用前者，生产用后者。</span>
+    </p>
+  </section>
+
+  <!-- ============ 9. PART 05 事件参考 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">05</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">事件参考</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">EVENTS</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">GitHub 有几十种 webhook 事件，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">常见的有</span></span><span leaf="">：</span>
+    </p>
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">事件</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">触发时机</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">典型用途</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">issues.opened</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Issue 生命周期</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">问候、模板检查</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_request.opened</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">PR 生命周期</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">门禁检查、lint、DCO</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_request.labeled</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">标签变化</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">状态机驱动</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_request_review.submitted</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">评审提交</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">批准逻辑</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">issue_comment.created</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">评论创建</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">slash 命令入口</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">check_run.completed</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Check Run 结束</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">外部 CI 完成后重新评估</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">workflow_run.completed</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">GitHub Actions 工作流结束</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">同上（Actions 场景）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">status</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">旧式 commit status 更新</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">兼容旧 CI</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">push</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">推代码</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">触发构建、自动 rebase</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">repository_dispatch</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">外部手动触发</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">定时任务入口（配合 cron workflow）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">installation.created</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">App 被安装/卸载</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">初始化/清理</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">schedule</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">定时（Probot 内置）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">周期任务</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section style="background:#F0FDF4;padding:12px 16px;border-radius:8px;border:1px solid #BBF7D0;margin-bottom:20px;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">san-ci 用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">repository_dispatch</span></span><span leaf=""> + cron workflow 实现每天一次的 stale 检查——App 本身不需要常驻定时器。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 10. PART 06 实战模式 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">06</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">实战模式：用这些 API 能搭出什么</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PATTERNS</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">模式一：slash 命令</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf=""><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">issue_comment.created</span></span> 是所有 slash 命令（<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/lgtm</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/approve</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/rebase</span></span>…）的入口。解析评论 → 查权限 → 执行动作：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.on('issue_comment.created', async (context) =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const comment = context.payload.comment</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const issue = context.payload.issue</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　if (!issue.pull_request) return　// 只在 PR 上生效</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const cmd = comment.body.trim().split(/\s+/)[0].replace(/^\//, '')</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　switch (cmd) {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　case 'lgtm':</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　// 打标签 + 提交 APPROVED review</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　break</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　case 'assign':</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　// 添加 assignee</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　　　break</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">san-ci 的分发器在 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">src/commands.js</span></span><span leaf="">，权限模型挂在仓库的 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">OWNERS</span></span><span leaf=""> 文件上（approvers/reviewers 名单），</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">/lgtm 只有 approver 能用</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">模式二：标签即状态机</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">不用数据库，PR 状态用标签表达（<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">lgtm</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">approved</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">needs-rebase</span></span>、<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">do-not-merge/hold</span></span>…）。每次事件到达就</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">全量重算状态</span></span><span leaf="">并同步标签——无状态、幂等、不怕丢事件：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">app.on('pull_request.labeled', async (context) =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const pr = context.payload.pull_request</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　if (context.payload.label.name === 'lgtm') {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　await context.octokit.rest.issues.addLabels(context.issue({ labels: ['approved'] }))</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">模式三：Check Run 作为状态 UI</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">checks: write</span></span><span leaf=""> 权限创建 Check Run，把 bot 的状态展示在 PR 的 checks 列表里，还能作为 branch protection 的 required check：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">await context.octokit.rest.checks.create({</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　...context.repo(),</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　name: 'Review Gate',</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　head_sha: pr.head.sha,</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　status: 'queued',</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　output: { title: '⏳ Needs review', summary: '...' }</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">san-ci 的门禁就是这样一个叫 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">Review Gate</span></span><span leaf=""> 的 check：<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">⏳ Needs review</span></span> → <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">✅ All checks passed</span></span> → </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">自动 squash-merge</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">模式四：定时任务</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">方案 A</span></span><span leaf="">：GitHub Actions cron workflow 发 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">repository_dispatch</span></span><span leaf="">，App 收到后执行（san-ci 的做法，推荐——GitHub 替你扛调度）。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">方案 B</span></span><span leaf="">：App 自己用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">setInterval</span></span><span leaf="">/</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">schedule</span></span><span leaf=""> 事件（仅当 App 常驻且只有一个实例时可靠）。</span>
+    </p>
+  </section>
+
+  <!-- ============ 11. PART 07 本地开发与测试 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">07</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">本地开发与测试</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">DEV &amp; TEST</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">用 fixture 模拟事件（不需要真实 GitHub）</span></span>
+    </p>
+    <p style="font-size:13px;color:#374151;margin:0 0 24px;line-height:1.8;">
+      <span style="display:inline-block;background:#111827;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;margin-right:6px;vertical-align:middle;letter-spacing:0.5px;"><span leaf="">CMD</span></span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">npx probot receive -e pull_request -p ./test/fixtures/pull_request.opened.json ./src/index.js</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">v14 的 CLI 是 receive（v12 时代叫 simulate）。fixture 就是一条抓下来的真实 webhook payload，开发时从 GitHub 抓一条存进仓库，以后反复用。san-ci 的 fixture 在 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">test/fixtures/</span></span><span leaf=""> 下。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">本地联调真实 webhook</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf=""><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">probot run</span></span> 内置 smee.io 代理支持：<span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-W, --webhook-proxy &lt;url&gt;</span></span>。本地起一个 smee 通道，把 URL 填到 GitHub App 设置页的 Webhook URL，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">真实事件就能流到你的本地进程</span></span><span leaf="">——首次 setup 模式会自动配好这一切。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">单元测试：nock + probot.receive()</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">Probot App 本质是“事件进、API 调用出”，测试时 mock 掉所有 GitHub API 即可。san-ci 用 Node 内置 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">node:test</span></span><span leaf=""> + </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">nock</span></span><span leaf="">：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">js</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">const { Probot } = require('probot')</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">nock.disableNetConnect()</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">test('opened PR triggers reviewer suggestion', async () =&gt; {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　const probot = new Probot({ githubToken: 'test-token' })</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　await probot.load(appFn)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// mock 顺序必须与代码调用顺序一致</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　nock('https://api.github.com').get('/repos/octocat/hello/contents/OWNERS').reply(200, ...)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　nock('https://api.github.com').post('/repos/octocat/hello/issues/1/comments').reply(201, ...)</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　await probot.receive({</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　name: 'pull_request',</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　payload: fixture.pullRequestOpened</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　})</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">})</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""></span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">afterEach(() =&gt; nock.cleanAll())</span></p>
+      </section>
+    </section>
+    <section style="padding:6px 0 4px;margin-bottom:16px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:#059669;"><span leaf="">✦ 测试模式小技巧</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">Probot 构造函数传 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">githubToken</span></span><span leaf=""> 会跳过 App 认证，直接以该令牌调用 API，测试里就不用准备私钥了。</span>
+      </p>
+    </section>
+  </section>
+
+  <!-- ============ 12. PART 08 CLI 与环境变量速查 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">08</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">CLI 与环境变量速查</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">CLI &amp; ENV</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">v14 的 CLI：</span>
+    </p>
+    <p style="font-size:13px;color:#374151;margin:0 0 24px;line-height:1.8;">
+      <span style="display:inline-block;background:#111827;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;margin-right:6px;vertical-align:middle;letter-spacing:0.5px;"><span leaf="">CMD</span></span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">probot run [options] &lt;app.js...&gt;　# 启动服务</span></span>
+    </p>
+    <p style="font-size:13px;color:#374151;margin:0 0 24px;line-height:1.8;">
+      <span style="display:inline-block;background:#111827;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;margin-right:6px;vertical-align:middle;letter-spacing:0.5px;"><span leaf="">CMD</span></span>
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">probot receive -e &lt;event&gt; -p &lt;payload.json&gt; &lt;app.js&gt;　# 模拟单个事件</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">常用配置（CLI 参数 / 环境变量 / 构造函数选项三套一一对应）：</span>
+    </p>
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">配置</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">CLI</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">环境变量</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">默认值</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">App ID</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-a, --app</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">APP_ID</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">私钥</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-P, --private-key &lt;file&gt;</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf=""><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">PRIVATE_KEY_PATH</span></span> 或 <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">PRIVATE_KEY</span></span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Webhook secret</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-s, --secret</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">WEBHOOK_SECRET</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">development</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">端口</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-p, --port</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">PORT</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">3000</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Webhook 路径</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-w, --webhook-path</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">WEBHOOK_PATH</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/api/github/webhooks</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Webhook 代理</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-W, --webhook-proxy &lt;url&gt;</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">WEBHOOK_PROXY_URL</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">smee.io 默认通道</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">日志级别</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">-L, --log-level</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">LOG_LEVEL</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">info</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">日志格式</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">--log-format</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">LOG_FORMAT</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">pretty（可 json）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">错误上报</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">--sentry-dsn</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">SENTRY_DSN</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">速率限制集群</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">--redis-url</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">REDIS_URL</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">GitHub Enterprise</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">--base-url</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf=""><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">GHE_HOST</span></span> / <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">GHE_PROTOCOL</span></span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">https://api.github.com</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">运行时要求：Node.js ≥ 20.18.1（或 22.x）、Deno ≥ 2.3、Bun ≥ 1.2.14。</span>
+    </p>
+  </section>
+
+  <!-- ============ 13. PART 09 部署 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">09</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">部署</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">DEPLOYMENT</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">Probot App 就是一个 HTTP 服务，部署 = 跑一个 Node 进程。最简单的形态：</span>
+    </p>
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#F6F8FA;border:1px solid #E5E7EB;border-left:3px solid #059669;">
+      <section style="padding:7px 14px;border-bottom:1px solid #E5E7EB;">
+        <span style="font-size:12px;color:#9CA3AF;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">npm install --production</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,monospace;font-size:13px;line-height:1.6;color:#24292F;"><span leaf="">APP_ID=... PRIVATE_KEY_PATH=... WEBHOOK_SECRET=... npm start</span></p>
+      </section>
+    </section>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">可以部署在任何能跑 Node 的地方：VM、K8s、Azure Functions、Vercel、Glitch。或者用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">app.getNodeMiddleware()</span></span><span leaf=""> 把 webhook 处理挂进你现有的 Express/Node 服务。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">两个生产注意点：</span>
+    </p>
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">至少两个实例：webhook 没有“至少一次投递”保证，丢失要能自愈——把 handler 写成幂等的（“全量重算”模型天然满足）</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">高吞吐场景：配 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">REDIS_URL</span></span><span leaf=""> 启用请求限流的集群支持，避免触发 GitHub 的 rate limit</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 14. PART 10 常见坑 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">10</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">常见坑（webhook 开发的通用经验）</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">PITFALLS</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">review 的 body <span style="border-bottom:2px solid #FECACA;"><span leaf="">不会触发 issue_comment.created</span></span>。reviewer 在评审里写 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">/lgtm</span></span><span leaf="">，到达的只有 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pull_request_review.submitted</span></span><span leaf="">。所以要在该 handler 里把“长得像命令”的 review body 手动重构成 comment 再分发——san-ci 用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">Object.create(context)</span></span><span leaf=""> 而不是对象展开，因为展开会丢掉 context 原型上的 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">repo()</span></span><span leaf=""> 等方法。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf=""><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">listPullRequestsAssociatedWithCommit</span></span> 可能返回空数组。用 commit SHA 反查 PR 时<span style="border-bottom:2px solid #FECACA;"><span leaf="">不要相信空结果</span></span>（san-ci 在 genai-io/san#459 实际遇到过），要退回全量扫描 open PR 匹配 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">head.sha</span></span><span leaf="">。workflow_run 事件则直接带 pull_requests 数组，不用查。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">webhook payload 是“事件发生那一刻”的快照。你的 handler 自己刚打的标签、刚合的 PR，在 payload 里看不到——需要时重新 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">pulls.get</span></span><span leaf=""> 拉最新状态。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">4</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <span leaf="">改 app.yml <span style="border-bottom:2px solid #FECACA;"><span leaf="">≠ 订阅事件</span></span>。生效的是 GitHub App 设置页。</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- ============ 15. LAST 写在最后 ============ -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">///</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">LAST</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">SUMMARY</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">更多资源</span></span>
+    </p>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">官方文档</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">probot.github.io</span></span>
+      </p>
+    </section>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">API 文档</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">github.com/probot/probot</span></span><span leaf=""> 的 docs 目录</span>
+      </p>
+    </section>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">官方脚手架</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">npx create-probot-app</span></span>
+      </p>
+    </section>
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">生态列表</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">awesome-probot</span></span>
+      </p>
+    </section>
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">完整实战代码</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">genai-io/san-ci</span></span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin:32px 0 16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">小结</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">Probot 把 GitHub App 开发里</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">90% 的重复工程</span></span><span leaf="">（认证、令牌、webhook 服务器、签名校验）压缩成了几行配置，留给你的是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">纯粹的业务逻辑</span></span><span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">核心心智模型只有一个：</span><strong style="color:#059669;"><span leaf="">事件进，context.octokit 出</span></strong><span leaf="">——app.on() 订阅，handler 里写逻辑，用 context.issue()/context.repo() 构造参数，用 context.octokit 读写 GitHub。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">掌握这一个循环，再加上标签状态机、Check Run、slash 命令这几个组合拳，你就能搭出 san-ci 那样的组织级自动化。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">我是 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">{{作者名}}</span></span><span leaf="">，</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;font-family:'SF Mono',Consolas,monospace;"><span leaf="">{{一句话简介}}</span></span><span leaf="">。</span>
+    </p>
+
+    <!-- 16. footer-cta 互动三连 -->
+    <section style="background:radial-gradient(circle at center,#F9FAFB 0%,#FFFFFF 100%);border:1px solid #E5E7EB;border-radius:16px;padding:32px 20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin:0 0 24px;">
+      <p style="font-size:13px;font-weight:bold;color:#111827;margin-bottom:20px;line-height:1.6;">
+        <span leaf="">既然看到这里了，如果觉得有用，随手点个赞、在看、转发三连吧。</span>
+      </p>
+      <section style="display:flex;justify-content:center;gap:24px;margin-bottom:16px;">
+        <section style="text-align:center;cursor:pointer;color:#4B5563;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">点赞</span></span>
+        </section>
+        <section style="text-align:center;cursor:pointer;color:#4B5563;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">在看</span></span>
+        </section>
+        <section style="text-align:center;cursor:pointer;color:#059669;">
+          <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#ECFDF5;border-radius:12px;box-shadow:0 2px 4px rgba(5,150,105,0.15);border:1px solid #A7F3D0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-4a8 8 0 0 1 8-8h8"></path><polyline points="16 2 20 6 16 10"></polyline></svg>
+          </section>
+          <span style="font-size:10px;font-weight:600;"><span leaf="">转发</span></span>
+        </section>
+      </section>
+      <p style="font-size:10px;color:#9CA3AF;letter-spacing:1px;margin:0;">
+        <span leaf="">THANKS FOR READING</span>
+      </p>
+    </section>
+
+  </section>
+
+</section>
+  </div>
+</div>
+<script>
+  function gzhShowToast(msg){
+    var t=document.getElementById('gzhToast');
+    t.textContent=msg;t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer=setTimeout(function(){t.classList.remove('show');},2800);
+  }
+  function gzhCopy(){
+    var el=document.getElementById('gzh-content');
+    // 选中渲染后的富文本节点并复制（等价于手动 Ctrl+A / Ctrl+C，保留全部样式）
+    var range=document.createRange();
+    range.selectNodeContents(el);
+    var sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    var ok=false;
+    try{ok=document.execCommand('copy');}catch(e){ok=false;}
+    sel.removeAllRanges();
+    var btn=document.getElementById('gzhCopyBtn');
+    if(ok){
+      gzhShowToast('✅ 已复制！去公众号编辑器按 Ctrl/⌘+V 粘贴即可');
+      var old=btn.textContent;btn.textContent='✅ 已复制';
+      setTimeout(function(){btn.textContent=old;},2200);
+    }else{
+      gzhShowToast('⚠ 自动复制失败，请手动全选(Ctrl/⌘+A)再复制(Ctrl/⌘+C)');
+    }
+  }
+</script>
+</body>
+</html>

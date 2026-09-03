@@ -13,7 +13,9 @@ FRAG_DIR="$LABS_DIR/nginx/fragments"
 GEN_CONF="$LABS_DIR/nginx/nginx.conf.gen"
 OUT_DIR="$LABS_DIR/out"
 CNAME="tls-lab"
-IMG="nginx:stable-alpine"
+IMG="nginx:stable-alpine"     # 基础镜像(也是本地镜像构建失败时的回退)
+LOCAL_IMG="tls-lab:local"     # 本地构建镜像:基础镜像 + tcpdump(②08 章抓容器内明文段用)
+DOCKERFILE="$LABS_DIR/Dockerfile.tls-lab"
 
 # host 端口(文档示例统一用这些)
 HOST_TERM=1443    # termination 前端 443
@@ -85,15 +87,29 @@ reload_conf() {
   return 1
 }
 
+# 选择运行镜像:优先本地构建(nginx+tcpdump,②08 章实验三抓容器内明文段用);
+# Dockerfile 存在则每次 start 时构建(层有缓存即秒回),失败回退基础镜像并提示
+pick_run_img() {
+  [ -f "$DOCKERFILE" ] || { echo "$IMG"; return 0; }
+  if docker build -q -f "$DOCKERFILE" -t "$LOCAL_IMG" "$LABS_DIR" >/dev/null 2>&1; then
+    echo "$LOCAL_IMG"
+  else
+    echo "[注意] 构建 $LOCAL_IMG(nginx+tcpdump)失败,回退 $IMG;" \
+         "②08 章实验三请先手动安装:docker exec $CNAME sh -c 'apk add --no-cache tcpdump'" >&2
+    echo "$IMG"
+  fi
+}
+
 # 容器起/停
 start_lab() {
   docker rm -f "$CNAME" >/dev/null 2>&1 || true
   render_conf
+  local run_img; run_img="$(pick_run_img)"
   docker run -d --name "$CNAME" \
     -p 1443:443 -p 8443:8443 -p 9443:9443 -p 4443:4443 -p 18080:8080 \
     -v "$CERT_DIR:/etc/nginx/certs:ro" \
     -v "$LABS_DIR/nginx:/etc/nginx/lab:ro" \
-    "$IMG" nginx -g 'daemon off;' -c /etc/nginx/lab/nginx.conf.gen >/dev/null
+    "$run_img" nginx -g 'daemon off;' -c /etc/nginx/lab/nginx.conf.gen >/dev/null
   sleep 0.5
   # bridging 用域名上游(api.example.com → 容器内 127.0.0.1:9443),保证 SNI 语义真实
   docker exec "$CNAME" sh -c "grep -q 'api.example.com' /etc/hosts || echo '127.0.0.1 api.example.com' >> /etc/hosts"

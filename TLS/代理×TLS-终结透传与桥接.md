@@ -290,69 +290,134 @@ Istio 这类服务网格的标准姿势:
 
 ## 08 抓包实操:让流量开口说话
 
-前几章的原理,这一章全部用抓包验证。环境:本机 Nginx + openssl + tcpdump(Linux 用 `lo`,macOS 用 `lo0`,下文以 lo0 为例)。
+前几章的原理,这一章全部用抓包验证。环境与 §09 共用 `TLS/labs` 实验环境(单容器 nginx + 自带 lab CA),先一键拉起:
 
-### 实验一:看 ClientHello 里的 SNI 明文
+```bash
+$ bash TLS/labs/start.sh    # 依赖:docker + openssl + tshark;本地镜像已内置 tcpdump
+```
 
-先起一个 termination 的 Nginx(监听 8443),然后抓包:
+本次用到的监听(host 端口,证书全部由 lab CA 签发):
+
+| host 端口 | 容器内 | 角色 | 持证 |
+| --- | --- | --- | --- |
+| 1443 | 443 | termination 前端(www.example.com) | server-www.crt |
+| 4443 | 4443 | stream passthrough(按 SNI 转发到 9443) | 无(不持证) |
+| 9443 | 9443 | TLS 后端(api.example.com) | server-api.crt |
+| 8443 | 8443 | mTLS 前端(需客户端证书,本实验不用) | server-www.crt |
+
+抓包说明:**宿主**流量抓 `lo`(Linux)/ `lo0`(macOS,下文以 lo0 为例),tshark 需要 root 或 Wireshark 的 ChmodBPF;termination 的明文段发生在**容器内**,用 `docker exec` 里的 tcpdump 抓,不需要 sudo。命令都在 `TLS/labs/` 目录下执行;若本机配了 HTTP 代理,curl 记得加 `--noproxy '*'`。
+
+### 实验一:看 ClientHello 里的 SNI 明文——URL 必须是域名
+
+起两个终端,访问 1443 的 termination 前端:
 
 ```bash
 # 终端1:抓 ClientHello,过滤 TLS 握手扩展里的 server_name
-sudo tshark -i lo0 -f "tcp port 8443" \
+sudo tshark -i lo0 -f "tcp port 1443" \
   -Y "tls.handshake.extensions_server_name" \
   -T fields -e tls.handshake.extensions_server_name
 
-# 终端2:发起请求
-curl -k https://127.0.0.1:8443/ -s >/dev/null
+# 终端2:发起请求——注意:URL 是"域名 + --resolve",不是 IP 字面量!
+curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt \
+     --resolve www.example.com:1443:127.0.0.1 https://www.example.com:1443/
 
 # 终端1输出(明文可见!):
-# example.com
+# www.example.com
 ```
 
-**结论**:SNI 作为唯一的明文信息,在握手第一步就暴露——这就是 passthrough 路由的唯一依据,也是 ECH 要解决的事。
+**最容易翻车、也是最大的知识点:URL 必须是域名**。SNI 声明的是"我要访问哪个域名",所以 curl 和浏览器在 URL 主机是 IP 字面量(`https://127.0.0.1:1443/`)时**根本不携带 SNI**——不换成域名 + `--resolve`,抓一万次也是空。实测对比:
+
+```bash
+$ curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt https://127.0.0.1:1443/ -s -o /dev/null
+tshark 输出:0 行          # IP 字面量 → ClientHello 里没有 server_name 扩展
+
+$ curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt \
+       --resolve www.example.com:1443:127.0.0.1 https://www.example.com:1443/
+tshark 输出:1 行
+www.example.com
+```
+
+**结论**:SNI 作为唯一的明文信息,在握手第一步就暴露,而且只在"以域名访问"时存在——这既是 passthrough 路由的唯一依据,也是 ECH 想消灭的东西。
 
 ### 实验二:对比三种模式的握手终点
 
-同一台机器,三个监听:8443(termination)、443(passthrough 到 8443)、8444(后端 TLS)。逐个用 openssl 验证:
+同一台机器、同一套 lab CA,三个监听:1443(termination 前端)、4443(passthrough 到 9443)、9443(TLS 后端)。证书的 subject/issuer 会直接告诉你"谁应答了 ClientHello":
 
 ```bash
-# termination:证书是代理签发的
-openssl s_client -connect 127.0.0.1:8443 -servername example.com \
+# termination:出示的是"代理自己的"证书(subject=www.example.com)
+openssl s_client -connect 127.0.0.1:1443 -servername www.example.com \
   </dev/null 2>/dev/null | grep -E "subject=|issuer="
+# subject=CN=www.example.com
+# issuer=CN=Lab Internal Root CA
 
-# passthrough:证书是"后端"签发的——握手根本没经过代理
-openssl s_client -connect 127.0.0.1:443 -servername example.com \
+# passthrough:出示的是"9443 后端"的证书——握手根本没经过代理
+openssl s_client -connect 127.0.0.1:4443 -servername api.example.com \
   </dev/null 2>/dev/null | grep -E "subject=|issuer="
+# subject=CN=api.example.com
+# issuer=CN=Lab Internal Root CA
 
-# 加上 -state 看握手阶段,对比两边的流程
-openssl s_client -connect 127.0.0.1:8443 -servername example.com -state </dev/null 2>&1 | head -20
+# 直连 9443 后端做对照:证书与上一条完全一致
+# → 4443 只是把后端的证书"原样搬"给你,自己一张证都没出
+openssl s_client -connect 127.0.0.1:9443 -servername api.example.com \
+  </dev/null 2>/dev/null | grep -E "subject=|issuer="
+# subject=CN=api.example.com   (与上一条相同)
 ```
 
-`-state` 会打印握手状态机:`CONNECTED → client hello → server hello → ... → SSL negotiation finished`。对比 passthrough 时你会发现——代理的 443 上**根本不会出现握手状态**,它只是搬运字节。
+> 澄清一个常见误解:用 `-state` 观察握手状态机时,直连和过代理**都会**完整走一遍 `client hello → server hello → … → finished`——状态机打印在客户端自己这边,代理参不参与从状态机里看不出来。判断"谁应答了 ClientHello",证书的 subject 才是最直接的证据:前端应答 → www.example.com;后端应答 → api.example.com。
 
-### 实验三:抓包看 termination 的明文段
+### 实验三:抓包看 termination 的明文段——宿主 vs 容器内
+
+termination 的明文发生在代理与后端之间——labs 的单容器拓扑里,这条明文段在**容器内部**(nginx → 127.0.0.1:8080 echo),宿主 `lo0` 上永远看不到,要进容器抓。三个终端:
 
 ```bash
-# 终端1:抓后端 8080 端口的流量
-sudo tcpdump -i lo0 -A port 8080 2>/dev/null | grep -a "GET /"
+# 终端1:宿主抓"公网段"(1443)。先试 http 过滤器——密文段什么都解不出来:
+sudo tshark -i lo0 -f "tcp port 1443" -Y "http" -a duration:10
+# (期间 curl 两次,输出 0 行:过滤器 http 在这里匹配不到任何包)
 
-# 终端2:通过代理访问
-curl -k https://127.0.0.1:8443/ -s >/dev/null
-
-# 终端1输出:明文 HTTP 请求!GET / HTTP/1.1
+# 换 tls 过滤器重跑(同样 10 秒窗口,curl 一次),看到的是:
+sudo tshark -i lo0 -f "tcp port 1443" -Y tls -a duration:10
+    5 0.000311 127.0.0.1 → 127.0.0.1 TLSv1 381 Client Hello (SNI=www.example.com)
+    7 0.002666 127.0.0.1 → 127.0.0.1 TLSv1.3 1523 Server Hello, Change Cipher Spec, ...
+   11 0.003401 127.0.0.1 → 127.0.0.1 TLSv1.3 114 Application Data
+   13 0.003460 127.0.0.1 → 127.0.0.1 TLSv1.3 142 Application Data
+   17 0.004053 127.0.0.1 → 127.0.0.1 TLSv1.3 598 Application Data, ...
+   ...                                            (握手后全是 Application Data——GET 不可见)
 ```
 
-**结论**:同样一次 HTTPS 访问,公网段全是密文,代理后段全是明文——图 1 里那条"明文 HTTP"标签,是可以在抓包里亲眼看到的。
+```bash
+# 终端2:进容器抓"明文段"(镜像已内置 tcpdump,不用 sudo):
+docker exec tls-lab tcpdump -i lo -A -s0 port 8080
+
+# 终端3:发起同一次请求
+curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt \
+     --resolve www.example.com:1443:127.0.0.1 https://www.example.com:1443/
+```
+
+终端 2 的输出——明文 HTTP,连同代理在明文侧插入的头一字排开:
+
+```
+14:52:11.37 IP localhost.51742 > localhost.8080: Flags [P.], ... length 132: HTTP: GET / HTTP/1.1
+GET / HTTP/1.1
+X-Forwarded-Proto: https      ← 代理在明文侧加的头,密文段里看不到
+X-Forwarded-For: 172.17.0.1   ← docker 网桥网关地址(不同机器可能不同)
+Host: 127.0.0.1:8080
+```
+
+**结论**:同一次 HTTPS 访问,1443 段全是密文(过滤器 `http` 一行都匹配不到,抓到的是 Application Data),8080 段全是明文(GET 连同转发头肉眼可读)——图 1 里那条"明文 HTTP"标签,可以亲手抓出来。注意明文段里的 `X-Forwarded-Proto: https`:只有 termination 的代理才知道这个信息,后端正是靠它判断自己站在 HTTPS 后面。
 
 ### 实验四:验证 X-Forwarded-Proto 的传递
 
+labs 的 8080 echo 后端会把收到的转发头原样回显——后端视角一览无余:
+
 ```bash
-# 后端收下代理转发的头(用 curl 模拟或起个打印 header 的小服务)
-curl -k https://127.0.0.1:8443/ -v 2>&1 | grep -i "forwarded"
-# 后端视角: X-Forwarded-Proto: https, X-Forwarded-For: 127.0.0.1
+$ curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt \
+       --resolve www.example.com:1443:127.0.0.1 https://www.example.com:1443/
+backend: xfp=[https] xff=[172.17.0.1] client_cn=[] client_verify=[]
 ```
 
-> 绿色提示:抓包三连就是本节浓缩——**看 SNI 用 tshark,看握手终点用 s_client -state,看明文段用 tcpdump -A**。这三招能验证你遇到的任何一个 TLS 代理问题。
+**结论**:`xfp=[https]` 证明 nginx 在明文段如实告知后端"客户端走的是 HTTPS"。和 §09 坑三对着看:漏配 `proxy_set_header X-Forwarded-Proto` 时这里会变成 `xfp=[]`——termination 后端唯一的信息来源,就是这么一条头。
+
+> 绿色提示:抓包三连就是本节浓缩——**看 SNI 用 tshark(实验一,URL 记得用域名)、看握手终点用 s_client 的 subject/issuer(实验二)、看明文段进容器 tcpdump -A(实验三)**。这三招能验证你遇到的任何一个 TLS 代理问题。
 
 ## 09 常见坑(升级版)
 
@@ -683,7 +748,7 @@ Reused, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
 
 Termination 是把权力交给代理(换来七层能力,承担私钥风险);Passthrough 是把权力留给后端(换来干净边界,接受路由贫血);Bridging 是两段权力分置(最稳,也最重)。攻防那一章要记住的不是每个攻击的名字,而是**每一层防御都在回答"信任边界画在哪"**;架构那一章的每一个组合,都是这个问题的工程答案。
 
-抓包是理解这一切的最后一步:当你在 tshark 里亲眼看到 SNI 明文、在 s_client -state 里看到握手终点、在 tcpdump -A 里看到明文 HTTP——这些名词就不再是名词,而是你排查问题时的直觉。
+抓包是理解这一切的最后一步:当你在 tshark 里亲眼看到 SNI 明文、在 s_client 的 subject/issuer 里看到握手终点、在容器内 tcpdump -A 里看到明文 HTTP——这些名词就不再是名词,而是你排查问题时的直觉。
 
 ---
 

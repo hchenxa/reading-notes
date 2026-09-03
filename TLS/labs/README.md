@@ -1,11 +1,11 @@
 # TLS labs:可复现实验环境
 
-三篇文章「常见坑 / 排障」章节里贴的**所有命令输出都来自这里**——本机 OpenSSL + 单容器 nginx,一键拉起、逐个场景复现,输出可对照、可重跑。
+三篇文章「常见坑 / 排障」章节里贴的**所有命令输出都来自这里**——本机 OpenSSL + 单容器 nginx,一键拉起、逐个场景复现,输出可对照、可重跑。②文 08 章「抓包实操」的抓包实验同样基于本环境(交互式,命令见该文 §08);镜像为本地构建的 `nginx:stable-alpine` + tcpdump,方便 `docker exec` 进容器抓 termination 的明文段(宿主侧看不到容器内流量)。
 
 ## 环境要求与快速开始
 
-- 依赖:`docker`(任意引擎)、`openssl`(3.x)、`bash`
-- 拉起:`bash TLS/labs/start.sh`(首次自动渲染默认 nginx 配置并启动容器)
+- 依赖:`docker`(任意引擎)、`openssl`(3.x)、`bash`;②08 章抓包实验另需宿主 `tshark`(抓包窗口;Linux 抓 `lo`,macOS 抓 `lo0`)
+- 拉起:`bash TLS/labs/start.sh`(首次自动构建含 tcpdump 的本地镜像 `tls-lab:local`、渲染默认配置并启动容器;构建失败自动回退基础镜像)
 - 跑单个场景:`bash TLS/labs/scenarios/<场景>.sh`,输出同时写入 `TLS/labs/out/<场景>.txt`
 - 停止:`bash TLS/labs/stop.sh`
 - 重新生成证书物料:`bash TLS/labs/certs/generate.sh`(会清空重签;**跑完必须重启容器**:`bash start.sh`,因为容器挂载的是生成目录,目录被重建后挂载会失效)
@@ -35,6 +35,7 @@
 
 | 文档章节 | 场景脚本(相对 `TLS/labs/`) | 复现什么 |
 |---|---|---|
+| ②08 抓包实操 | —(交互式,命令见该文 §08) | SNI 明文 / 握手终点 / termination 明文段 |
 | ②09 坑一 | `scenarios/09-1-cert-expired.sh` | 过期证书静默加载、客户端报错、修复前后 |
 | ②09 坑二 | `scenarios/09-2-cert-no-san.sh` | 只写 CN 不写 SAN:CLI 全绿但证书废了 |
 | ②09 坑三 | `scenarios/09-3-xfp-missing.sh` | Termination 忘配 X-Forwarded-Proto |

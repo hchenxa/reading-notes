@@ -1,0 +1,5 @@
+# tls-lab 本地镜像:nginx + tcpdump
+# ②文 08 章「抓包实操」实验三需要在容器内抓明文段(nginx → 8080 echo 发生在容器内部自环)
+# start.sh 首次启动会自动 docker build;构建失败时回退基础镜像 nginx:stable-alpine
+FROM nginx:stable-alpine
+RUN apk add --no-cache tcpdump

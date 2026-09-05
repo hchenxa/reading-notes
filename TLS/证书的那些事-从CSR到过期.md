@@ -9,18 +9,52 @@
 证书不是"文件",是一段 ASN.1 编码的结构化数据。用 openssl 把它翻译成人话:
 
 ```bash
-openssl x509 -in server.crt -text -noout
+$ openssl x509 -in server.crt -text -noout
+Certificate:
+    Data:
+        Version: 3 (0x2)                              ← 版本:X.509 第三版(现在都这个)
+        Serial Number:
+            20:13:59:f9:25:b4:…:ed:2b:6c:46           ← CA 内唯一编号:吊销就找它(04 节)
+        Signature Algorithm: sha256WithRSAEncryption  ← 签名算法 = SHA-256 摘要 + RSA
+        Issuer: CN=Lab Internal Root CA               ← ③ 谁签的(上一级 CA)
+        Validity
+            Not Before: Sep  3 02:26:25 2026 GMT      ← ④ 生效起点
+            Not After : Sep  3 02:26:25 2027 GMT      ← ④ 过期时刻:到点即废,谁都不认
+        Subject: CN=www.example.com                   ← ① 主体:"这是谁的证书"
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)                ← ⑤ 证书的"载荷":RSA-2048 公钥
+                Modulus:
+                    00:cb:68:d8:0f:27:…:c0:7f:db     ← 公钥本体(大数,长 hex 已截短)
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Alternative Name:          ← ② SAN:绑定的域名/IP(重点!)
+                DNS:www.example.com, DNS:example.com,
+                DNS:localhost, IP Address:127.0.0.1
+            X509v3 Basic Constraints: critical
+                CA:FALSE                              ← ⑦ 不是 CA,不能拿去签下级
+            X509v3 Key Usage: critical
+                Digital Signature, Key Encipherment   ← ⑦ 用途:数字签名 + 密钥加密
+            X509v3 Extended Key Usage:
+                TLS Web Server Authentication         ← ⑦ 只许当"服务器证书"用
+            X509v3 Subject Key Identifier:
+                56:A7:30:57:…:9E:FE:EE:06             ← 自己的指纹(hex 截短)
+            X509v3 Authority Key Identifier:
+                2B:0C:D7:7B:…:E9:3D:A5:EA             ← 指向上一级 CA(链式验证靠它)
+    Signature Algorithm: sha256WithRSAEncryption      ← ⑥ 签名本体在下面,防篡改
+    Signature Value:
+        42:17:78:50:71:13:…:37:94:40:44             ← ⑥ CA 用私钥对以上全部内容签名
 ```
 
-输出里的核心字段(按重要性排):
+> 上面的输出来自 `TLS/labs` 里一张真实证书(自建 CA 签发,有效期一年),`…` 只是把超长的十六进制截短了,结构一字未动——把你自己的 `server.crt` 换进命令,输出骨架完全一样。
 
-1. **Subject(主体)**:这是"谁的证书",如 `CN=example.com`
-2. **SAN(主题备用名)**:**证书绑定的域名/IP 列表**——现代客户端校验的是这里,不是 CN。`DNS:example.com, DNS:*.example.com, IP:127.0.0.1`
-3. **Issuer(签发者)**:谁签的这张证书,如 `CN=R10, O=Let's Encrypt`
-4. **有效期**:`Not Before` / `Not After`——过期瞬间失效
-5. **公钥**:证书的核心载荷(如 RSA-2048 或 EC P-256),配合私钥使用
-6. **签名算法与签名**:CA 用它的私钥对以上内容签名——**签名让内容不可篡改**
-7. **扩展字段**:KeyUsage(用途:数字签名/加密)、ExtendedKeyUsage(服务器认证/客户端认证)、BasicConstraints(是否为 CA)……
+箭头指到的地方是核心,对照着读:
+
+1. **证书只回答三个问题**(①+②+③+④):"这是谁"、"谁担保的"、"担保到何时"。三者合一,才是一张能用的证书。
+2. **② SAN 才是现代"身份"**:浏览器/curl 校验域名只比对 SAN 列表;Subject 里的 CN 是历史包袱——只写 CN 没写 SAN 的证书,浏览器直接拒(08 案例四现场演示)。
+3. **⑤ 证书里只有公钥,永远没有私钥**:私钥单独留在服务器上(07 章),证书 + 对应私钥才凑成一套完整身份。
+4. **⑥ 签名盖住上面全部内容**:用 CA 证书里的公钥验签,通过 = 内容没被改、确实是这家 CA 签的——整条信任链的第一环,就在这一小段 hex 里。
+5. **⑦ 扩展字段全是"限制"不是"能力"**:BasicConstraints 管"能不能当 CA",EKU 管"能当什么证书用"——mTLS 里服务端校验对方 EKU 是 ClientAuth,就是防止服务器证书被拿去冒充客户端。
 
 > 关键认知:证书 = 公钥 + 身份声明 + CA 的签名。公钥是公开的,签名是防篡改的,身份声明是谁担保的——整个信任体系就建立在"CA 的签名可信"这一个假设上。
 

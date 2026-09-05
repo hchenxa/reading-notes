@@ -203,17 +203,32 @@ mTLS 的意义:**身份验证从"单向信任"变成"双向互认"**。只有持
 
 ## 06 攻防:私钥、中间人与降级
 
-这一章,把安全视角拉满——攻击者怎么打,你就知道怎么防。
+这一章,把安全视角拉满——攻击者怎么打,你就知道怎么防。每个攻击的格式统一:**攻击怎么打 → 防御参数(nginx 配置示例,注释里逐参数拆解)→ 验证/注意**。配置默认挂在 termination 的主 server 上,bridging/透传场景差异会单独注明。
 
 ### 攻击一:SSL 剥离(SSL Stripping)
 
 攻击者在客户端和真实服务器之间插入自己,把页面里的 `https://` 链接改成 `http://`,客户端如果没察觉,就以明文发起请求——攻击者在明文侧全收。
 
-**防御:HSTS**。服务器用 `Strict-Transport-Security` 头告诉浏览器:"未来 max-age 秒内,只准走 HTTPS"。浏览器记住后,剥离攻击失效。所以 HSTS 不是可选项,是 termination 的必选项。
+**防御:HSTS**。服务器用 `Strict-Transport-Security` 头告诉浏览器:"未来 max-age 秒内,只准走 HTTPS"。浏览器记住后,剥离攻击失效。所以 HSTS 不是可选项,是 termination 的必选项。参数就一个 add_header,生产版(03 章基础版已写过简版):
+
+```nginx
+# 写在 443 的 server 块里(HTTPS 响应才下发)
+server {
+    listen 443 ssl;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    #   max-age=31536000    强制 HTTPS 的秒数(1 年)。上线节奏:先 300 灰度 → 稳定后调大
+    #   includeSubDomains   子域名一并强制(没有它,剥离攻击还能从子域下手)
+    #   always              4xx/5xx 错误响应也带这个头,不给"错误页走明文"留口子
+    # ⚠ add_header 继承坑:某个 location 一旦自己写了 add_header,
+    #   server 级的所有 add_header(含 HSTS)在它里面全部失效——要跟着补一条
+}
+```
+
+> 别急着上 `preload`:提交浏览器 preload 名单后想撤要等 max-age 过期,先小流量验证再提。
 
 ### 攻击二:中间人(MITM)与"企业版 MITM"
 
-经典 MITM:攻击者拦截连接、冒充服务器出示自己的证书——浏览器校验失败,报警。
+经典 MITM:攻击者拦截连接、冒充服务器出示自己的证书——浏览器校验失败,报警。**注意:这种攻击服务器侧没有任何配置能防**——它成立的前提是客户端信任库被污染,防线只在客户端/设备管理侧(比如别让员工终端信任来路不明的 CA、公网服务永远用受信 CA 的证书)。
 
 但有一个合法的 MITM:公司/学校的 HTTPS 审计网关。原理是**你的设备信任了公司下发的内部 CA**:
 
@@ -222,25 +237,118 @@ mTLS 的意义:**身份验证从"单向信任"变成"双向互认"**。只有持
 3. 浏览器校验链:叶子 → 公司 CA → 信任库,**校验通过**
 4. 网关解密 → 审计 → 重新加密 → 转发给真实站点
 
+服务器侧防"被冒充",配置上能补的是**让客户端(调用方)反过来也要证明身份**——双向认证后,攻击者即使截到了连接,没有客户端私钥也握不到 HTTP 层:
+
+```nginx
+# 服务端要求客户端出示证书(termination server 上追加三行)
+server {
+    listen 443 ssl;
+    ssl_client_certificate /etc/nginx/certs/ca/lab-ca.crt;  # 信任哪些 CA 签发的客户端证书
+    ssl_verify_client on;    # on = 必须出示且链有效,否则握手阶段直接断;
+    #                        # optional = 出示才验、不出示也放行(HTTP 层再按 $ssl_client_verify 判)
+    # 验证失败的表现:curl 不带客户端证书 → 握手错误,请求根本到不了应用
+}
+```
+
+另一条更常用的 MITM 防线在**代理当客户端**的方向(防假后端冒充,参数是 `proxy_ssl_verify on` + `proxy_ssl_trusted_certificate`,见 05 章配置与 09 坑四的完整复现)。
+
 > 关键认知:所谓"企业能不能看到我的 HTTPS 流量",本质不是技术问题,而是**信任问题**——你的设备信任了谁的 CA,谁就能终止你的 TLS。这和 termination 是同一个机制:审计网关就是持证的"代理"。
 
 ### 攻击三:降级攻击
 
 攻击者干扰握手,逼迫客户端与服务器用旧协议(TLS 1.0)或弱密码套件(3DES、RC4),然后暴力破解或利用已知漏洞。
 
-**防御**:`ssl_protocols TLSv1.2 TLSv1.3` + 白名单式密码套件,不给降级留空间。
+**防御**:协议与套件双双白名单,不给降级留空间——协议层把门关死,套件层只放 ECDHE + AEAD:
+
+```nginx
+server {
+    listen 443 ssl;
+    ssl_protocols        TLSv1.2 TLSv1.3;      # 1.0/1.1 直接不监听
+    ssl_prefer_server_ciphers on;              # TLS ≤1.2 时由服务器挑套件,不许客户端点名弱的
+
+    # TLS 1.2 套件白名单:ECDHE(前向保密)+ GCM(AEAD,不怕 CBC padding 类攻击)
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    # 写法 = 按优先级冒号分隔,列表里没有的就是被禁的;3DES/RC4/CBC 全不在名单内
+
+    # TLS 1.3 套件和 1.2 是两套独立配置!ssl_ciphers 管不到 1.3(见 09 章坑六的翻车现场):
+    # ssl_conf_command 需要 nginx ≥ 1.19.4 + OpenSSL 1.1.1;官方默认就是下边这三个强套件,
+    # 这里显式写出来是"白名单声明",防止哪天实现加了个默认弱套件
+    ssl_conf_command Ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;
+}
+```
+
+验证:老协议/弱套件应当直接握手失败:
+
+```bash
+openssl s_client -connect localhost:443 -tls1 -servername www.example.com </dev/null   # TLS1.0 → 应失败
+openssl s_client -connect localhost:443 -tls1_2 -cipher 'AES128-SHA' \
+    -servername www.example.com </dev/null                                             # CBC 弱套件 → 应失败
+```
 
 ### 攻击四:CRIME / BREACH
 
 利用压缩率的侧信道:数据压缩后,密文变短;攻击者反复构造请求,通过"压缩后更短"推断出明文(如 Cookie 里的会话令牌)。TLS 层压缩早已默认禁用,HTTP 层压缩(BREACH)需要应用层配合,比如 CSRF token 随机化。
 
+**防御(配置能做的很有限,要诚实)**:CRIME 不需要配置——nginx/OpenSSL 根本不提供 TLS 层压缩;BREACH 的前提是"压缩 + 页面里有机密(CSRF token)",所以服务端能做的是**别压缩会带回机密的响应**,根治在应用层:
+
+```nginx
+# 含会话机密/表单 token 的路径不参与 gzip(有全局 gzip on 才需要加这条)
+location /account/ {
+    gzip off;
+    proxy_pass http://127.0.0.1:8080;
+}
+```
+
+nginx 这边能管的开关:`gzip`(HTTP 层)按需关、`gzip_types` 白名单收紧;TLS 层压缩在 OpenSSL 里没有对应开关,默认安全,不用管。**根治仍在应用层**:CSRF token 每次请求随机化、与请求体绑定,别把可预测的 token 放进会被 gzip 压缩的响应。
+
 ### 攻击五:会话恢复攻击
 
-会话票据(Session Ticket)如果被偷,攻击者可以重放票据冒充客户端。**防御**:定期轮换 ticket 密钥(`ssl_session_ticket_key`),票据有效期设短。
+会话票据(Session Ticket)如果被偷,攻击者可以重放票据冒充客户端。**防御**:定期轮换 ticket 密钥(`ssl_session_ticket_key`),票据有效期设短。核心参数两个——**票据寿命** + **密钥轮换**,轮换还有个"不掉线"的写法:
+
+```nginx
+server {
+    listen 443 ssl;
+    ssl_session_timeout 10m;                     # 会话寿命:10 分钟,别按小时开
+    # 票据密钥:第一个用来签发新票,后面的只用来解密旧票 → 换密钥不掉会话
+    ssl_session_ticket_key /etc/nginx/certs/ticket-2026-08.key;   # 新钥匙:负责签发
+    ssl_session_ticket_key /etc/nginx/certs/ticket-2026-07.key;   # 旧钥匙:仅解密过渡
+}
+```
+
+轮换节奏与命令(`openssl rand 48` 生成一把新钥匙;完整流程与"旧票能解、新票能签"的验证见 09 章坑七):
+
+```bash
+# 每 1-2 周轮换:生成新 key → 放到 ssl_session_ticket_key 第一行(签发)→ 旧的留在下方解一周 → 删最旧
+openssl rand 48 > /etc/nginx/certs/ticket-$(date +%F).key
+nginx -t && nginx -s reload
+```
+
+另一个极端是**干脆关掉票据**——没有可偷的票据,代价是失去会话恢复的一部分收益(纯服务端缓存可兜底):
+
+```nginx
+ssl_session_tickets off;    # 没票据可偷;配合 ssl_session_cache shared:SSL:10m 仍有缓存恢复
+```
 
 ### 攻击六:私钥泄露
 
-见 03 章推演——现代 ECDHE 保证历史流量安全,但冒充站点、控制明文仍然成立。**防御**:私钥最小权限、定期轮换、硬件密钥(HSM)、监控私钥异常使用。
+见 03 章推演——现代 ECDHE 保证历史流量安全,但冒充站点、控制明文仍然成立。**防御**:私钥最小权限、定期轮换、硬件密钥(HSM)、监控私钥异常使用。这条攻击没有"一个指令能堵死"的配置,防御是四个落地动作:
+
+```bash
+# 1. 文件权限:能读私钥的进程越少越好
+chown root:nginx /etc/nginx/certs/server.key
+chmod 640          /etc/nginx/certs/server.key     # 600/640;644(别人能读)就是事故前兆
+ls -l /etc/nginx/certs/server.key                  # -rw-r----- 才合格
+
+# 2. 私钥不进任何"会扩散的地方":git 仓库、容器镜像、备份桶,CI 加扫描
+#    git secrets / trufflehog 扫历史提交;镜像构建用 buildkit secret,别 COPY 进去
+
+# 3. 定期轮换(证书续期一起换);nginx master(root)启动时读一次密钥,reload 即生效
+#    轮换窗口内新老私钥都要能验签,别签完就删旧的(双钥匙过渡,同坑七思路)
+
+# 4. 监控私钥的异常使用:同一私钥在多地/多时间出现 = 已泄露,立即吊销证书重签
+```
+
+证书被吊销后记得把信任它的客户端(双向认证场景)**换掉旧信任锚**——只换服务器证书、客户端还信旧 CA/旧链,等于白换(见证书篇吊销一章)。
 
 > 一句话亮点:加密解决的是"偷听",证书解决的是"冒充",HSTS 解决的是"降级",mTLS 解决的是"谁在敲门"——每一层防一种攻击,少一层就漏一类。
 

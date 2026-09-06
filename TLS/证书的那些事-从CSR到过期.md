@@ -610,6 +610,25 @@ backend: xfp=[] xff=[] client_cn=[] client_verify=[]
 
 > 复现脚本:`bash scenarios/08-7-ghost-sni-mixup.sh`。要点:IP 共用时证书与 SNI 是一一对应的;排障永远带 `-servername`,别用裸 IP 测多证书站点。
 
+同样的机制在公网随手可验:letsencrypt.org 解析到的 IP 其实是 Netlify CDN 的共享地址,背后躺着成千上万张证书——不点名,服务器只能发默认兜底证书:
+
+```bash
+$ echo | openssl s_client -connect letsencrypt.org:443 2>/dev/null \
+    | openssl x509 -noout -subject
+subject=CN=letsencrypt.org              ← 竟然对了?(原因见下)
+
+$ echo | openssl s_client -connect letsencrypt.org:443 -noservername 2>/dev/null \
+    | openssl x509 -noout -subject
+subject=C=US, ST=California, L=San Francisco, O=Netlify, Inc, CN=*.netlify.app
+                                        ← 强制不发 SNI:发来 CDN 默认证书,串台实锤
+
+$ echo | openssl s_client -connect letsencrypt.org:443 -servername letsencrypt.org 2>/dev/null \
+    | openssl x509 -noout -subject
+subject=CN=letsencrypt.org              ← SNI 点名,各回各家
+```
+
+> 第一行为什么"忘带"也对?现代 openssl 有个贴心行为:`-connect` 写的是**域名**时,它自动拿域名当 SNI 发出去;只有当 `-connect` 写的是 **IP**(lab 里全是 127.0.0.1,无从推断域名)或显式 `-noservername` 时,SNI 才真的缺席——默认证书随之而来。lab 的灵异事件和 Netlify 发来的 `*.netlify.app` 是同一回事:证书按域名签发,IP 是共享的,SNI 是唯一的分发依据。
+
 ## 写在最后
 
 把证书的一生串起来看,它就是一个**治理问题套着技术问题**:

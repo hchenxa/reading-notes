@@ -77,6 +77,52 @@ Certificate:
 
 信任传递规则:**只要链上的每一环都被上一环签名,整条链就都可信**。浏览器只需要验证叶子 → 中间 → 根,而根是它本来就信任的。
 
+### 链文件:一次看完整条链
+
+概念落到文件上:服务器部署的是一份**链文件**——`fullchain.pem` 里按顺序拼着"叶子 + 中间 CA",根 CA 不拼进去,它留在客户端的信任库里。文件里既然可能不止一张,拆开看就要用对姿势。
+
+`openssl x509` 有个隐藏限制:**永远只读文件里第一张证书**:
+
+```bash
+$ openssl x509 -in certs/out/server-chain-full.crt -noout -subject -issuer
+subject=CN=www.example.com
+issuer=CN=Lab Intermediate CA              ← 文件里其实还躺着中间 CA,它没看到
+```
+
+想一次看完整条链,把整个文件封装成 PKCS#7 再解出来:
+
+```bash
+$ openssl crl2pkcs7 -nocrl -certfile certs/out/server-chain-full.crt \
+    | openssl pkcs7 -print_certs -noout
+subject=CN=www.example.com
+issuer=CN=Lab Intermediate CA              ← 叶子 ← 中间 CA 签
+
+subject=CN=Lab Intermediate CA
+issuer=CN=Lab Internal Root CA             ← 中间 ← 根签:拼到头了
+```
+
+subject/issuer 一对对排开,上面的信任规则原样呈现在文件里:共 2 张,到根为止——根在客户端信任库里,不出现在文件里。顺序必须是**叶子在前、CA 在后**,nginx 的 `ssl_certificate` 直接填这份文件即可。
+
+想逐张细看 01 节那些字段(SAN、EKU、有效期)——`openssl x509` 一次只认一张,先按 `BEGIN CERTIFICATE` 拆开再循环:
+
+```bash
+$ awk 'BEGIN{n=0} /BEGIN CERTIFICATE/{n++} {print > ("split-" n ".pem")} END{print n " 张"}' \
+    certs/out/server-chain-full.crt
+2 张
+$ for f in split-*.pem; do openssl x509 -in "$f" -noout -subject -dates; echo; done
+subject=CN=www.example.com
+notBefore=Sep  3 02:26:25 2026 GMT
+notAfter=Sep  3 02:26:25 2027 GMT
+
+subject=CN=Lab Intermediate CA
+notBefore=Sep  3 02:26:25 2026 GMT
+notAfter=Sep  2 02:26:25 2031 GMT
+```
+
+顺带验证一个直觉:**中间 CA 的有效期比叶子长得多**(2027 vs 2031)。整条链上每一张都得在有效期内,所以轮换叶子时中间不用动——这正是 07 章轮换策略能成立的前提。
+
+> 上面的输出来自 `TLS/labs` 的真实链文件(`certs/out/server-chain-full.crt`,叶子 + 中间拼接)。以后遇到"我配了 fullchain 怎么还报错",先跑一遍第二条命令数张数、看顺序——08 案例三的坑就是这样现形的。
+
 ### 为什么需要中间 CA
 
 直接让根 CA 签所有叶子证书不行:

@@ -4,6 +4,64 @@
 
 ## 01 一张证书里有什么
 
+### 文件后缀:.crt / .key / .pem 只是命名习惯
+
+后缀不是格式标准,openssl 只认文件内容开头的 `BEGIN` 行,不认后缀。常见的后缀惯例:
+
+| 后缀 | 惯例装什么 | 内容开头(head -1) |
+| --- | --- | --- |
+| `.crt` / `.cer` | 证书 | `-----BEGIN CERTIFICATE-----` |
+| `.key` | 私钥——和证书是一对,但永远是**两个文件**:证书发出去给别人验,私钥自己藏着签名 | `BEGIN RSA PRIVATE KEY`(老式)/ `BEGIN PRIVATE KEY`(PKCS#8) |
+| `.pem` | 编码格式名,不是内容种类:证书、私钥、CSR 都可以是 PEM | 看内容 |
+| `.csr` | 签名申请单(还没签的"准证书") | `BEGIN CERTIFICATE REQUEST` |
+| `.crl` | 吊销列表 | `BEGIN X509 CRL` |
+
+另外两种非文本编码,部署/导数据时才常见:**.der**(证书的二进制格式,Windows 导出常叫 .cer)、**.p12/.pfx**(证书 + 私钥打包进一个加密容器,导入浏览器/Windows 用)。
+
+后缀会骗人——lab 里就有现成例子:本节的 `server.crt` 是一张证书,而 02 节那个 `server-chain-full.crt` 后缀同样叫 .crt,**实际是"叶子 + 中间 CA"两张拼的**;`certs/out/ticket.key` 后缀像私钥,其实是 80 字节随机数。判断文件真相,最快是看第一行:
+
+```bash
+$ head -1 server.crt
+-----BEGIN CERTIFICATE-----
+```
+
+这一行头到底是什么?证书的二进制真身是 DER 编码,不便直接贴进配置文件/网页/邮件,于是外面套一层 Base64 文本壳,头尾各钉一行标签——PEM 的完整长相:
+
+```
+-----BEGIN CERTIFICATE-----   ← 头行:标签,声明"里面是什么"
+MIIE0zCCA7ugAwIBAgIUGx9hV/…  ← 正文:DER 的 Base64 文本(每行 64 字符)
+…(通常几十行)                  ← 整段解出来 = 完整 DER 证书
+-----END CERTIFICATE-----     ← 尾行:与头行对称
+```
+
+头尾标签**不是安全机制**:改掉标签内容照旧,openssl 解析的是中间那段 Base64——标签只服务人和解析器的"预判":`head -1` 一眼分辨种类,openssl 据此知道按证书还是私钥去读。同理这招只对 PEM 文本壳有效:DER 二进制文件没有头行,得用 `file` 或 `openssl x509 -inform DER` 认。
+
+实际排查是反着查的:先 `head -1` 看到第一行,再对表认内容——
+
+| 第一行(`head -1`) | 里面是什么 | 常见后缀 |
+| --- | --- | --- |
+| `-----BEGIN CERTIFICATE-----` | 证书:公钥 + 身份声明 + CA 签名 | `.crt` / `.cer` / `.pem` |
+| `-----BEGIN RSA PRIVATE KEY-----` | 私钥(PKCS#1 老式,`openssl genrsa` 的产物) | `.key` / `.pem` |
+| `-----BEGIN PRIVATE KEY-----` | 私钥(PKCS#8 新式,`openssl genpkey` 的产物) | `.key` / `.pem` |
+| `-----BEGIN ENCRYPTED PRIVATE KEY-----` | 带口令加密的私钥 | `.key` |
+| `-----BEGIN CERTIFICATE REQUEST-----` | CSR:签名申请单,还没签 | `.csr` |
+| `-----BEGIN X509 CRL-----` | 吊销列表 | `.crl` |
+
+lab 里 `certs/out/*.key` 全是 `genrsa` 产物,第一行统一是 `BEGIN RSA PRIVATE KEY`。
+
+剥壳验证:把头尾行之间解 Base64,应当与 openssl 直接吐出的 DER 一字不差:
+
+```bash
+$ awk '/BEGIN/{f=1;next} /END/{f=0} f' certs/out/server-www.crt | base64 -d | shasum
+6232c1b534b8c62330f5708759682c74dedb8c1f  -
+$ openssl x509 -in certs/out/server-www.crt -outform DER | shasum
+6232c1b534b8c62330f5708759682c74dedb8c1f  -
+```
+
+两个哈希一致 = 壳里包的就是 DER 原档。也多亏有这行标签,02 节数 `BEGIN` 才能知道一个文件里躺了几张证书。
+
+> 怎么确认手上的 `.crt` 和 `.key` 是一对?比对两边模数:`openssl x509 -in server.crt -noout -modulus | openssl md5` 与 `openssl rsa -in server.key -noout -modulus | openssl md5`,输出一致才算配对(08 章换证书前后值得跑一遍)。
+
 ### 用 openssl 拆开看看
 
 证书不是"文件",是一段 ASN.1 编码的结构化数据。用 openssl 把它翻译成人话:

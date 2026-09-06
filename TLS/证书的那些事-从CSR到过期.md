@@ -393,6 +393,48 @@ echo | openssl s_client -servername example.com \
   | openssl x509 -noout -subject -issuer -dates
 ```
 
+三连第 ② 步的 `openssl verify` 是主角,先把它的参数和输出读法交代清楚:
+
+| 参数 | 含义 | 本手册里的用法 |
+| --- | --- | --- |
+| `-CAfile 文件` | **信任库**:装着受信根 CA 的 PEM 文件,可多张拼进一个文件;被验证书的链必须追到这里面某张根,才算通 | 三连②、每个案例的验链 |
+| `-untrusted 文件` | **中间 CA**:链上垫路用的,自己不必被信任——等价于客户端视角里"服务器下发的 fullchain 中间那一截" | 案例三、案例五(补上才 OK) |
+| `-verbose` | 逐层打印拼链过程,一眼看出断在哪一环 | 案例五 |
+| 末尾的证书 | 被验证的证书,可一次给多个 | — |
+
+认参数有个小窍门:命令里那一排文件,以 `-` 开头的是**选项**,选项的值是**紧跟它的那一个**(所以 `-CAfile root.crt` 是一个整体,`root.crt` 是信任库);其余**不带 `-` 的裸文件名**才是被验证的证书,且可以给多个。输出里 `OK` 前面写谁的名字,谁就是被验证的那个:
+
+```bash
+openssl verify -CAfile certs/out/ca/lab-ca.crt certs/out/server-www.crt
+#                ↑信任库(选项的值)           ↑被验证的证书(位置参数)
+# certs/out/server-www.crt: OK     ← OK 前的文件名 = 被告
+```
+
+> 报错读法:`error N at M depth lookup: 原因`——**M** 是断掉的层(0=叶子,1=中间,2=根),**N** 是错误码(10=过期,18=自签,20=找不到签发者→缺中间,2=中间之上没人认→信任锚配错)。三个边界:verify 只验"链"不验"名字"(域名/IP 匹不匹配是案例四的事)、只验你给的文件不验线上实发(那是第 ③ 步的活)、`OK` 只代表链健康,能访问还得名字对得上。
+
+### 案例的"修复":具体命令速查
+
+案例的"修复:"段只写结论,是因为修复动作在通用层面就两大步:**让 nginx 用上新证书 + reload**。reload 那一步永远一样(lab 容器内;本机 nginx 则换成 `nginx -s reload`):
+
+```bash
+docker exec tls-lab nginx -t -c /etc/nginx/lab/nginx.conf.gen     # ① 语法检查
+docker exec tls-lab nginx -s reload -c /etc/nginx/lab/nginx.conf.gen   # ② 重载生效
+```
+
+第一步按根因分三种:**证书本身坏 → 重新签发**(03 章姿势);**链没拼全 → 拼链**(案例三);**域名/IP 没写进 SAN → 重签带 SAN**(案例四)。lab 里好/坏证书都以文件备在 `certs/out/`(容器内映射为 `/etc/nginx/certs/`),"换证书" = 把 nginx 配置的 `ssl_certificate`/`ssl_certificate_key` 指向新文件 + 上面两步 reload。各案例速查:
+
+| 案例 | 根因 | 具体动作 |
+| --- | --- | --- |
+| 一 过期 | 证书到期 | 换有效证书:lab 备着 `server-www.crt/key`,指向它;没有现成证书就按 03 章重签再换 → reload |
+| 二 自签 | 证书不是 CA 签的 | 同上,换成 lab CA 签的 `server-www.crt/key`(自签那张根本不在信任链上)→ reload |
+| 三 缺中间 | 链没拼全 | 不用重签:拼链 + 指向 `cat certs/out/server-chain-leaf.crt certs/out/ca/intermediate.crt > certs/out/server-chain-full.crt` → reload |
+| 四 无 SAN | 域名/IP 没写进证书 | 重签带 SAN:`openssl req -new … -addext "subjectAltName=DNS:www.example.com,…,IP:127.0.0.1"`(完整命令见案例四)→ 指向 → reload |
+| 五 信任锚错 | 客户端没装对根 | 服务器零改动;客户端换根:`curl --cacert certs/out/ca/lab-ca.crt …` |
+| 灵异一 | 证书文件早换了,没 reload | 什么都不用换,直接 reload(上面两步) |
+| 灵异二 | other 没有自己的 server 块 | nginx 配置补 443 server 块(server_name=other.example.com + 对应证书),见案例 → reload |
+
+reload 漏掉的现场,就是下方的灵异事件一。
+
 ### 案例一:certificate has expired(表第一行)
 
 前端被换上一张 2024-09 就过期的证书,nginx 毫无意见,客户端先炸:
@@ -421,7 +463,14 @@ $ echo | openssl s_client -connect 127.0.0.1:1443 -servername www.example.com 2>
 notAfter=Sep  1 00:00:00 2024 GMT                      ← 线上实发:确认无误
 ```
 
-修复:换有效证书并 reload(见下方灵异事件一:换完必须 reload);验证以 `openssl verify` 的 **OK** 为金标准:
+修复:换有效证书并 reload——lab 的 `certs/out/` 备着好证书 `server-www.crt/key`,把 nginx 配置的 `ssl_certificate`/`ssl_certificate_key` 指向它,然后:
+
+```bash
+docker exec tls-lab nginx -t -c /etc/nginx/lab/nginx.conf.gen
+docker exec tls-lab nginx -s reload -c /etc/nginx/lab/nginx.conf.gen
+```
+
+没有现成证书就按 03 章姿势重签(openssl req + CA 签名)再换;漏掉 reload 就是下方灵异事件一;验证以 `openssl verify` 的 **OK** 为金标准:
 
 ```bash
 $ openssl verify -CAfile certs/out/ca/lab-ca.crt certs/out/server-www.crt
@@ -451,7 +500,7 @@ $ openssl verify -CAfile certs/out/ca/lab-ca.crt certs/out/server-selfsigned.crt
 error 18 at 0 depth lookup: self-signed certificate
 ```
 
-修复:换上 lab CA 签发的正规证书并 reload;验证:`server-www.crt: OK` + curl 通过。
+修复:换上 lab CA 签发的正规证书并 reload——lab 的 `server-www.crt/key` 就是正规品(自签那张根本没进 lab CA 的信任链,必须整张换):把 `ssl_certificate`/`ssl_certificate_key` 指向它,重载命令同案例一;验证:`server-www.crt: OK` + curl 通过。
 
 > 复现脚本:`bash scenarios/08-2-self-signed.sh`。常见变体:链里出现 error 19(self-signed in chain)——中间 CA 缺了,见案例三。
 
@@ -480,7 +529,13 @@ $ openssl verify -CAfile certs/out/ca/lab-ca.crt \
 certs/out/server-chain-leaf.crt: OK            ← 补上中间就通:证书没问题
 ```
 
-修复:`ssl_certificate` 填 **叶子+中间CA 拼接**的完整链文件;验证:线上改为下发 2 张、curl 通过:
+修复:`ssl_certificate` 填 **叶子+中间CA 拼接**的完整链文件——拼链(叶子在前、CA 在后):
+
+```bash
+cat certs/out/server-chain-leaf.crt certs/out/ca/intermediate.crt > certs/out/server-chain-full.crt
+```
+
+把 `ssl_certificate` 指向 `server-chain-full.crt`,重载命令同案例一;验证:线上改为下发 2 张、curl 通过:
 
 ```bash
 $ echo | openssl s_client ... -showcerts 2>/dev/null | grep -c 'BEGIN CERTIFICATE'
@@ -512,7 +567,15 @@ $ echo | openssl s_client -connect 127.0.0.1:1443 -verify_hostname www.example.c
 Verification: OK                                ← 域名靠 CN 兼容放行(浏览器不会!)
 ```
 
-修复:重签时把访问要用到的域名/IP 全部写进 SAN;验证:新证书 SAN 在、IP 访问恢复。
+修复:重签,把访问要用到的域名/IP 全部写进 SAN——生成 CSR 时把 SAN 用 `-addext` 带上:
+
+```bash
+openssl req -new -newkey rsa:2048 -nodes \
+  -keyout server.key -out server.csr -subj "/CN=www.example.com" \
+  -addext "subjectAltName=DNS:www.example.com,DNS:example.com,DNS:localhost,IP:127.0.0.1"
+```
+
+再走 03 章的 CA 签名姿势(openssl 3.x 记得 `-copy_extensions copy` 把扩展抄进证书),换上新证书,重载命令同案例一;lab 里直接换成已带 SAN 的 `server-www.crt/key` 即可;验证:新证书 SAN 在、IP 访问恢复。
 
 > 复现脚本:`bash scenarios/08-4-hostname-mismatch.sh`。要点:CN 兼容是"历史包袱",浏览器/严格库已去掉;排查"名字对不上"先 `-ext subjectAltName`。
 

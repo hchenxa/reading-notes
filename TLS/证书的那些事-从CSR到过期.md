@@ -137,7 +137,43 @@ notAfter=Sep  2 02:26:25 2031 GMT
 
 ### 证书透明度(CT):让"信任"可审计
 
-CT 是一个公开账本:所有公共 CA 签发的证书都必须提交日志。好处:你能查到"有没有人冒充 example.com 申请过证书"——恶意签发的证书无处遁形。Chrome 已经强制要求新证书必须带 SCT(签名证书时间戳)。
+上面整套信任体系藏着一个盲区:**CA 签了什么,以前只有 CA 自己知道**。2011 年荷兰 CA DigiNotar 被入侵,攻击者冒它之名签了几百张 google.com、mozilla.org 等大牌域名的证书,潜伏近一个月才被察觉,事后只能紧急批量吊销、让浏览器集体拉黑这家根。CT 要补的就是这个洞:**把"CA 偷偷签了什么"变成公开账本——信任,从此可审计**。
+
+机制其实只有三步:
+
+1. 公共 CA 每签一张证书,都先把**预证书(precertificate)**提交给多家 **CT 日志**(Google、Cloudflare 等机构运营的公开服务器)
+2. 日志核对后回一张签名"收据"——**SCT(signed certificate timestamp,签名证书时间戳)**,CA 把它嵌进正式证书的扩展区
+3. 浏览器校验 SCT 的签名:必须出自它信任的日志,否则拒绝(Chrome 报 `NET::ERR_CERTIFICATE_TRANSPARENCY_REQUIRED`)
+
+对日常使用者,CT 透明得无感;但任何人都能直接查日志——**"有没有人冒充 example.com 申请过证书"**,在 crt.sh(`https://crt.sh/?q=example.com`)输入域名,历次签发记录全在。恶意签发在 CT 时代几天内就会现形。
+
+SCT 到底长什么样?看一张**公共 CA 签发的真实证书**(私有 CA 的证书里永远没有它,原因见下面两条):
+
+```bash
+$ echo | openssl s_client -connect letsencrypt.org:443 -servername letsencrypt.org 2>/dev/null \
+    | openssl x509 -noout -text | sed -n '/CT Precertificate SCTs/,/Signature Algorithm/p'
+CT Precertificate SCTs:                     ← 2 条 SCT = 这张证进了 2 家日志
+    Signed Certificate Timestamp:
+        Version   : v1 (0x0)
+        Log ID    : D8:09:55:3B:94:4F:7A:FF:…:45:4B:14   ← 哪家日志签的(日志身份公开)
+        Timestamp : Sep  4 15:33:02.377 2026 GMT         ← 进日志的时刻(≈签发时刻)
+        Extensions: none
+        Signature : ecdsa-with-SHA256
+                    30:46:02:21:00:D0:2E:25:…:3F:1F:15   ← 日志私钥的签名(hex 截短)
+    Signed Certificate Timestamp:
+        Log ID    : 46:AF:86:3D:3B:3E:E5:…:95:50:5F
+        Timestamp : Sep  4 15:33:02.552 2026 GMT
+        Extensions: 00:00:05:00:24:DF:DB:0C
+        Signature : ecdsa-with-SHA256
+                    30:44:02:20:31:2F:83:…:E8:4B:B0:9A
+```
+
+> 上面是 2026-09-04 对 letsencrypt.org 的实测输出,`…` 只是截短了超长 hex。注意名字里的 "Pre":CA 提交的是**去掉签名**的预证书去换 SCT,拿到回执才签正式证书、把回执嵌进扩展区——这段就是这张证书的"签发收据"。
+
+两个容易困惑的点,顺带说清:
+
+- **为什么前面 lab 证书的输出里都没有 SCT?** CT 只管**公共信任**:自建 lab CA / step-ca 的根是你手动装进信任库的"自己人",不需要也不接受第三方日志监督。SAN、EKU 这些扩展私有证书一样有,SCT 是"公网证书专供"——哪天你的服务器换上 Let's Encrypt 证书,重跑 01 节 `openssl x509 -text` 就能在扩展区看到它
+- **为什么是"日志的签名"而不是浏览器实时去查?** 每次握手都联网查日志又慢又能被拦截;改成 CA 事先离线拿回执、浏览器只验签名——和 04 节 OCSP stapling"把查询变成随身凭证"是同一个思路
 
 ## 03 一张证书是怎么签出来的
 

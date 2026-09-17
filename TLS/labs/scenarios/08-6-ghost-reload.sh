@@ -26,7 +26,7 @@ pipe "echo | openssl s_client -connect 127.0.0.1:1443 -servername www.example.co
 
 # ── 修复 ──
 stage "修复"
-run docker exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen
+run $DOCKER exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen
 
 # ── 验证 ──
 stage "验证"
@@ -35,4 +35,4 @@ pipe "echo | openssl s_client -connect 127.0.0.1:1443 -servername www.example.co
 echo "# 收尾:还原默认证书+密钥并 reload:"
 run cp /tmp/server-www.crt.bak "$C/server-www.crt"
 run cp /tmp/server-www.key.bak "$C/server-www.key"
-run docker exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen
+run $DOCKER exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen

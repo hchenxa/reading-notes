@@ -6,9 +6,11 @@ cd "$(dirname "$0")/.." && source ./lib.sh
 reset_cfg && start_if_needed
 CA="certs/out/ca/lab-ca.crt"
 
-section "坑四:Bridging 关了 proxy_ssl_verify —— 后端段等于明文裸奔"
+section "坑四:Bridging 关了 proxy_ssl_verify —— 后端段失去对端身份校验"
 echo "# 场景:443 前端以 bridging 方式代理到 https://api.example.com:9443(后端,"
-echo "# 容器内解析到 127.0.0.1);后端故意换成一站自签证书(模拟攻击者/被冒名的后端)。"
+echo "# 容器内解析到 127.0.0.1);后端故意换上一张自签证书(模拟攻击者/被冒名的后端)。"
+echo "# 注意:这一段仍然是密文(bridging 会重新加密,见 ②08 实验五),丢掉的是对端身份校验——"
+echo "#       代理不验证后端是谁,任何证书都照单全收,流量被假后端接走。"
 
 # ── 现象 ──
 stage "现象"
@@ -33,7 +35,7 @@ reload_conf
 echo "# 代理立刻拒绝自签后端:"
 run curl --noproxy '*' -sS --max-time 6 --resolve www.example.com:1443:127.0.0.1 --cacert "$CA" https://www.example.com:1443/ -o /dev/null -w "http_code=%{http_code}\n"
 echo "# nginx error log 里的真实原因:"
-run docker logs "$CNAME" 2>&1 | grep -iE "upstream SSL certificate" | tail -1
+run $DOCKER logs "$CNAME" 2>&1 | grep -iE "upstream SSL certificate" | tail -1
 
 # ── 验证 ──
 stage "验证"

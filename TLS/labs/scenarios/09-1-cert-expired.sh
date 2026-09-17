@@ -13,7 +13,7 @@ stage "现象"
 echo "# 把 443 前端的证书换成一张已经过期(notAfter=2024-09-01)的证书,reload 成功:"
 WWW_CERT=server-expired.crt WWW_KEY=server-expired.key reload_conf
 echo "# 事后单独跑配置检查,nginx 依然毫无意见(关键:没有任何过期告警):"
-run docker exec "$CNAME" nginx -t -c /etc/nginx/lab/nginx.conf.gen
+run $DOCKER exec "$CNAME" nginx -t -c /etc/nginx/lab/nginx.conf.gen
 echo "# 客户端一握手就翻车:"
 run curl --noproxy '*' -sS --max-time 6 --resolve www.example.com:1443:127.0.0.1 --cacert "$CA" https://www.example.com:1443/
 

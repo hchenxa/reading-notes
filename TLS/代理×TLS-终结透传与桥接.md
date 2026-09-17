@@ -74,6 +74,22 @@ Bridging:     [客户端] ──握手1──> [代理:应答·再发起握手2]
 | 可改写的 | 一切(改内容都行) | 无 | 一切 |
 | 私钥风险面 | 集中在代理 | 分散在后端 | 两处 |
 
+这张表里最容易被读错的是"明文"这一行。它问的**不是"代理能不能读到明文"**——termination 和 bridging 的代理都能读到,否则下面两行的"一切"根本无从谈起;它问的是**明文出现在哪个位置**:
+
+```
+Termination:  [客户端] ──密文──> [代理] ──明文──> [后端]       明文在"链路"上
+Bridging:     [客户端] ──密文──> [代理] ──密文──> [后端]       明文只在"代理内部"
+Passthrough:  [客户端] ──密文──────────────────> [后端]       明文只在两个端点上
+```
+
+- **Termination 的"全可见"**:代理到后端那一段跑的就是明文 HTTP,任何能在后端网络里抓包的人都能读到它(§08 实验三抓到的正是这一段)。所以选 termination,你不仅要信任代理,还要信任代理到后端之间的**整条链路**
+- **Bridging 的"代理内部可见、链路不可见"**:代理解密第一段拿到明文(于是能记日志、能按 Header 路由、能改内容),然后立刻重新加密发给后端。明文在代理内存里出现过,却**没有在任何一根网线上出现过**——抓包只能看到密文。实战含义:你必须信任代理,但**不必信任代理到后端的那条内网链路**
+- **Passthrough 的"不可见"**:代理连第一段握手都没参与,明文只存在于客户端和后端自己的进程里
+
+一句话:**termination 把明文放到了链路上,bridging 把它关进了代理进程里,passthrough 则让它只留在两端**。这正是 §07 里"内网 Nginx 为什么还要重新加密""CDN 回源为什么必须 bridging"的全部理由——内网不是绝对可信的,而 bridging 让内网链路重新变得不值得信任。
+
+> 表格不是背出来的:§08 实验五里切一次配置,就能亲眼看到 9443 段(代理→后端)从 termination 下的"不存在"变成 bridging 下的"只有密文"。
+
 ## 03 Termination 深潜:权力的代价
 
 ### 配置与四个"加分项"
@@ -180,7 +196,7 @@ location / {
 
 三个细节:
 
-1. **proxy_ssl_verify 是安全下限**:关了它,代理到后端这段等于裸奔(攻击者在后端网络里插一台假后端就能接走流量)
+1. **proxy_ssl_verify 是安全下限**:关了它,代理到后端这段**依然是密文,但代理不验对端身份**——攻击者在后端网络里插一台假后端,拿一张自签证书就能把流量接走(复现见 §09 坑四)
 2. **proxy_ssl_server_name on**:代理作为"客户端"发起握手时也要带 SNI,后端按 SNI 选证书
 3. **session reuse**:代理到后端是一条高频长连接,复用会话能省掉每请求一次握手
 
@@ -391,7 +407,7 @@ Istio 这类服务网格的标准姿势:
 
 **为什么这么组合**:
 - CDN 边缘必须 termination:它要缓存静态资源,必须看到内容;终止在边缘,还能就近加解密
-- 回源必须 bridging:CDN 到自己源站的链路跨运营商、跨地域,不能裸奔;`proxy_ssl_verify on` 保证源站不被假 CDN 冒认
+- 回源必须 bridging:CDN 到自己源站的链路跨运营商、跨地域,不能裸奔;不过"加密"只解决偷听,还要靠 `proxy_ssl_verify on` 才能保证源站不被假 CDN 冒认
 - 代价:CDN 厂商可见你的明文——选 CDN 本质是选信任对象
 
 > 绿色提示:所有架构都在回答同一个问题——"每一段链路的信任边界画在哪"。终止放哪,信任边界就在哪;加密到哪,信任就延伸到哪。
@@ -413,7 +429,9 @@ $ bash TLS/labs/start.sh    # 依赖:docker + openssl + tshark;本地镜像已�
 | 9443 | 9443 | TLS 后端(api.example.com) | server-api.crt |
 | 8443 | 8443 | mTLS 前端(需客户端证书,本实验不用) | server-www.crt |
 
-抓包说明:**宿主**流量抓 `lo`(Linux)/ `lo0`(macOS,下文以 lo0 为例),tshark 需要 root 或 Wireshark 的 ChmodBPF;termination 的明文段发生在**容器内**,用 `docker exec` 里的 tcpdump 抓,不需要 sudo。命令都在 `TLS/labs/` 目录下执行;若本机配了 HTTP 代理,curl 记得加 `--noproxy '*'`。
+抓包说明:**宿主**流量抓 `lo`(Linux)/ `lo0`(macOS,下文以 lo0 为例),tshark 需要 root 或 Wireshark 的 ChmodBPF;明文段发生在**容器内**,用 `docker exec` 里的 tcpdump 抓,不需要 sudo。命令都在 `TLS/labs/` 目录下执行;若本机配了 HTTP 代理,curl 记得加 `--noproxy '*'`。
+
+> 只能有一个容器引擎在跑这套环境。本机若同时装了多个(如 colima + podman),一定要显式指定:所有命令前加 `LAB_DOCKER_CONTEXT=<引擎名>`。否则 `start.sh` 会在默认引擎里再起一个容器——它能"启动成功",但 host 端口早被另一个引擎占着,于是脚本改的是 A 容器、流量打的是 B 容器,现象是"配置改了却不生效",极具误导性(排查:`lsof -nP -iTCP:1443 -sTCP:LISTEN` 看端口归谁)。
 
 ### 实验一:看 ClientHello 里的 SNI 明文——URL 必须是域名
 
@@ -525,7 +543,84 @@ backend: xfp=[https] xff=[172.17.0.1] client_cn=[] client_verify=[]
 
 **结论**:`xfp=[https]` 证明 nginx 在明文段如实告知后端"客户端走的是 HTTPS"。和 §09 坑三对着看:漏配 `proxy_set_header X-Forwarded-Proto` 时这里会变成 `xfp=[]`——termination 后端唯一的信息来源,就是这么一条头。
 
-> 绿色提示:抓包三连就是本节浓缩——**看 SNI 用 tshark(实验一,URL 记得用域名)、看握手终点用 s_client 的 subject/issuer(实验二)、看明文段进容器 tcpdump -A(实验三)**。这三招能验证你遇到的任何一个 TLS 代理问题。
+### 实验五:验证 Bridging 的"代理内部可见,链路不可见"
+
+§02 那张表里,termination 的"明文全可见"、passthrough 的"不可见"分别由实验三、实验二验过了,只剩 bridging 的"**代理内部可见,链路不可见**"没有实测——它恰恰是三兄弟里最容易想当然的一格。
+
+把 443 前端从 termination 切成 bridging(复用 §09 坑四的片段,顺带把 `proxy_ssl_verify` 也开了):
+
+```bash
+# 切换(想切回去:bash -c 'source ./lib.sh; reset_cfg; reload_conf')
+$ bash -c 'source ./lib.sh; reset_cfg; FRAG_FRONT_LOC=front-bridge-verify-on; reload_conf'
+$ grep -n "proxy_pass https\|proxy_ssl_verify" nginx/nginx.conf.gen
+33:            proxy_pass https://api.example.com:9443;
+34:            proxy_ssl_verify on;
+```
+
+现在拓扑变成 `[客户端] ──TLS#1──> [443 前端] ──TLS#2──> [9443 后端] ──明文──> [8080 echo]`。前两段都该是密文:
+
+```bash
+# 终端1:容器内抓"代理→后端"段(9443)——bridging 独有的链路(存一份,下面要 grep)
+docker exec tls-lab tcpdump -i lo -A -s0 port 9443 > /tmp/cap-9443.txt
+
+# 终端2:容器内抓"后端→echo"段(8080)
+docker exec tls-lab tcpdump -i lo -A -s0 port 8080 > /tmp/cap-8080.txt
+
+# 终端3:发起请求
+curl --noproxy '*' --cacert certs/out/ca/lab-ca.crt \
+     --resolve www.example.com:1443:127.0.0.1 https://www.example.com:1443/
+```
+
+终端 1 抓到的 9443 段——TCP 握手看得清清楚楚,握手之后全是读不懂的字节(行这么碎,是因为密文里夹着换行字节,被 `-A` 当成了断行):
+
+```
+13:24:36.688684 IP localhost.49418 > localhost.9443: Flags [P.], seq 1:1549, ..., length 1548
+u....oM....Bol............_;.<.......,.0.........+./...$.(.k.#.'.g.
+...9.	...3.....=.<.5./...~..............api.example.com.........
+```
+
+把整个抓包文件里"能读出来的业务字符串"捞一遍,只剩一个:
+
+```bash
+$ grep -aoE 'GET |Host:|HTTP/1\.1|api\.example\.com' /tmp/cap-9443.txt | sort | uniq -c
+      1 api.example.com
+```
+
+`GET`、`Host`、`HTTP/1.1` 一个都搜不到——**这就是"链路不可见"**:代理到后端虽说是"内部"链路,链路上跑的依然是密文。唯一能读到的 `api.example.com` 是 **TLS#2 的 SNI**,和实验一里客户端的 SNI 明文是同一回事——顺带说明一个实战事实:bridging 虽然藏住了内容,却仍把**后端主机名**暴露给代理→后端那段链路。
+
+终端 2 的输出正相反,是标准的明文 HTTP:
+
+```
+13:24:36.691952 IP localhost.37896 > localhost.8080: Flags [P.], ..., length 77: HTTP: GET / HTTP/1.1
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+user-agent: curl/8.7.1
+accept: */*
+```
+
+**这里有个 lab 拓扑的坑必须说清楚**:8080 上的明文是**后端 nginx 自己**产生的(它终止了 TLS#2,再明文转发给 echo),**不是**"代理→后端那段链路上的明文"。真实环境里后端是个应用进程,它解密后的明文同样不会出现在任何网线上;lab 把 8080 这一跳露出来,只是为了让"后端内部也有明文"这件事肉眼可见。
+
+那"代理内部可见"的证据在哪?在日志里。同一次请求,代理的 access_log 留下了三条明文记录:
+
+```bash
+$ docker logs tls-lab 2>&1 | grep 'GET /' | tail -3
+127.0.0.1  [...] "GET / HTTP/1.1" 200 ssl_verify=-    cn="-"   # 8080 echo(`-` 是非 SSL server,变量取不到)
+127.0.0.1  [...] "GET / HTTP/1.1" 200 ssl_verify=NONE cn="-"   # 9443 后端:代理发出的第二段
+172.17.0.1 [...] "GET / HTTP/2.0" 200 ssl_verify=NONE cn="-"   # 443 前端:客户端来的一跳
+```
+
+链路上一个明文字节都抓不到,代理自己却把 `GET /` 记得明明白白——**它记日志是因为它真的看得见**,同理它也能按 Header 路由、能改内容、能做审计。选择 bridging,等于把明文的可见权交给了代理。
+
+最后把实验三和实验五并排看,同一套环境、同一个 8080 端口,差别只在 443 的 location 写的是哪个上游:
+
+| 抓包点 | Termination | Bridging |
+| --- | --- | --- |
+| 9443(代理→后端) | `0 packets captured`——这一段根本不存在 | 有流量,但只有密文(唯一可读的是 SNI) |
+| 8080 | 明文 `GET /`,带 `X-Forwarded-Proto: https` | 明文 `GET /`(但这是**后端自己**产生的) |
+
+**结论**:termination 与 bridging 给代理的 L7 能力完全一样(所以 §02 表里"可路由信息""可改写"两行都是"一切"),真正的差别只有一处——**代理到后端那段链路上,跑的是明文还是密文**。这一格决定了你要不要信任内网链路,也是"内网也要重新加密"的全部理由。
+
+> 绿色提示:抓包四连就是本节浓缩——**看 SNI 用 tshark(实验一,URL 记得用域名)、看握手终点用 s_client 的 subject/issuer(实验二)、看明文段进容器 tcpdump -A(实验三)、看 bridging 的"链路不可见"要抓代理到后端那一段(实验五)**。这四招能验证你遇到的任何一个 TLS 代理问题。
 
 ## 09 常见坑(升级版)
 

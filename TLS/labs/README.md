@@ -6,6 +6,9 @@
 
 - 依赖:`docker`(任意引擎)、`openssl`(3.x)、`bash`;②08 章抓包实验另需宿主 `tshark`(抓包窗口;Linux 抓 `lo`,macOS 抓 `lo0`)
 - 拉起:`bash TLS/labs/start.sh`(首次自动构建含 tcpdump 的本地镜像 `tls-lab:local`、渲染默认配置并启动容器;构建失败自动回退基础镜像)
+- **本机装了多个容器引擎时**(如 colima + podman),务必显式指定跑实验环境那一个:
+  `LAB_DOCKER_CONTEXT=colima bash scenarios/09-4-bridge-verify.sh`。
+  不指定的话 `docker` 会走默认 context,可能 exec 到不存在的容器,甚至 start 出一个**端口根本没绑上的幽灵容器**——场景脚本自说自话,curl 却一直打在另一个引擎的容器上(见"已知环境细节")
 - 跑单个场景:`bash TLS/labs/scenarios/<场景>.sh`,输出同时写入 `TLS/labs/out/<场景>.txt`
 - 停止:`bash TLS/labs/stop.sh`
 - 重新生成证书物料:`bash TLS/labs/certs/generate.sh`(会清空重签;**跑完必须重启容器**:`bash start.sh`,因为容器挂载的是生成目录,目录被重建后挂载会失效)
@@ -35,7 +38,7 @@
 
 | 文档章节 | 场景脚本(相对 `TLS/labs/`) | 复现什么 |
 |---|---|---|
-| ②08 抓包实操 | —(交互式,命令见该文 §08) | SNI 明文 / 握手终点 / termination 明文段 |
+| ②08 抓包实操 | —(交互式,命令见该文 §08) | 实验一 SNI 明文 / 实验二 握手终点 / 实验三 termination 明文段 / 实验四 X-Forwarded-Proto / **实验五 bridging 的"链路不可见"**(需先切配置,见该文 §08) |
 | ②09 坑一 | `scenarios/09-1-cert-expired.sh` | 过期证书静默加载、客户端报错、修复前后 |
 | ②09 坑二 | `scenarios/09-2-cert-no-san.sh` | 只写 CN 不写 SAN:CLI 全绿但证书废了 |
 | ②09 坑三 | `scenarios/09-3-xfp-missing.sh` | Termination 忘配 X-Forwarded-Proto |
@@ -58,6 +61,8 @@
 - **配置**:`nginx/nginx.conf.tpl` 是唯一模板,`#@FRAG:xxx@` 行按场景展开为 `nginx/fragments/<选中片段>.conf`,`@TOKEN@`(证书路径等)逐个替换 → 生成 `nginx/nginx.conf.gen` 挂载进容器,场景切换 = 换配置片段 + `nginx -s reload`
 - **输出为真**:场景脚本只跑真实命令;文档里的输出片段与 `out/*.txt` 一一对应
 - **已知环境细节**:
+  - **多引擎共存**:本机同时装了 colima 与 podman 时,`docker` 默认 context 指向 podman,而 host 端口(`1443/4443/8443/9443/18080`)早已被 colima 里那个 `tls-lab` 占着。此时 `start.sh` 会在 podman 里再起一个容器:它能"启动成功",但 1443 压根没绑上,于是脚本改的是 podman 容器、流量打的是 colima 容器,现象极具误导性(表现为"配置改了但不生效")。排查:`lsof -nP -iTCP:1443 -sTCP:LISTEN` 看端口归谁、`docker context ls` 看默认指向谁。用法:所有命令前加 `LAB_DOCKER_CONTEXT=<引擎名>`
   - 容器挂载目录被重建(重跑 generate.sh)后必须重启容器,否则挂载句柄失效
+  - 容器内 `tcpdump` 需要 `NET_RAW` 能力(已由 `start_lab` 的 `--cap-add NET_RAW` 保证);缺失时报 `You don't have permission to perform this capture`
   - macOS 自带 git 在部分 filter-branch 场景下行为异常,故 07-4 演示移除→证明历史残留,并给出 filter-repo 作为生产工具
   - TLS 1.3 下本环境 nginx 不回复 NewSessionTicket,票据演示统一用 `-tls1_2`

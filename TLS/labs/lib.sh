@@ -17,6 +17,14 @@ IMG="nginx:stable-alpine"     # 基础镜像(也是本地镜像构建失败时�
 LOCAL_IMG="tls-lab:local"     # 本地构建镜像:基础镜像 + tcpdump(②08 章抓容器内明文段用)
 DOCKERFILE="$LABS_DIR/Dockerfile.tls-lab"
 
+# ---------- 容器运行时选择 ----------
+# 本机可能同时装着多个引擎(如 colima + podman),而 `docker` 的默认 context 未必是
+# 跑着实验环境的那一个:用错 context 会 exec 到"不存在"的容器,或者更糟——start 出一个
+# 端口根本没绑上的幽灵容器,场景脚本自说自话,curl 却一直打到另一个引擎的容器上。
+# 用 LAB_DOCKER_CONTEXT=colima 显式指定;所有调用一律走 $DOCKER,不要直接写 docker。
+DOCKER="docker"
+[ -n "${LAB_DOCKER_CONTEXT:-}" ] && DOCKER="docker --context $LAB_DOCKER_CONTEXT"
+
 # host 端口(文档示例统一用这些)
 HOST_TERM=1443    # termination 前端 443
 HOST_MTLS=8443    # mTLS 前端
@@ -78,8 +86,8 @@ render_conf() {
 reload_conf() {
   render_conf
   local out
-  if out=$(docker exec "$CNAME" nginx -t -c /etc/nginx/lab/nginx.conf.gen 2>&1); then
-    docker exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen >/dev/null 2>&1
+  if out=$($DOCKER exec "$CNAME" nginx -t -c /etc/nginx/lab/nginx.conf.gen 2>&1); then
+    $DOCKER exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen >/dev/null 2>&1
     sleep 0.3
     return 0
   fi
@@ -89,33 +97,42 @@ reload_conf() {
 
 # 选择运行镜像:优先本地构建(nginx+tcpdump,②08 章实验三抓容器内明文段用);
 # Dockerfile 存在则每次 start 时构建(层有缓存即秒回),失败回退基础镜像并提示
+# 三级回退:buildkit → legacy builder(buildkit 拉 registry 元数据超时/被代理拦截时可用,基础镜像本地已有即可)
+#           → 镜像已存在(构建探活失败但镜像其实还在)
 pick_run_img() {
   [ -f "$DOCKERFILE" ] || { echo "$IMG"; return 0; }
-  if docker build -q -f "$DOCKERFILE" -t "$LOCAL_IMG" "$LABS_DIR" >/dev/null 2>&1; then
-    echo "$LOCAL_IMG"
-  else
-    echo "[注意] 构建 $LOCAL_IMG(nginx+tcpdump)失败,回退 $IMG;" \
-         "②08 章实验三请先手动安装:docker exec $CNAME sh -c 'apk add --no-cache tcpdump'" >&2
-    echo "$IMG"
+  if $DOCKER build -q -f "$DOCKERFILE" -t "$LOCAL_IMG" "$LABS_DIR" >/dev/null 2>&1; then
+    echo "$LOCAL_IMG"; return 0
   fi
+  if DOCKER_BUILDKIT=0 $DOCKER build -q -f "$DOCKERFILE" -t "$LOCAL_IMG" "$LABS_DIR" >/dev/null 2>&1; then
+    echo "$LOCAL_IMG"; return 0
+  fi
+  if $DOCKER image inspect "$LOCAL_IMG" >/dev/null 2>&1; then
+    echo "$LOCAL_IMG"; return 0
+  fi
+  echo "[注意] 构建 $LOCAL_IMG(nginx+tcpdump)失败,回退 $IMG;" \
+       "②08 章实验三请先手动安装:$DOCKER exec $CNAME sh -c 'apk add --no-cache tcpdump'" >&2
+  echo "$IMG"
 }
 
 # 容器起/停
 start_lab() {
-  docker rm -f "$CNAME" >/dev/null 2>&1 || true
+  $DOCKER rm -f "$CNAME" >/dev/null 2>&1 || true
   render_conf
   local run_img; run_img="$(pick_run_img)"
-  docker run -d --name "$CNAME" \
+  # --cap-add NET_RAW:容器内 tcpdump 抓包用(②08 实验三/五)。多数引擎默认给,
+  # 但 rootless podman 等默认能力集里没有,不加会报 "You don't have permission to perform this capture"
+  $DOCKER run -d --name "$CNAME" --cap-add NET_RAW \
     -p 1443:443 -p 8443:8443 -p 9443:9443 -p 4443:4443 -p 18080:8080 \
     -v "$CERT_DIR:/etc/nginx/certs:ro" \
     -v "$LABS_DIR/nginx:/etc/nginx/lab:ro" \
     "$run_img" nginx -g 'daemon off;' -c /etc/nginx/lab/nginx.conf.gen >/dev/null
   sleep 0.5
   # bridging 用域名上游(api.example.com → 容器内 127.0.0.1:9443),保证 SNI 语义真实
-  docker exec "$CNAME" sh -c "grep -q 'api.example.com' /etc/hosts || echo '127.0.0.1 api.example.com' >> /etc/hosts"
+  $DOCKER exec "$CNAME" sh -c "grep -q 'api.example.com' /etc/hosts || echo '127.0.0.1 api.example.com' >> /etc/hosts"
 }
 
-stop_lab() { docker rm -f "$CNAME" >/dev/null 2>&1; }
+stop_lab() { $DOCKER rm -f "$CNAME" >/dev/null 2>&1; }
 
 # 小工具:带分隔线的场景输出(run 合并 stderr,保证转录可复现)
 section() { printf '\n───── %s ─────\n' "$*"; }
@@ -138,7 +155,7 @@ reset_cfg() {
 
 # 容器未运行则先拉起
 start_if_needed() {
-  if ! docker inspect -f '{{.State.Running}}' "$CNAME" 2>/dev/null | grep -q '^true$'; then
+  if ! $DOCKER inspect -f '{{.State.Running}}' "$CNAME" 2>/dev/null | grep -q '^true$'; then
     start_lab
   fi
 }

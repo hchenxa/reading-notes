@@ -16,7 +16,7 @@ echo "# 已知域名 api.example.com 正常;未知域名直接翻车:"
 run curl --noproxy '*' -sS --max-time 6 --resolve api.example.com:4443:127.0.0.1 --cacert "$CA" https://api.example.com:4443/
 run curl --noproxy '*' -sS --max-time 6 --resolve new-app.example.com:4443:127.0.0.1 --cacert "$CA" https://new-app.example.com:4443/ || echo "(curl 退出码 $?)"
 echo '# nginx 侧的真实日志($backend 为空 → 无法路由):'
-run docker logs "$CNAME" 2>&1 | tail -2
+run $DOCKER logs "$CNAME" 2>&1 | tail -2
 
 # ── 排查 ──
 stage "排查"

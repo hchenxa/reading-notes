@@ -15,7 +15,7 @@ run openssl x509 -in "$C/client-expired.crt" -noout -subject -dates
 echo "# 服务端(8443,ssl_verify_client on)直接拒绝:"
 pipe "$MTLS --cert $C/client-expired.crt --key $C/client-expired.key -o /dev/null -w 'http_code=%{http_code}\n'"
 echo '# nginx 访问日志里的 $ssl_client_verify 状态(FAILED 一目了然):'
-pipe "docker logs $CNAME 2>&1 | grep -E 'FAILED|400' | tail -2"
+pipe "$DOCKER logs $CNAME 2>&1 | grep -E 'FAILED|400' | tail -2"
 
 # ── 排查 ──
 stage "排查"
@@ -38,6 +38,6 @@ stage "验证"
 echo "# 换上有交期的客户端证书,立即可用:"
 pipe "$MTLS --cert $C/client-alice.crt --key $C/client-alice.key"
 echo "# 服务端视角:SUCCESS:"
-pipe "docker logs $CNAME 2>&1 | grep SUCCESS | tail -1"
+pipe "$DOCKER logs $CNAME 2>&1 | grep SUCCESS | tail -1"
 
 echo "# 结论:客户端证书也有有效期;mTLS 轮换要两端协调,一刀切=全线 400。"

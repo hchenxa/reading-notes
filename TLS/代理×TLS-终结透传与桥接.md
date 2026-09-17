@@ -17,6 +17,35 @@
 
 > 关键认知:握手结束后,真正传输数据的密钥是**双方临时算出来的会话密钥**,而不是证书里的私钥。证书的作用是"证明我是我",会话密钥的作用是"我们悄悄说话"。这个区分,是理解后面一切攻击与防御的基础。
 
+### SNI:握手第一步就暴露的域名
+
+STEP 01 里那项"明文可见的 SNI",值得单独说清楚——因为后面三种模式的差异,一半都建立在它身上。
+
+**SNI(Server Name Indication)是客户端在 ClientHello 里说的那句话:"我要访问哪个域名。"** 它为什么必须存在:一个 IP 上可能放了几十个 HTTPS 站点(虚拟主机),服务器得先知道该出示哪张证书。SNI 出现之前(2003 年)这件事做不到——想要 HTTPS,就得独占一个 IP 和一张证书。SNI 让"一台机器托管几百个站点"成为常态,代价是**你访问的域名在握手第一步就暴露在链路上**。
+
+它在线上就是一串明文 ASCII。本 lab 一次真实握手(访问 `api.example.com`)抓到的 ClientHello 片段:
+
+```text
+0120  16 2d fa f6 58 d0 b2 3a 28 24 cf 8f 55 00 00 00   .-..X..:($..U...
+0130  14 00 12 00 00 0f 61 70 69 2e 65 78 61 6d 70 6c   ......api.exampl
+0140  65 2e 63 6f 6d 00 0b 00 02 01 00 00 0a 00 0a 00   e.com...........
+```
+
+从第一行末尾那两字节 `00 00` 开始读:它是**扩展类型 0**(server_name),紧跟 `00 14` 是**扩展长度 20**;第二行 `00 12` 是**服务器名列表长度 18**、`00` 表示**名字类型是 host_name**、`00 0f` 是**主机名长度 15**——后面那 15 个字节 `61 70 69 2e 65 78 61 6d 70 6c 65 2e 63 6f 6d` 就是 `api.example.com`。**没有压缩、没有编码,就是一堆可以直接读的 ASCII。**
+
+(第一行开头那截 `16 2d fa f6 58 d0 b2 3a ...` 是上一项 key_share 的密钥材料——那里就是真正的随机数了,和人眼可读的 SNI 形成鲜明对比。)
+
+同一个 ClientHello 往后 70 来字节,还有另一串同样好读的字节:
+
+```text
+0170  03 02 01 02 03 00 10 00 0e 00 0c 02 68 32 08 68   ............h2.h
+0180  74 74 70 2f 31 2e 31                              ttp/1.1
+```
+
+`00 10` 是扩展类型 16(ALPN)、`00 0e` 是长度、`00 0c` 是协议列表长度,然后是两项 `02 68 32` = `h2` 和 `08 68 74 74 70 2f 31 2e 31` = `http/1.1`——客户端在声明"我支持哪些 HTTP 版本"。**握手第一步的明文远不止 SNI 一项**,这一点 §08 实验一会实测。
+
+SNI 是三种模式的分水岭:**passthrough 只有它可用来路由**(所以 ECH 一旦普及,SNI 路由整体失效);termination 和 bridging 用它决定出示哪张证书、以及以什么身份去连后端。
+
 ### 密钥交换:为什么现代 TLS 不用 RSA 静态交换
 
 早期 TLS 用 RSA 密钥交换:客户端用服务器公钥加密一个随机数发过去,服务器用私钥解开。简单,但有一个致命伤——**没有前向保密(Forward Secrecy)**:
@@ -463,7 +492,61 @@ tshark 输出:1 行
 www.example.com
 ```
 
-**结论**:SNI 作为唯一的明文信息,在握手第一步就暴露,而且只在"以域名访问"时存在——这既是 passthrough 路由的唯一依据,也是 ECH 想消灭的东西。
+**结论**:SNI 是握手里最显眼的那项明文信息,在第一步就暴露,而且只在"以域名访问"时存在——这既是 passthrough 路由的唯一依据,也是 ECH 想消灭的东西。
+
+#### 实验一·补:SNI 长什么样,代理读到的又是什么
+
+实验一证明了 SNI 明文可见,但没回答两个更细的问题:它在线上究竟是什么形态?代理读到的和客户端发的,是同一个东西吗?
+
+**① 字节级:SNI 就是一串明文 ASCII。** 这条路径全程不需要 sudo——容器内抓成 pcap,拷出来用宿主 tshark 读文件:
+
+```bash
+# 终端1:容器内抓 4443。注意网卡:4443 是从宿主进来的,走 eth0(不是 lo)
+docker exec tls-lab tcpdump -i eth0 -s0 -w /tmp/sni.pcap port 4443
+
+# 终端2:发一次带 SNI 的请求
+curl --noproxy '*' -sk --resolve api.example.com:4443:127.0.0.1 https://api.example.com:4443/
+
+# 终端1 Ctrl-C 后,拷出来解(读文件不需要 sudo):
+docker cp tls-lab:/tmp/sni.pcap .
+tshark -r sni.pcap -Y "tls.handshake.type==1" -V \
+  | sed -n '/Extension: server_name/,/Server Name: /p'
+```
+
+```text
+            Extension: server_name (len=20) name=api.example.com
+                Type: server_name (0)
+                Length: 20
+                Server Name Indication extension
+                    Server Name list length: 18
+                    Server Name Type: host_name (0)
+                    Server Name length: 15
+                    Server Name: api.example.com
+```
+
+**② 代理视角:不同模式读到的是不同的变量。**
+
+| 模式 | 变量 | 它看到的是什么 |
+|---|---|---|
+| passthrough | `$ssl_preread_server_name` | 从**流经**自己的 ClientHello 里读出来的(代理不参与握手) |
+| termination / bridging | `$ssl_server_name` | 代理**自己收到的**握手里带的那一项 |
+
+lab 的 passthrough 日志格式里正好带了这个变量(`sni=$ssl_preread_server_name`),实测:
+
+```bash
+$ curl --noproxy '*' -sk --resolve api.example.com:4443:127.0.0.1 https://api.example.com:4443/
+127.0.0.1 [...] sni=api.example.com -> 127.0.0.1:9443
+
+$ curl --noproxy '*' -sk https://127.0.0.1:4443/      # IP 字面量,不发 SNI
+127.0.0.1 [...] sni= -> 127.0.0.1:9443                # 空!只能靠 map 的 default 兜住
+```
+
+`$ssl_server_name` 同理:带 SNI 时是 `api.example.com`,不带时是空字符串。**这条空的 SNI 正是坑五的成因**——map 里没写 default,新域名或 IP 直连就无处可去。
+
+**两个容易踩的匹配细节**(本机 nginx 实测):
+
+- `map` 的字符串匹配**大小写不敏感**:`API.EXAMPLE.COM` 能匹配上 `api.example.com`
+- 但**结尾点不归一化**:`api.example.com.` 匹配不上 `api.example.com`。不过 curl 会在发 SNI 前自己把结尾点剥掉,`openssl s_client -servername` 则原样发出——同一个域名,换一个客户端就可能落到不同分支
 
 ### 实验二:对比三种模式的握手终点
 

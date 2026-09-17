@@ -62,6 +62,7 @@
 - **输出为真**:场景脚本只跑真实命令;文档里的输出片段与 `out/*.txt` 一一对应
 - **已知环境细节**:
   - **多引擎共存**:本机同时装了 colima 与 podman 时,`docker` 默认 context 指向 podman,而 host 端口(`1443/4443/8443/9443/18080`)早已被 colima 里那个 `tls-lab` 占着。此时 `start.sh` 会在 podman 里再起一个容器:它能"启动成功",但 1443 压根没绑上,于是脚本改的是 podman 容器、流量打的是 colima 容器,现象极具误导性(表现为"配置改了但不生效")。排查:`lsof -nP -iTCP:1443 -sTCP:LISTEN` 看端口归谁、`docker context ls` 看默认指向谁。用法:所有命令前加 `LAB_DOCKER_CONTEXT=<引擎名>`
+  - **reload 不依赖 pid 文件**:容器内若手动起过临时 nginx 实例(`docker exec tls-lab nginx -c /tmp/xxx.conf`),它会占用并最终删掉 `/run/nginx.pid`,导致此后所有 `nginx -s reload` 报 `open() "/run/nginx.pid" failed` 后**静默失效**——配置一行没生效,场景输出却停在旧配置上,现象极易误判成"改了配置没反应"。`lib.sh` 的 `reload_conf` 已改为直接给 master 发 `HUP` 并校验新 worker 出现,不再依赖 pid 文件
   - 容器挂载目录被重建(重跑 generate.sh)后必须重启容器,否则挂载句柄失效
   - 容器内 `tcpdump` 需要 `NET_RAW` 能力(已由 `start_lab` 的 `--cap-add NET_RAW` 保证);缺失时报 `You don't have permission to perform this capture`
   - macOS 自带 git 在部分 filter-branch 场景下行为异常,故 07-4 演示移除→证明历史残留,并给出 filter-repo 作为生产工具

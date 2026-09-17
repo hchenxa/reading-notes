@@ -83,13 +83,41 @@ render_conf() {
 }
 
 # 重新装载配置:nginx -t 通过后 reload(默认静默,失败才打印)
+#
+# 不用 `nginx -s reload`:该子命令只是"读 pid 文件 → 给 master 发 HUP"的糖。
+# 本实验的自定义配置(nginx.conf.gen)里没有 pid 指令,编译期默认路径
+# /run/nginx.pid 又不存在,于是它报 open() "/run/nginx.pid" failed 后**静默退出**——
+# 配置一行没生效,脚本却毫无察觉,场景输出会停留在旧配置上(现象极具误导性:
+# 像是"改了配置没反应")。改为直接定位 master 并发 HUP,且校验 worker 确实换代。
 reload_conf() {
   render_conf
   local out
   if out=$($DOCKER exec "$CNAME" nginx -t -c /etc/nginx/lab/nginx.conf.gen 2>&1); then
-    $DOCKER exec "$CNAME" nginx -s reload -c /etc/nginx/lab/nginx.conf.gen >/dev/null 2>&1
-    sleep 0.3
-    return 0
+    local old_pid new_workers
+    old_pid="$($DOCKER exec "$CNAME" sh -c 'pgrep -f "nginx: master" | head -1' 2>/dev/null)"
+    if [ -z "$old_pid" ]; then
+      echo "[reload 失败] 容器内找不到 nginx master 进程"
+      return 1
+    fi
+    # 记下当前 worker 集合:master 收到 HUP 会 fork 新 worker、旧 worker 优雅退出,
+    # 所以要判断的是"出现了新 worker",而不是"worker 变了"。
+    local old_workers new_set
+    old_workers="$($DOCKER exec "$CNAME" sh -c 'pgrep -f "nginx: worker" | sort' 2>/dev/null | tr '\n' ' ')"
+    $DOCKER exec "$CNAME" kill -HUP "$old_pid" 2>/dev/null
+    local i p
+    for i in 1 2 3 4 5 6 7 8 9 10; do
+      sleep 0.2
+      new_set="$($DOCKER exec "$CNAME" sh -c 'pgrep -f "nginx: worker" | sort' 2>/dev/null | tr '\n' ' ')"
+      # 出现任何一个不在旧集合里的 worker → 新配置已被加载
+      for p in $new_set; do
+        case " $old_workers " in
+          *" $p "*) ;;
+          *) return 0 ;;
+        esac
+      done
+    done
+    echo "[reload 告警] HUP 已发送但未见新 worker(配置可能未生效)"
+    return 1
   fi
   echo "[nginx -t 失败] $out"
   return 1

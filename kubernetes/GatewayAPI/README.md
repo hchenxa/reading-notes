@@ -77,6 +77,94 @@ Gateway API **不是** Ingress 的 v2 字段升级,而是按"**每类参与者�
 - 请求匹配不到任何规则 ⇒ 返回 **404**(不是 500;500/503 只发生在"规则命中但后端无效");
 - 请求匹配不到任何 listener("Listener Isolation")是 Extended 特性,各实现自行声明。
 
+### 资源之间的关系:引用图 vs 属主图
+
+> 一句话:**Gateway API 的核心资源彼此之间,一个 `ownerReference` 都没有**。
+> 它们靠"按名字引用"连接,不是靠属主。(可自查:在官方源码 `apis/v1/*.go` 里
+> `grep -r ownerReferences`——一条都没有。)
+
+这不是疏忽,是设计。两者是两种完全不同的关系:
+
+| | `ownerReferences`(属主) | 引用字段(`gatewayClassName`/`parentRefs`/`backendRefs`…) |
+| --- | --- | --- |
+| 语义 | **生命周期绑定**:父删子删,由 k8s GC 执行 | **只是指向**:被指向方删了,引用方对象还在,只是条件变 `False` |
+| 跨命名空间 | **不能跨 ns**(GC 直接判定无效) | 可以(部分需 ReferenceGrant) |
+| 谁写 | 控制器写,用户不写 | 用户写 |
+
+**"不能跨 ns"是决定性的**:Route 在 `team-a`、Gateway 在 `infra`、Service 在 `platform`——
+如果 Route→Gateway 用属主表达,跨 ns 这个主场景物理上就不成立。所以整套 API 选了引用。
+
+#### 引用图:你写的对象,谁指向谁
+
+| 你写的对象 | 引用字段 | 指向 | 跨 ns? |
+| --- | --- | --- | --- |
+| Gateway | `spec.gatewayClassName` | GatewayClass | 集群级,无 ns 概念 |
+| Gateway | `listeners[].tls.certificateRefs[]` | Secret | ★需 ReferenceGrant |
+| Gateway | `spec.tls.frontend.caCertificateRefs[]` | ConfigMap | ★需 ReferenceGrant |
+| Gateway | `spec.tls.backend.clientCertificateRef` | Secret | ★需 ReferenceGrant |
+| HTTPRoute / GRPCRoute / TLSRoute / TCPRoute / UDPRoute | `spec.parentRefs[]` | Gateway(或 Service,GAMMA) | **可以,且不走 ReferenceGrant**——由 `allowedRoutes` 管 |
+| 同上 | `rules[].backendRefs[]` | Service | ★需 ReferenceGrant |
+| HTTPRoute | `filters[].requestMirror.backendRef` | Service | ★需 ReferenceGrant |
+| HTTPRoute | `filters[].extensionRef` | 实现自定义 CR | 仅同 ns |
+| BackendTLSPolicy | `spec.targetRefs[]` | Service | **只能同 ns** |
+| BackendTLSPolicy | `validation.caCertificateRefs[]` | ConfigMap | **只能同 ns** |
+| ReferenceGrant | `spec.from[]` / `spec.to[]` | 授权上面带 ★ 的那些跨 ns 引用 | 建在**被引用方**的 ns |
+
+#### 属主图:只有控制器创建的资源才有 ownerReference
+
+| 你写的 | 控制器创建的 | 位置与命名 | `ownerReference` 指向谁 |
+| --- | --- | --- | --- |
+| Gateway | 数据面 Deployment / Service / ServiceAccount / ConfigMap | 实现决定。Envoy Gateway 默认放 `envoy-gateway-system`,名字形如 `envoy-<gw-ns>-<gw-name>-<hash>` | **随实现、随模式变**:Envoy Gateway 默认模式指向 **GatewayClass**,切到 "Gateway 命名空间模式"才指向 **Gateway** |
+
+> **别踩这个坑**:"删掉 Gateway,数据面一定跟着删"**并不成立**——因为属主可能是 GatewayClass
+> 而不是 Gateway,取决于实现与部署模式。要确认到底谁属谁,别猜,直接查:
+>
+> ```bash
+> # 哪些数据面资源把 Gateway 当属主?
+> kubectl get deploy,svc,configmap -A -o json \
+>   | jq -r '.items[] | select(.metadata.ownerReferences[]?.kind=="Gateway")
+>            | "\(.kind)/\(.metadata.namespace)/\(.metadata.name) → \(.metadata.ownerReferences[0].name)"'
+> # 或直接用实现自带的标签选择器(Envoy Gateway 用这两个标签,§13.1 就是这么找 Service 的)
+> kubectl get svc -A -l gateway.envoyproxy.io/owning-gateway-name=eg
+> ```
+
+#### 实战推论
+
+- **`kubectl delete gateway` 之后回头看一眼数据面**——孤儿 Deployment 会一直占着资源和端口。
+- **Route 挂不上 Gateway 时,别去找 ownerReference**——它俩根本没这层关系。
+  正确动线是看 Route 的 `status.parents[].conditions`(§6.2、§7.3、§15.2)。
+- **`spec.infrastructure.labels/annotations` 不是强制的**:规范只说实现 "SHOULD" 把它加到
+  "响应这个 Gateway 而创建的资源"上——加不加、加到哪些资源,是实现的自由。
+
+### 场景速查:遇到这个需求,建哪个对象
+
+上面回答"这些对象怎么连起来",这一节回答"**我到底该建哪个**"。按"我想干什么"倒查:
+
+| 我要做的事 | 建什么 | 它解决什么问题 | 不这么做会怎样 |
+| --- | --- | --- | --- |
+| 同一集群跑两套网关(公网/内网),或换一家实现 | **GatewayClass** | 把"用哪种实现"变成一个可引用、可授权的集群级对象;`controllerName` 决定谁认领 | 没有 GatewayClass 就没有"实现"这一层,Gateway 无从落地 |
+| 开一个对外端口、装一张证书 | **Gateway** | 端口 + 证书 + "谁能挂路由"三件事收在一个对象里,归平台团队管 | 证书散在各团队的 Ingress 注解里,没人统一治理 |
+| 把 `api.example.com/v1/*` 转到某个 Service | **HTTPRoute** | 匹配规则 + 转发目标从入口资源里拆出来,应用团队自己写,不用碰证书和端口 | 规则全挤在一个 Ingress 里,改一条要动全量 |
+| 灰度:A 版 90%、B 版 10% | **HTTPRoute `backendRefs[].weight`** | 权重是 spec 字段,不是注解方言,跨实现一致 | Ingress 的 canary 注解是 nginx 方言,换实现等于重写 |
+| 80 端口自动跳 443 | **HTTPRoute + `RequestRedirect` filter** | 结构化表达,不依赖 annotation | 同上 |
+| 把 `/old/*` 改写成 `/new/*` 再转发 | **HTTPRoute + `URLRewrite` filter** | 同上;且能与 `backendRefs` 共存(改写后转发) | — |
+| team-a 的 route 要用 platform 的 Service | **ReferenceGrant**(建在 `platform`) | 跨 ns 引用默认一律无效(防 confused-deputy);RG 就是那张介绍信 | route `ResolvedRefs=False/RefNotPermitted`,命中请求 **500** |
+| 前端 mTLS:校验客户端证书 | **Gateway `spec.tls.frontend`** | 挂在 Gateway 级而不是 listener 级,防 HTTP/2 连接聚合绕过校验 | 挂 listener 级会被连接复用绕过 |
+| 网关到后端这段也要加密 | **BackendTLSPolicy**(挂 Service) | 网关以 TLS 客户端身份连后端并校验后端证书 | 内网明文,横向移动可嗅探 |
+| Kafka / PostgreSQL 这类非 HTTP 的 TLS 流量按 SNI 分流 | **Gateway(`protocol: TLS` + `tls.mode: Passthrough`)+ TLSRoute** | 网关不解密,只读 ClientHello 里的 SNI 决定转发目标 | L4 负载均衡器做不到按域名分流 |
+| 纯 TCP / UDP 转发(数据库、DNS、游戏) | **TCPRoute / UDPRoute** | 端口即匹配依据,没有 hostname/path 概念 | — |
+| gRPC 按 service/method 路由 | **GRPCRoute** | 结构化匹配 gRPC 方法 | 用 HTTPRoute 硬凑 `/pkg.Svc/Method` 能做,但表达力弱 |
+| 多团队共享一套数据面,不想每个 Gateway 起一个 LB | **ListenerSet**(v1.5 GA) | 把多个 Gateway 的 listener 合并到同一套数据面 | 每个 Gateway 一个 LB 实例,资源放大 |
+| 服务网格里做路由(不经过网关) | **HTTPRoute,`parentRefs` 直接指 Service** | GAMMA:mesh 数据面拦请求按 route 决策,不需要 Gateway/GatewayClass | — |
+| 给某个 Service 的所有调用方统一加超时/重试预算 | **XBackendTrafficPolicy**(实验) | 挂在 backend 上,而不是逐条 route 写 | 每个调用方各写一遍,容易漂移 |
+
+**两个最常见的"其实不需要建"误判:**
+
+- **Route 跨 ns 挂 Gateway,不需要 ReferenceGrant**——由 Gateway 的 `allowedRoutes.namespaces`
+  控制(§9.2)。以为需要而去建了 RG,不会有任何作用,只会掩盖真正的原因。
+- **只想改 HTTP 行为,不需要动 Gateway**——证书/端口/SNI 在 Gateway,匹配/改写/权重在 Route。
+  改路由规则却去动 Gateway,等于让平台团队替你改代码。
+
 ## 2. 角色分工与权限建议(为什么多团队能用)
 
 | 角色 | 建什么 | 典型 RBAC 边界 | 为什么安全 |
@@ -636,6 +724,360 @@ spec:
     backendRefs:
     - name: web
       port: 8080
+```
+
+### 7.3 「创建出来是什么样子」:spec 是你写的,status 才是你要看的
+
+前面各节的 YAML 都是**你写进去的 spec**。但决定"它到底生效了没有"的是控制器回填的 **status**——
+排障时大部分时间花在这儿。这一节把每个资源的 status 形状一次讲清。
+
+> 下面 condition 的 **type 与 reason 都是规范定义的常量**(源码 `apis/v1/shared_types.go`),
+> 可以直接拿来做判断;**`message` 是各实现自己写的,不要拿它当判断依据**,只当线索。
+> 示例按通用形状给出,**未在本机实测**;你的实现可能多写若干个 condition。
+
+#### 一张表:谁有 status,排障先看哪
+
+| 资源 | 有 status? | 排障先看 |
+| --- | --- | --- |
+| GatewayClass | 有 | `status.conditions[type=Accepted]` |
+| Gateway | 有 | `status.addresses[]`(**不是** `spec.addresses`)+ `status.listeners[].attachedRoutes` + `listeners[].conditions[]` |
+| HTTPRoute / GRPCRoute / TLSRoute / TCPRoute / UDPRoute | 有 | `status.parents[].conditions[]`(每个 parentRef 一段) |
+| BackendTLSPolicy | 有 | `status.ancestors[].conditions[]` |
+| ListenerSet | 有 | 形状同 Gateway |
+| **ReferenceGrant** | **没有** | 只能看引用方的 `ResolvedRefs`——见下 |
+
+#### GatewayClass
+
+```yaml
+# kubectl get gatewayclass internet -o yaml
+status:
+  conditions:
+  - type: Accepted
+    status: "True"
+    reason: Accepted
+    message: GatewayClass has been accepted by the controller
+    observedGeneration: 1
+  supportedFeatures:            # v1.4+:该实现支持的特性名(字母升序)
+  - GatewayPort8080
+  - HTTPRoutePathRedirect
+```
+
+#### Gateway(信息量最大的一个)
+
+```yaml
+# kubectl get gateway shared-gateway -n infra -o yaml
+status:
+  addresses:                    # ★ 对外地址由控制器回填;kind 等无 LB 环境这里会是空的
+  - type: IPAddress
+    value: 172.18.0.5
+  conditions:
+  - type: Accepted
+    status: "True"
+    reason: Accepted
+  - type: Programmed
+    status: "True"
+    reason: Programmed
+  listeners:
+  - name: https-api
+    supportedKinds:             # 这个 listener 实际接受哪些 Route 类型
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+    attachedRoutes: 1           # ★ 挂上来了几条 Route——"路由没生效"先看这个数
+    conditions:
+    - type: Accepted
+      status: "True"
+      reason: Accepted
+    - type: Conflicted
+      status: "False"
+      reason: NoConflicts
+    - type: ResolvedRefs
+      status: "True"
+      reason: ResolvedRefs
+    - type: Programmed
+      status: "True"
+      reason: Programmed
+```
+
+#### HTTPRoute / GRPCRoute / TLSRoute / TCPRoute / UDPRoute
+
+成功的样子:
+
+```yaml
+# kubectl get httproute api-route -n team-a -o yaml
+status:
+  parents:                      # ★ 每个 parentRef 一段,可以一段成功一段失败
+  - controllerName: example.net/gateway-controller
+    parentRef:
+      name: shared-gateway
+      namespace: infra
+      sectionName: https-api
+    conditions:
+    - type: Accepted
+      status: "True"
+      reason: Accepted
+    - type: ResolvedRefs
+      status: "True"
+      reason: ResolvedRefs
+```
+
+失败的样子——**看 reason 就能直接对到 §15.2 那张表**:
+
+```yaml
+    conditions:
+    - type: Accepted
+      status: "False"
+      reason: NoMatchingListenerHostname     # route.hostnames ∩ listener.hostname = ∅
+      message: No listener hostname intersects with the route's hostnames
+    - type: ResolvedRefs
+      status: "True"
+      reason: ResolvedRefs
+```
+
+规范定义的常量,记住这两组就够用:
+
+| condition type | 可能出现的 reason |
+| --- | --- |
+| `Accepted` | `Accepted` / `NoMatchingParent` / `NoMatchingListenerHostname` / `NotAllowedByListeners` / `UnsupportedValue` / `IncompatibleFilters` / `Pending` |
+| `ResolvedRefs` | `ResolvedRefs` / `RefNotPermitted` / `InvalidKind` / `BackendNotFound` / `UnsupportedProtocol` |
+| `PartiallyInvalid` | 部分 rule 无效时出现(此时整条 route 仍是 `Accepted=True`) |
+
+#### ReferenceGrant:它没有 status,这是个大坑
+
+源码注释原话:
+
+> `Note that Status sub-resource has been excluded at the moment as it was difficult to work out`
+> `the design. Status sub-resource may be added in future.`
+
+后果很直接:**RG 写错时(建错 ns、group 写错、kind 写错),RG 自己一片安静**——`kubectl get
+referencegrant` 看不出任何异常,`kubectl describe` 也没有条件可看。唯一的反馈落在**引用方**身上:
+route 出现 `ResolvedRefs=False/RefNotPermitted`,命中请求 500。
+
+所以跨 ns 引用的排查动线是**反的**:
+
+```
+✗ 盯着 ReferenceGrant 找问题        → 它没有任何状态可以告诉你
+✓ 去看 route 的 status.parents[].conditions[type=ResolvedRefs]
+  → False/RefNotPermitted ⇒ 再回头核对 RG 的 ns / from.group / to.group 三个字段
+```
+
+#### BackendTLSPolicy
+
+```yaml
+status:
+  ancestors:                    # 每个 targetRef 一段(名字叫 ancestors,实际是"目标对象视角")
+  - ancestorRef:
+      group: ""
+      kind: Service
+      name: my-backend
+    controllerName: example.net/gateway-controller
+    conditions:
+    - type: Accepted
+      status: "True"
+      reason: Accepted
+    - type: ResolvedRefs
+      status: "True"
+      reason: ResolvedRefs
+```
+
+`ResolvedRefs=False` 时不外乎这几种 reason:`InvalidCACertificateRef`(ConfigMap 没找到)、
+`InvalidKind`(指了不支持的类型)、`NoValidCACertificate`(ConfigMap 里没有可用的 `ca.crt`)、
+`Conflicted`(同一 Service 挂了多个策略)。
+
+### 7.4 改一处配置,curl 看到什么:对照清单
+
+§7.1/§7.2 讲"写什么",这一节讲"写完 curl 过去看到什么",以及**改哪个字段会让现象从左边变到右边**。
+
+> ⚠️ **本节所有响应是按规范推导的预期结果,未在本机实测**。规范原文出处标在"依据"列。
+> 实现之间在细节上会有出入,请把它当**对照实验的预期值**,以你实测为准。
+> 怎么把环境跑起来见 §13;下面假设你已经有了 Gateway 和它的访问地址 `GW`
+> (有 LB 就用 `status.addresses[0].value`;没有就
+> `kubectl port-forward svc/<网关 Service> 8080:80`,然后 `GW=127.0.0.1:8080`)。
+
+#### 主对照表
+
+请求统一用 `curl -s -o /dev/null -w '%{http_code}\n'` 只取状态码。
+
+| # | 你改的地方 | 请求 | 预期 | 依据 |
+| --- | --- | --- | --- | --- |
+| 1 | Route 还没建 / hostname 与 listener 不相交 | `-H 'Host: api.example.com' $GW/` | **404** | 无规则成功附着 ⇒ MUST 404 |
+| 2 | Route 建好且附着 | 同上 | **200** | — |
+| 3 | `path: {type: Exact, value: /abc}` | `/abc` | **200** | Exact 全等 |
+| 4 | 同上 | `/abc/` | **404** | "an exact path match on `/abc` will only match `/abc`, NOT `/abc/`" |
+| 5 | 同上 | `/Abc` | **404** | Exact/PathPrefix 均区分大小写 |
+| 6 | `path: {type: PathPrefix, value: /abc}` | `/abc/def` | **200** | "`/abc`, `/abc/`, and `/abc/def` would all match the prefix `/abc`" |
+| 7 | 同上 | `/abcd` | **404** | "the path `/abcd` would not" |
+| 8 | `headers: [{name: env, value: prod}]` | 不带 `env` 头 | **404** | 匹配不成立 = 无规则命中 |
+| 9 | 规则只写 `method: GET` | `-X POST` | **404**(不是 405!) | Core 里没有"方法不匹配"这个独立响应,方法不匹配就是规则不匹配 |
+| 10 | 两条规则:`Exact /abc` 与 `PathPrefix /` | `/abc` | 命中 **Exact** 那条 | 优先级 `Exact` > 最长 `PathPrefix` |
+| 11 | 两条同长 PathPrefix,分属两条 Route | 任意 | **creationTimestamp 更老**的赢 | 跨 Route 平局裁决顺序(§6.8) |
+| 12 | `backendRefs` 指向不存在的 Service | 任意 | **500** + `ResolvedRefs=False/BackendNotFound` | 全部无效且无响应型 filter ⇒ MUST 500 |
+| 13 | 两个等权后端,其中一个不存在 | 打 100 次 | 约 **50% 200 + 50% 500** | "if two backends are specified with equal weights, and one is invalid, 50 percent of traffic must receive a 500" |
+| 14 | 后端 Service 存在但无 ready 端点 | 任意 | **503** | "implementations SHOULD return a 503 for requests to that backend" |
+| 15 | 跨 ns `backendRef` 但没 RG | 任意 | **500** + `ResolvedRefs=False/RefNotPermitted` | 跨 ns 引用默认无效 |
+| 16 | 补上 RG(建在 Service 的 ns) | 同上 | **200** | — |
+| 17 | `RequestRedirect`(不写 statusCode) | `curl -i` | **302** + `Location:` | statusCode 默认 302 |
+| 18 | `RequestRedirect{statusCode: 301}` | `curl -i` | **301** | — |
+| 19 | `URLRewrite{path: {type: ReplacePrefixMatch, value: /new}}` + match `PathPrefix /old` | `/old/a/b` | 后端收到 `/new/a/b` | "`/foo/bar` → `/xyz/bar`" |
+| 20 | `RequestHeaderModifier` set `x-env: prod` | `curl $GW/`(后端需回显请求头) | 后端看到 `x-env: prod`,客户端状态码不变 | — |
+| 21 | `ResponseHeaderModifier` set `x-served-by: gw` | `curl -i $GW/` | 响应头里有 `x-served-by: gw`,状态码不变 | — |
+| 22 | HTTPS listener,SNI 与 Host 不一致,但 Host 能命中**另一个** listener | `curl --resolve a.example.com:443:IP https://a.example.com/ -H 'Host: b.example.com'` | **421** | "If another Listener does match the Host, the Gateway SHOULD return a 421" |
+| 23 | 同上,但没有任何 listener 匹配该 Host | 同上 | **404** | "If no other Listener matches the Host, the Gateway MUST return a 404" |
+| 24 | listener 是 `protocol: TLS`(`Passthrough`),却想挂 HTTPRoute | — | route `Accepted=False/NotAllowedByListeners` | TLS listener 的 `supportedKinds` 只有 TLSRoute |
+
+#### 例 A:404 → 200,一次"路由挂上没挂上"的对照
+
+```bash
+GW=<你的网关地址>
+H='Host: api.example.com'
+
+# ① 只有 Gateway,没有 HTTPRoute
+curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://$GW/
+# 预期:404
+```
+
+```bash
+# ② 建一条 HTTPRoute 挂上去
+kubectl apply -f - <<'EOF'
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: api-route
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra
+  hostnames: ["api.example.com"]
+  rules:
+  - backendRefs:
+    - name: api-svc
+      port: 8080
+EOF
+
+curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://$GW/
+# 预期:200
+```
+
+**还是 404 时,不要急着改配置,先看两个数**:
+
+```bash
+# ① 有多少 Route 成功挂到了这个 listener 上?
+kubectl get gateway shared-gateway -n infra \
+  -o jsonpath='{range .status.listeners[*]}{.name}{" attachedRoutes="}{.attachedRoutes}{"\n"}{end}'
+
+# ② 这条 Route 自己怎么说?
+kubectl get httproute api-route -o jsonpath='{range .status.parents[*].conditions[*]}{.type}={.status}/{.reason}{"\n"}{end}'
+```
+
+- `attachedRoutes=0` ⇒ route **压根没挂上**。看 route 的 `Accepted` reason:hostname 不相交?
+  `sectionName` 写错?ns 不被 `allowedRoutes` 放行?
+- `attachedRoutes=1` 但请求还是 404 ⇒ route 挂上了,是**匹配**没命中:
+  hostname 对不上?path 写窄了?method/header 卡住了?
+
+**这个区分很关键:404 有两个完全不同的成因,修法完全不同。**
+
+#### 例 B:PathPrefix 的边界,一次把"到底匹配不匹配"看清
+
+```bash
+for p in /abc /abc/ /abc/def /abcd /Abc; do
+  printf '%-10s -> ' "$p"
+  curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: ex.com' "http://$GW$p"
+done
+```
+
+`path: {type: PathPrefix, value: /abc}` 下的预期:
+
+```
+/abc       -> 200
+/abc/      -> 200
+/abc/def   -> 200
+/abcd      -> 404     ← 按 "/" 分层:abcd 不是 abc 这个 path element
+/Abc       -> 404     ← 区分大小写
+```
+
+换成 `Exact` 之后:
+
+```
+/abc       -> 200
+/abc/      -> 404     ← Exact 连结尾多一个斜杠都不算
+/abc/def   -> 404
+/abcd      -> 404
+/Abc       -> 404
+```
+
+**一句话记住**:`PathPrefix` 是按 `/` 切开的**路径元素**前缀,不是字符串前缀。
+它和 Ingress 的 `Prefix` 是同一语义——从 Ingress 迁过来时这条最容易想当然。
+
+#### 例 C:跨命名空间,ReferenceGrant 前后
+
+```bash
+# team-a 的 route 要转发到 platform 的 Service
+kubectl apply -f - <<'EOF'
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cross-ns-route
+  namespace: team-a
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra
+  hostnames: ["api.example.com"]
+  rules:
+  - backendRefs:
+    - name: platform-svc
+      namespace: platform     # ★ 跨 ns 必须显式写,不写默认本 ns
+      port: 8080
+EOF
+
+curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: api.example.com' http://$GW/
+# 预期:500
+```
+
+```bash
+kubectl get httproute cross-ns-route -n team-a \
+  -o jsonpath='{range .status.parents[*].conditions[*]}{.type}={.status}/{.reason}{"\n"}{end}'
+# 预期出现一行:ResolvedRefs=False/RefNotPermitted
+```
+
+```bash
+# 授权:ReferenceGrant 必须建在【被引用方】的 ns(这里是 platform),不是 route 的 ns
+kubectl apply -f - <<'EOF'
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: allow-team-a
+  namespace: platform           # ★ 被引用资源所在 ns
+spec:
+  from:
+  - group: gateway.networking.k8s.io    # HTTPRoute 的 group
+    kind: HTTPRoute
+    namespace: team-a                   # 只放行 team-a 的 HTTPRoute
+  to:
+  - group: ""                           # Service 属于 core 组 = 空串
+    kind: Service
+EOF
+
+curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: api.example.com' http://$GW/
+# 预期:200
+```
+
+三个最容易写错、而 `ReferenceGrant` **一个都不会报错**告诉你的地方:RG 建到了 route 的 ns、
+`from[].group` 填成了空串(HTTPRoute 的 group 是 `gateway.networking.k8s.io`)、
+`to[].group` 填成了 `core`/`v1`(Service 的 group 是空串)。
+**只能靠 route 那边的 `ResolvedRefs` 反推**——这就是 §7.3 说"排查动线是反的"的原因。
+
+#### gRPC 的对照(GRPCRoute)
+
+| 配置 | 预期 RPC 结果 | 依据 |
+| --- | --- | --- |
+| 后端全部无效且无响应型 filter | `UNAVAILABLE` | 规范 |
+| `backendRefs` 为空且无响应型 filter | `UNIMPLEMENTED` | 规范 |
+
+gRPC 不能用 curl 测,用 `grpcurl`(§16):
+
+```bash
+grpcurl -plaintext -authority grpc.example.com $GW pkg.Svc/Method
+# 挂 HTTPS listener 时加 -insecure(跳过证书校验)或给 -cacert
 ```
 
 ## 8. 其余 Route 类型

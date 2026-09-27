@@ -8,7 +8,8 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 SIDEBAR="$ROOT/_sidebar.md"
 
 # Directories to skip
-SKIP_DIRS="node_modules|\.venv|\.git|\.github|\.claude|_sass|_includes|kind|python/sample|python/pytest|appium/sample|javascript/example|javascript/project|go/gin/templates|go/rpc|go/socket|go/tips|go/go-kit"
+# istio-<x>.<y>.<z>/ 是下载下来的发行包（自带 README.md），不是笔记目录，必须排除
+SKIP_DIRS="node_modules|\.venv|\.git|\.github|\.claude|_sass|_includes|kind|python/sample|python/pytest|appium/sample|javascript/example|javascript/project|go/gin/templates|go/rpc|go/socket|go/tips|go/go-kit|istio-[0-9]+\.[0-9]+\.[0-9]+"
 
 echo "* [Home](/)" > "$SIDEBAR"
 

@@ -7,9 +7,11 @@
 
 ## 0. 一分钟速览
 
-- **1.25 ~ 1.30.1 有一个会把 Gateway 配置清空的 bug**:只要 `Gateway` 的 `istio.io/rev` label
-  变了,旧控制面立刻把该 Gateway 从配置快照里剔除,向仍在服务的旧 gateway Pod 推**空 xDS**。
-  影响所有 Gateway API + 多 revision 的集群。**修复在 1.29.5 / 1.30.2 / 1.31.0。**
+- **1.25 ~ 1.30.1 有一个会把 Gateway 配置清空的 bug**:只要一个 `Gateway` 的**归属控制面变了**
+  (翻 tag、改 namespace label、改 Gateway 自己的 label,三条都算),旧控制面立刻把该 Gateway
+  从配置快照里剔除,向仍在服务的旧 gateway Pod 推**空 xDS**。
+  **正常 revision 升级走的翻 tag 路径就会踩到 —— 你不需要手动改 Gateway 的 label。**
+  修复在 1.29.5 / 1.30.2 / 1.31.0。
 - **tag 与 revision 名只在「所有权判定」上等价**,两个操作本身**不等价** —— patch label 会连锁
   改写 **6 个**生成对象(含 LoadBalancer Service),翻 tag 只改写 **1 个**(Deployment 的 pod template)。
   见第 2 篇。

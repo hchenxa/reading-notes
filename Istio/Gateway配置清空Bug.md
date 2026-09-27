@@ -7,10 +7,14 @@
 
 ## 0. 这个 Bug 是什么
 
-**一句话**:在 1.25 ~ 1.30.1 之间,只要 Kubernetes `Gateway` 资源的 `istio.io/rev` label
-发生变化,旧控制面会**立刻把该 Gateway 从自己的配置快照里剔除**,并向仍在服务的旧 gateway Pod
-推送一份**空 xDS 配置** —— listener 和 route 全部删除。旧 Pod 还在 Service endpoints 里继续
-接收 LB 流量,于是表现为**连接立即被拒**,直到新的 gateway Pod 起来,约 30 秒。
+**一句话**:在 1.25 ~ 1.30.1 之间,只要一个 `Gateway` 的**归属控制面发生变化**,旧控制面会
+**立刻把该 Gateway 从自己的配置快照里剔除**,并向仍在服务的旧 gateway Pod 推送一份**空 xDS 配置**
+—— listener 和 route 全部删除。旧 Pod 还在 Service endpoints 里继续接收 LB 流量,于是表现为
+**连接立即被拒**,直到新的 gateway Pod 起来,约 30 秒。
+
+**关键:你不需要手动改 Gateway 的 label 就会触发。** 判定依据是"这个 label 值**当前解析到哪个
+revision**",而不是"label 有没有被改过"。归属变化有四条途径(见 §1.1),其中**三条完全不碰
+Gateway 对象** —— 而**正常的 revision 升级走的正是翻 tag 这条路**,原始 issue 就是这么触发的。
 
 **它暴露了什么设计问题**:`Gateway` 资源天生只归属于一个 istiod。这与 VirtualService /
 DestinationRule 等核心 CRD 在多控制面下的行为**完全不同** —— 后者只要不带 `istio.io/rev` label
@@ -33,10 +37,37 @@ DestinationRule 等核心 CRD 在多控制面下的行为**完全不同** ——
 
 ## 1. 现象与时间线
 
-### 1.1 现象
+### 1.1 触发条件:Gateway 的「归属控制面」发生变化
 
-触发动作很小 —— 改一下 `Gateway` 的 `istio.io/rev`,`istioctl tag set default --revision <新>`,
-甚至只是切一个 tag 的指向。观察到:
+**先纠正一个容易搞错的框架**:这个 bug **不是**"你手动改 Gateway 的 label"才会踩到。
+原始 issue 里报告者做的动作是:
+
+> `istioctl tag set default --revision 1-29-2 --overwrite`
+
+他**没有碰任何 Gateway 对象**。因为 `IsMine()` 判定的是"这个 label 值(**或它继承来的值**)
+当前解析到哪个 revision",而不是"label 有没有被改过"。label 一直不动、只是它引用的 tag 被翻走,
+归属照样翻转。
+
+归属变化的四条途径 —— **其中三条完全不碰 Gateway 对象**:
+
+| 途径 | 是否碰 Gateway | 典型场景 |
+| --- | --- | --- |
+| ① 改 Gateway 自己的 `istio.io/rev` label | ✅ 会 | 手动把一个网关切到新 revision |
+| ② 翻 Gateway 引用的 tag 的指向 | ❌ 不会 | `istioctl tag set canary --revision <新> --overwrite` |
+| ③ 翻 `default` tag 的指向 | ❌ 不会 | `istioctl tag set default --revision <新>` —— **原始 issue 就是这个** |
+| ④ 改 Gateway 所在 **namespace** 的 `istio.io/rev` label | ❌ 不会 | Gateway 自己没写 label 时会**继承 namespace 的** |
+
+**②③④ 才是 revision 升级的正常路径** —— 标准流程里没人会去 patch 每个网关的 label,
+而是翻 tag 或改 namespace。所以这个 bug 会在**没有任何人手改 Gateway label** 的情况下发作。
+
+> **补充**:如果 Gateway 自己没写 label、所在 namespace 也没写,`selectedTag` 会是空字符串,
+> 判定落到 `myTags.Contains("default") || (weAreDefaultRevision && !otherDefaultTagExists)` ——
+> 也就是**该网关跟着 `default` revision 走**。这正是为什么翻 `default` tag 会把一批
+> 没写 label 的网关一起搬走,也解释了原始 issue 的现象。
+
+### 1.2 现象
+
+观察到:
 
 - Gateway 对应的 Deployment **正常滚动**,新 Pod 也能正常起来
 - 但用循环 curl 打 LB 地址时,**滚动窗口内有约 30 秒的连续失败**
@@ -49,7 +80,7 @@ issue 里的原始描述:
 > going to the existing 1.28 pods blows up … This process takes around 30 seconds or so of
 > traffic breaking.
 
-### 1.2 时间线
+### 1.3 时间线
 
 | 时间 | 事件 |
 | --- | --- |
@@ -106,12 +137,24 @@ func (p *tagWatcher) GetMyTags() sets.String {
 
 func (p *tagWatcher) IsMine(obj metav1.ObjectMeta) bool {
     selectedTag, ok := obj.Labels[label.IoIstioRev.Name]
-    // ... 无 label 时回退到 namespace 的 istio.io/rev
-    return p.GetMyTags().Contains(selectedTag) || /* default tag 的特殊分支 */
+    if !ok {
+        ns := p.namespaces.Get(obj.Namespace, "")
+        if ns == nil {
+            return true                                  // ① namespace 都取不到 → 人人有份
+        }
+        selectedTag = ns.Labels[label.IoIstioRev.Name]   // ② 回退到 namespace 的 label
+    }
+    myTags := p.GetMyTags()
+    // ... 再算出 otherDefaultTagExists / weAreDefaultRevision
+    return myTags.Contains(selectedTag) ||
+        selectedTag == "" && (myTags.Contains("default") ||   // ③ 空值 → 跟 default revision 走
+            (weAreDefaultRevision && !otherDefaultTagExists))
 }
 ```
 
-只要 label 值不再指向旧 istiod,旧 istiod **立刻** `IsMine=false`。
+**关键:只要这个值当前解析到的不再是旧 istiod,旧 istiod 立刻 `IsMine=false`。**
+而这个值可以来自 **Gateway 自己**、也可以来自 **它所在的 namespace**;label 本身甚至可以
+**一个字节都没变** —— 变的是 `myTags`(它引用的 tag 被翻走了)。这就是 §1.1 那四条途径的由来。
 
 **环 3 —— 旧 Pod 无法"漂移"过去。**
 

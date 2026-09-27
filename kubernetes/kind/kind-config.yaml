@@ -1,0 +1,22 @@
+# kind 集群配置：修复节点内 containerd 拉不到镜像（macOS 代理场景）
+#
+# 背景：mac 的系统代理是 127.0.0.1:7890，容器/节点继承了这个环境变量，
+# 但节点里的 127.0.0.1 指的是节点自己的 loopback，不是 mac，所以报
+# "proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused"。
+#
+# 解决：给节点内的 containerd 和 kubelet 注入指向宿主网关的代理配置。
+# kind 会在加载时把 __HOST_IP__ 替换成节点里可达的宿主地址（host.docker.internal）。
+#
+# 用法：kind create cluster --config kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+      # containerd 的拉镜像代理（kind 内置入口会自动把 __HOST_IP__ 替换成宿主 IP）
+      - hostPath: kind-proxy.conf
+        containerPath: /etc/systemd/system/containerd.service.d/http-proxy.conf
+      # kubelet 的代理（kubelet 环境变量从 PID 1 继承，必须单独覆盖，
+      # 否则 containerd 好了但 kubelet 仍在用节点内的 127.0.0.1:7890）
+      - hostPath: kind-proxy.conf
+        containerPath: /etc/systemd/system/kubelet.service.d/http-proxy.conf

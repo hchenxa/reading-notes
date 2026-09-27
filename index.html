@@ -34,6 +34,34 @@
       //   0 = 全部收起(只留 "Home" 与主题名,当前页所在分组自动展开)——侧栏不再一进来就巨长
       //   1 = 默认展开第一层分组(主题的下一级仍折叠)
       sidebarDisplayLevel: 0,
+      plugins: [
+        // mermaid 图表渲染（按需加载）。
+        // mermaid 的 ESM 包约 3.5MB，所以不做全站预加载：只有当前页真的出现
+        // ```mermaid 代码块时才动态 import，没有图表的页面完全不付这个成本。
+        function (hook) {
+          hook.doneEach(function () {
+            // 先查一次，没有图表就直接返回，连 import 都不触发
+            if (!document.querySelector('.markdown-section pre > code.language-mermaid')) return;
+            var ready = window.mermaid
+              ? Promise.resolve(window.mermaid)
+              : import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')
+                  .then(function (m) { window.mermaid = m.default; return m.default; });
+            ready.then(function (mermaid) {
+              // 异步加载期间用户可能已经切页，所以这里重新查询，不复用旧节点引用
+              var blocks = document.querySelectorAll('.markdown-section pre > code.language-mermaid');
+              if (!blocks.length) return;
+              mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+              Array.prototype.forEach.call(blocks, function (code) {
+                var div = document.createElement('div');
+                div.className = 'mermaid';
+                div.textContent = code.textContent;
+                if (code.parentElement) code.parentElement.replaceWith(div);
+              });
+              mermaid.run({ querySelector: '.markdown-section .mermaid:not([data-processed])' });
+            });
+          });
+        }
+      ],
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>

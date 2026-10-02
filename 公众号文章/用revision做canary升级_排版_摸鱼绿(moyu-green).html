@@ -1,0 +1,2111 @@
+<section style="max-width:677px;margin:0 auto;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#374151;line-height:1.75;letter-spacing:0.5px;overflow-x:hidden;">
+
+  <!-- 1. 封面 -->
+  <section style="margin:0 0 32px;background:#fff;border:1.5px solid rgba(5,150,105,0.15);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);width:100%;">
+    <section style="padding:32px 28px 28px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+        <span style="width:6px;height:6px;background:#059669;border-radius:50%;"><span leaf=""><br></span></span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:3px;color:#059669;"><span leaf="">ISTIO · 升级实战</span></span>
+        <section style="flex:1;height:1px;overflow:hidden;background:linear-gradient(to right,rgba(5,150,105,0.12),transparent);"><span leaf=""><br></span></section>
+        <span style="font-size:10px;color:#D1D5DB;font-weight:600;"><span leaf="">2026.10</span></span>
+      </section>
+      <section>
+        <p style="font-size:15px;color:#D1D5DB;margin:0 0 6px;text-decoration:line-through;letter-spacing:0.5px;">
+          <span leaf="">每次升级都去 patch 网关的 revision？</span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#111827;margin:0;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">让网关只认</span>
+          <span style="color:#059669;"><span leaf="">别名</span></span>
+        </p>
+        <p style="font-size:24px;font-weight:900;color:#059669;margin:0 0 16px;line-height:1.05;letter-spacing:-2px;">
+          <span leaf="">升级只翻一个指向</span>
+        </p>
+        <section style="width:48px;height:3px;background:linear-gradient(to right,#059669,#34D399);border-radius:2px;margin-bottom:12px;">
+          <span leaf=""><br></span>
+        </section>
+        <p style="font-size:13px;color:#9CA3AF;margin:0;line-height:1.7;letter-spacing:0.5px;">
+          <span leaf="">revision · tag · 6 个对象 vs 1 个 · 30 秒断流根因</span>
+        </p>
+      </section>
+    </section>
+    <section style="background:linear-gradient(135deg,#059669,#10B981);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <p style="font-size:12px;color:rgba(255,255,255,0.9);margin:0;font-weight:600;letter-spacing:0.5px;">
+        <span leaf="">Istio 升级笔记</span>
+      </p>
+      <section style="display:flex;gap:4px;">
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">REVISION</span></span>
+        <span style="background:rgba(255,255,255,0.2);padding:1px 6px;border-radius:3px;font-size:8px;color:#fff;font-weight:600;"><span leaf="">TAG</span></span>
+      </section>
+    </section>
+  </section>
+
+  <!-- 2. 目录 -->
+  <section style="margin:0 20px 32px;">
+    <section style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <p style="font-size:10px;color:#9CA3AF;margin:0;text-transform:uppercase;letter-spacing:2px;font-weight:600;">
+        <span leaf="">📦 9 Parts + Conclusion</span>
+      </p>
+      <p style="font-size:10px;color:#9CA3AF;margin:0;">
+        <span leaf="">👉 滑动</span>
+      </p>
+    </section>
+    <section style="overflow-x:scroll;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:8px;">
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:linear-gradient(135deg,#059669,#10B981);border-radius:12px;padding:12px;margin-right:8px;">
+        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 01</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#fff;margin:0 0 3px;">
+          <span leaf="">结论先行</span>
+        </p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.7);margin:0;">
+          <span leaf="">Gateway 永不动</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 05</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">只写 tag</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">6 个对象 vs 1 个</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 06</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">版本前提</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">旧控制面必须已带修复</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 07</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">还断 30 秒</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">改 revision 名那条路</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin-right:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART 08</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">零停机清单</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">照着做就行</span>
+        </p>
+      </section>
+      <section style="display:inline-block;white-space:normal;vertical-align:top;width:110px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <p style="font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:1px;margin:0 0 5px;">
+          <span leaf="">PART ///</span>
+        </p>
+        <p style="font-size:13px;font-weight:800;color:#111827;margin:0 0 3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="font-size:10px;color:#9CA3AF;margin:0;">
+          <span leaf="">三个判断</span>
+        </p>
+      </section>
+    </section>
+  </section>
+
+  <!-- 3. 开头引言 -->
+  <section style="margin:0 20px 28px;background:#FFF;border:1px dashed #BBF7D0;border-radius:8px;padding:14px 16px;text-align:center;">
+    <p style="margin:0;line-height:1.6;">
+      <span style="font-size:15px;color:#059669;font-weight:bold;border-bottom:3px solid #FDE68A;padding-bottom:2px;"><span leaf="">Gateway 上写什么，决定了升级会不会断流量</span></span>
+    </p>
+    <p style="font-size:13px;color:#9CA3AF;margin:6px 0 0;line-height:1.5;">
+      <span leaf="">而唯一的正确答案，是只写 tag</span>
+    </p>
+  </section>
+
+  <!-- 4. 前言 -->
+  <section style="padding:0 20px;">
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">Istio 的升级一直是个让人心里没底的操作。官方给了两条路：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">istioctl upgrade 的原地（in-place）升级</span></span><span leaf="">，和</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">基于 revision 的 canary 升级</span></span><span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">大多数团队的路径是：先在测试集群 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">istioctl upgrade</span></span><span leaf=""> 试一把，发现「居然没事」，于是生产也照做。这个归纳非常危险 —— 因为 in-place 升级「看起来没事」，恰恰是它的机制决定的：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">存量 Envoy 会保留最后一份可用配置</span></span><span leaf="">，只要升级窗口里没有新 Pod 要创建，你什么都感觉不到。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">先说结论。</span></strong><span leaf=""> revision 升级只有一种姿势是对的 —— </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">Gateway 上永远写 tag</span></span><span leaf="">（比如 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">istio.io/rev=prod</span></span><span leaf="">），升级时只翻 tag 的指向，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">Gateway 对象一个字节都不改</span></span><span leaf="">。这样全程没有服务中断：tag 指向变了之后，gateway 对应的 Deployment 会</span><strong style="color:#059669;"><span leaf="">自动做 rolling</span></strong><span leaf="">，这是预期行为，而且因为没有别的对象被改写，这次滚动是干净的。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">反过来，如果图省事把 revision 名直接写死在 Gateway 上，每次升级去 patch 它，就会有</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">约 30 秒的中断</span></span><span leaf="">。下面会讲清楚为什么 —— 以及一个版本前提：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">能不能用这套姿势，取决于你正在跑的旧 istiod 版本</span></span><span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这篇文章是把 istio.io 官方文档、上游 issue #59959、以及 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">istio/istio@9c8ba31</span></span><span leaf=""> 的源码对照读完之后整理的完整笔记。</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">机制部分是代码直读，版本判断经过 commit ancestry 校验</span></span><span leaf=""> —— 不是只读 release note 抄结论。</span>
+    </p>
+  </section>
+
+  <!-- 5. 第 01 章 -->
+  <section style="margin-top:16px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">01</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">结论先行：Gateway 永不动</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">TL;DR · 三条路，只有一条不断</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">三条路，只有一条不会断</span></span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">做法</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">升级时改什么</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">服务中断</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">Gateway 写 tag</span></strong><span leaf="">（istio.io/rev=prod）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">只翻 tag 的指向</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">无中断</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Gateway 写 revision 名（istio.io/rev=1-30-2）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">kubectl patch Gateway label</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">约 30 秒</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">不用 revision，走 in-place</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">istioctl upgrade</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">风险最高，见第 02 章</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第一行的「无中断」有一个前提：</span><strong style="color:#059669;"><span leaf="">你的旧控制面已经带上 #59959 的修复</span></strong><span leaf="">。这个前提很重要，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">第 06 章单独讲</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">推荐姿势：四步</span></span>
+    </p>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">装新 revision。</span></strong><span leaf=""> istioctl install --set revision=&lt;新&gt;，等它全部 Ready。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">Gateway / namespace 上只写 tag，永不写 revision 名。</span></strong><span leaf=""> 例如固定写 prod，让这个值在整个生命周期内不变。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">翻 tag 完成切换。</span></strong><span leaf=""> istioctl tag set prod --revision &lt;新&gt; --overwrite。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">4</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">观察，然后卸掉旧 revision。</span></strong><span leaf=""> istioctl uninstall --revision &lt;旧&gt; -y。</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第 3 步是全部动作。</span><strong style="color:#059669;"><span leaf="">Gateway 对象从头到尾没有被碰过。</span></strong>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">一个必须先说清楚的行为</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">翻完 tag，你会发现 gateway 的 Deployment </span><strong style="color:#059669;"><span leaf="">自己开始 rolling 了</span></strong><span leaf="">。这不是意外 —— tag 从不进入 Pod spec，CA_ADDR 取的是 owner istiod 自己的 revision：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">yaml</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># manifests/charts/istio-control/istio-discovery/files/kube-gateway.yaml</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">- name: CA_ADDR</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　value: istiod{{- if not (eq .Values.revision "") }}-{{ .Values.revision }}{{- end }}.{{ .Values.global.istioNamespace }}.svc:15012</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">tag 指向一变，owner istiod 就变了，pod template 里的 CA_ADDR 跟着变，Deployment 自然滚动。所以</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">两种姿势下 Pod 都会滚</span></span><span leaf="">，差别不在「滚不滚」，而在</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">滚动之外还改了什么</span></span><span leaf="">。</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">写 tag</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">只有这一次干净的 Pod 滚动。没有入口对象被改写，滚动有 startupProbe / readinessProbe 保护，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">流量不断</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">写 revision 名</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">Pod 滚动 ＋ </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">6 个生成对象被改写</span></span><span leaf="">，两个扰动窗口叠加 —— 这就是那 30 秒的来源，第 07 章展开。</span>
+      </p>
+    </section>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">这篇文章剩下的部分，就是解释「</span><strong style="color:#059669;"><span leaf="">为什么只有这一种姿势是对的</span></strong><span leaf="">」。</span>
+      </p>
+    </section>
+
+  </section>
+
+  <!-- 6. 第 02 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">02</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">为什么 in-place 升级是场赌博</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">IN-PLACE · 看着没事的代价</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">istioctl upgrade</span></span><span leaf=""> 做的事是：把已安装的 Istio </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">原地换到新版本</span></span><span leaf=""> —— 控制面和 gateway 一起被替换，集群里始终</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">只有一份控制面</span></span><span leaf="">。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">官方文档给的风险提示只有一句话：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">Warning: Traffic disruption may occur during the upgrade process. To minimize the disruption, ensure that </span><strong style="color:#059669;"><span leaf="">at least two replicas of istiod</span></strong><span leaf=""> are running. Also, ensure that </span><strong style="color:#059669;"><span leaf="">PodDisruptionBudgets</span></strong><span leaf=""> are configured with a minimum availability of 1.</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这句话背后的机制，比它读起来严重得多。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">核心：没有第二个控制面兜底</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">revision 升级时新老 istiod 并存，老的持续服务老 Pod；in-place 时 </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">istiod 自己先被滚掉，没有任何 fallback</span></span><span leaf="">。由此产生四个后果：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">后果</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">机制</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">注入 webhook fail-closed</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">istio-sidecar-injector 的 </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">failurePolicy: Fail</span></span><span leaf="">。istiod 全挂时新 Pod 根本创建不出来 —— 升级期间做任何 rollout 都会卡住。这是最常见的事故形态</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">CA / SDS 断供</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">istiod 就是 CA。</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">证书轮转失败</span></span><span leaf="">；若正好有 workload 证书在这个窗口到期，mTLS 直接断</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">新 endpoint 推不下去</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">窗口内上线的 Pod 不会及时进入其他 Envoy 的 cluster —— </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">后端已经扩容，流量却过不去</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">已有 Envoy 不会清空配置</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">xDS 断连时 Envoy 保留最后一份可用配置，所以</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">存量流量通常还在</span></span><span leaf="">。这正是 in-place 往往「看起来没事」的原因</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">为什么它常常「看起来没事」</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">两个原因叠在一起。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第一，就是上面表格的最后一行：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">Envoy 断连时保留最后一份可用配置</span></span><span leaf="">，存量流量不受影响。</span>
+    </p>
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第二，</span><strong style="color:#059669;"><span leaf="">没有 label 的对象是 global object</span></strong><span leaf="">。配置过滤走 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">LabelsInRevision</span></span><span leaf="">：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">go</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// pkg/config/model.go:111</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">func LabelsInRevision(lbls map[string]string, rev string) bool {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　configEnv, f := lbls[label.IoIstioRev.Name]</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　if !f {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　// This is a global object, and always included</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　return true</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　...</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">所有 istiod 都会生成配置，不存在「旧控制面清空配置」的问题。</span><strong style="color:#059669;"><span leaf="">所以 in-place 的风险是 istiod 可用性，不是配置连续性</span></strong><span leaf=""> —— 这两件事不要混。</span>
+    </p>
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">反过来说：只要升级窗口里出现了新的 Pod 创建需求（业务自己在发版、HPA 扩容、节点故障迁移），</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">fail-closed 立刻生效</span></span><span leaf="">。你没踩到，可能只是运气。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">另外两个结构性劣势</span></span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">不可回滚</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">出问题只能再 in-place 降级，还得</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">换对应版本的 istioctl</span></span><span leaf="">，暴露窗口翻倍。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">gateway 也在原地被升</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">istioctl upgrade 会把 gateway Deployment 一起滚。</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">没有第二份 gateway 可以分流时，这个滚动窗口就是纯 downtime</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">实操与其硬约束</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">命令本身很直接：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 前置检查</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl x precheck</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 执行升级（原来用 -f 装的必须传同样的 -f，用 --set 装的必须传同样的 --set，</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 否则自定义配置会被还原成默认 profile）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl upgrade -f &lt;原来那份配置&gt;</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 升级完成后，手动滚动数据面</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl rollout restart deployment -n &lt;你的业务命名空间&gt;</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">三条前置约束值得单独记：</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">版本跨度只能一个 minor</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">已安装版本不能比目标版本低超过一个 minor。例如升到 1.31，当前必须是 1.30.x。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">必须是 istioctl 装的</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">必须走 istioctl install / istioctl upgrade 这条路径。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">两者不通用</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">istioctl upgrade </span><span style="border-bottom:2px solid #FECACA;"><span leaf="">不支持</span></span><span leaf="">用 --revision 安装出来的控制面，会直接报错。用哪种装的，就只能用哪种升。</span>
+      </p>
+    </section>
+
+  </section>
+
+  <!-- 7. 第 03 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">03</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">心智模型：并存两份控制面</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">REVISION · 风险不会消失只会转移</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">revision</span></span><span leaf=""> 安装参数，可以在同一集群里</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">并存多份完整、互相独立的控制面</span></span><span leaf="">。每份 revision 有自己的 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">Deployment</span></span><span leaf="">、</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">Service</span></span><span leaf="">、注入 webhook：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">Each revision is a full Istio control plane implementation with its own Deployment, Service, etc.</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">升级 = </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">装一份新的 revision，把工作负载一批批切过去</span></span><span leaf="">，最后删掉旧的。官方对这条路径的态度非常明确：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">...much safer than doing an in-place upgrade and is the </span><strong style="color:#059669;"><span leaf="">recommended upgrade method</span></strong><span leaf="">.</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">具体换来什么：</span>
+    </p>
+
+    <section style="margin-bottom:28px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">维度</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">In-place</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">Revision / canary</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">控制面数量</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">只有一份，被滚掉时无兜底</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">新旧并存，旧的一直在服务</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">跨版本幅度</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">只能逐个 minor（1.29→1.30→1.31）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">允许跨 2 个 minor</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">灰度能力</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">无（一次全切）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">有（namespace / Gateway 粒度）</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">回滚</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">再做一次 in-place 降级 + 换 istioctl 版本</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">切回 label / tag</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">数据面</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">升级完手动 rollout restart</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">迁 namespace 后 rollout restart</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">资源开销</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">小</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">并存期间约 2 倍控制面资源</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">风险没有消失，只是换了地方</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这是全文最值得记住的一句话：</span><strong style="color:#059669;"><span leaf="">两种方式都会中断，但中断的来源完全不同。</span></strong>
+    </p>
+
+    <section style="margin-bottom:28px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">&nbsp;</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">In-place</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">Revision</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">中断来源</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">istiod 不可用</span></strong><span leaf="">（注入 webhook fail-closed、CA 断供、endpoint 推不下去）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">所有权切换时的配置连续性</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">为什么</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">没有第二个控制面兜底</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">新旧控制面交接时，配置和 Deployment 的归属要转移</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">排查起点</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">istiod 副本数、PDB、升级窗口内的 Pod 创建失败事件</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">归属切换时「哪些对象被改写了」、旧 Pod 是否还拿得到配置</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">而 revision 这条路上的「所有权切换」，正是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">第 05 到 07 章</span></span><span leaf="">的主题。</span>
+    </p>
+
+  </section>
+
+  <!-- 8. 第 04 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">04</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">Revision canary 实操三步</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">HOW TO · 装、迁、卸</span>
+        </p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 01</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">装新 revision</span>
+        </h4>
+      </section>
+      <p style="font-size:14px;margin:0 0 16px;color:#4B5563;line-height:1.9;text-align:justify;">
+        <span leaf="">老控制面完全不受影响，这是 revision 升级最重要的前提。</span>
+      </p>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 0. 前置检查（推荐）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl x precheck</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 1. 装新 revision —— 老控制面完全不受影响</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl install --set revision=1-31-0</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 装完可以看到两份并存</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get pods -n istio-system -l app=istiod</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># istiod-1-30-2-xxx   1/1   Running</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># istiod-1-31-0-yyy   1/1   Running</span></p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 02</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">把数据面迁过去</span>
+        </h4>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">方式 A：直接标 revision</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">简单，但</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">对象多时难维护</span></span><span leaf="">。</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 注意：istio-injection 优先级高于 istio.io/rev，必须先删掉它，否则不会生效</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl label namespace &lt;ns&gt; istio-injection-</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl label namespace &lt;ns&gt; istio.io/rev=1-31-0 --overwrite</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 然后重启 Pod 触发重新注入</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl rollout restart deployment -n &lt;ns&gt;</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">方式 B：用 revision tag（推荐，也就是第 01 章的姿势）</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">tag 是</span><strong style="color:#059669;"><span leaf="">稳定别名</span></strong><span leaf="">，指向某个 revision。升级时不用改任何对象的 label，只翻 tag 的指向：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 建立 tag</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl tag set prod-stable --revision 1-30-2</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl tag set prod-canary --revision 1-31-0</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># namespace / Gateway 上写的是 tag 名，而不是 revision 名</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl label namespace &lt;ns&gt; istio.io/rev=prod-stable --overwrite</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># —— 之后要升到 1-31-0，只改 tag 指向 ——</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl tag set prod-stable --revision 1-31-0 --overwrite</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl rollout restart deployment -n &lt;ns&gt;</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">官方原话：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">Notice that </span><strong style="color:#059669;"><span leaf="">no relabeling was required</span></strong><span leaf=""> to migrate workloads to the new revision.</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="display:inline-block;background:#111827;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;"><span leaf="">STEP 03</span></span>
+        <h4 style="font-size:15px;font-weight:800;color:#111827;margin:0;">
+          <span leaf="">卸掉旧控制面</span>
+        </h4>
+      </section>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 确认没有工作负载还在用旧 revision 后</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl uninstall --revision 1-30-2 -y</span></p>
+      </section>
+    </section>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">卸载只会删掉指定 revision 的资源，</span><strong style="color:#059669;"><span leaf="">不会</span></strong><span leaf="">删掉与其他控制面共享的集群级资源。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">顺带记住 default tag 的特殊语义</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">tag </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">default</span></span><span leaf=""> 指向的 revision 是「默认 revision」，额外承担三件事：</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">兜底注入</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">为 istio-injection=enabled、sidecar.istio.io/inject=true、istio.io/rev=default 注入 sidecar。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">校验 Istio 资源</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">承担 mesh 配置的校验职责。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">抢 leader 锁</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">抢占非默认 revision 的 leader 锁</span></span><span leaf="">，执行单例 mesh 职责。</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第一条和第三条是第 06 章的引线，记住它们。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">迁移顺序与回滚注意</span></span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">逐个迁移</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">迁移是逐个 namespace / 逐个 Gateway 做的，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">可以随时停下来观察</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">回滚</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">把 label 或 tag 切回旧 revision 即可，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">代价远低于 in-place</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">gateway 的例外</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">如果之前对 gateway 做过 in-place 升级，istioctl uninstall </span><span style="border-bottom:2px solid #FECACA;"><span leaf="">不会</span></span><span leaf="">自动把它恢复成旧 revision 的 gateway，需要手工用对应旧版本的 istioctl 装回来。官方提示：为避免 downtime，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">先确认旧 gateway 已经跑起来，再进行 canary 卸载</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+  </section>
+
+  <!-- 9. 第 05 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">05</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">为什么「只写 tag」是硬性要求</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">6 OBJECTS · 一个开关决定爆炸半径</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">在「所有权判定」这一层，tag 和 revision 名完全等价。它俩看起来只是两种写法 —— 在代码里判定「这个对象归不归我管」的是 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">IsMine</span></span><span leaf="">：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">go</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// pkg/revisions/tag_watcher.go</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">func (p *tagWatcher) GetMyTags() sets.String {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　res := sets.New(p.revision)                          // 自己的 revision 永远算自己的</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　for _, wh := range p.webhooksIndex.Lookup(p.revision) {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　　　res.Insert(wh.GetLabels()[label.IoIstioTag.Name]) // 再加上所有指向自己的 tag 名</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// ... servicesIndex 同理</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　return res</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">func (p *tagWatcher) IsMine(obj metav1.ObjectMeta) bool {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　selectedTag, ok := obj.Labels[label.IoIstioRev.Name]  // "canary" 或 "1-30-2"</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　// ... 无 label 时回退到 namespace 的 istio.io/rev</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　return p.GetMyTags().Contains(selectedTag) || /* default tag 的特殊分支 */</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">myTags 是「自己的 revision ∪ 指向自己的 tag」，两者是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">同一类值</span></span><span leaf="">，没有任何优先级或宽容度差别。把 label 写成 canary（tag）还是 1-30-2（revision 名），对 IsMine 而言完全一样。</span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">但这个等价只到这一层为止。</span></strong><span leaf=""> 两个操作本身并不等价，差别在</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">实际写入的对象集合</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">分水岭：一个默认开启的开关</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">PILOT_ENABLE_GATEWAY_API_COPY_LABELS_ANNOTATIONS</span></span><span leaf=""> </span><strong style="color:#059669;"><span leaf="">默认为 true</span></strong><span leaf="">（</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">pilot/pkg/features/experimental.go:152</span></span><span leaf="">），它会执行 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">maps.Clone(gw.GetLabels())</span></span><span leaf=""> —— 把 Gateway 的 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">metadata.labels</span></span><span leaf=""> </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">原样复制到它生成的所有对象上</span></span><span leaf="">。在 kube-gateway.yaml 里，.InfrastructureLabels 出现在 6 处：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">行号</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">对象</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">L10</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">ServiceAccount</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">L33</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Deployment metadata.labels</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">L66</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">Pod template labels</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">L328</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">Service（type: LoadBalancer）</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">L365 / L391</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">HPA / PDB</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">于是两条路径的写入集合完全不同：</span>
+    </p>
+
+    <section style="margin-bottom:28px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">&nbsp;</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">写 revision 名（patch label）</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">写 tag（翻 tag）</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Gateway 对象本身</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">被用户改写</span></strong><span leaf="">（resourceVersion 变，唤醒所有 Gateway watcher）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">从不被碰</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">pod template 的 rev 注解 / CA_ADDR / image</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">变</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">变</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">pod template 的 labels</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">变</span></strong><span leaf="">（1.30.2 → 1.30.3）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">不变（恒为 stable）</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">Service（LB）metadata.labels</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">变</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">不变</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">ServiceAccount / HPA / PDB labels</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">变</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">不变</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">内容真正变化的生成对象数</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">6 个全变</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">只有 1 个</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">补一个代码事实：</span><strong style="color:#059669;"><span leaf="">istiod 从不修改 Gateway 的 label</span></strong><span leaf="">。它唯一写 Gateway 的地方是 deploymentcontroller.go:779（setGatewayControllerVersion），且只在从旧 controller-version 接管时写一次注解。所以上面那列 Gateway label 的变化，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">只可能来自你自己的 patch</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">tag 的四项实打实的好处</span></span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">好处</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">说明</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">完全不动 Gateway 对象</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">翻 tag 只改 MutatingWebhookConfiguration istio-revision-tag-&lt;tag&gt; 与 Service istiod-&lt;tag&gt; 两个集群级对象；所有 Gateway / namespace / Deployment 的 label </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">一个字节都不变</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">一次翻转、原子生效</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">istioctl tag set 改的是同名 webhook（update，不是 delete + create），所有标了该 tag 的对象</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">在同一瞬间一起切过去</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">回滚成本极低</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">把 tag 翻回去就回滚了。硬编码 revision 名要再全改一遍，还得记得原值</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">有一张显式映射表</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">istioctl tag list 随时可查；revision 名本身没有任何登记处</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">官方文档的措辞也是这个角度：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">Revision tags are stable identifiers that point to revisions and can be used to avoid relabeling namespaces… Manually relabeling namespaces when moving them to a new revision can be </span><strong style="color:#059669;"><span leaf="">tedious and error-prone</span></strong><span leaf="">.</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">一个真实的语义差异：无人认领的中间态</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">tag 与 revision 名有一处</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">确实不同</span></span><span leaf="">的行为，值得单独记住。</span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">如果你先把 label 改成 1-30-3，但 1-30-3 的 istiod 还没装好或还没就绪，那么所有 istiod 的 IsMine 全为 false：</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">带修复的版本</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">旧 istiod 仍发配置所以流量不挂，但 </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">Deployment 没人管，新 Pod 永远起不来</span></span><span leaf="">，直到你装好为止。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">不修复的版本</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">没有任何控制面发配置 → </span><span style="border-bottom:2px solid #FECACA;"><span leaf="">立刻全挂</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">tag 流程天然避开这个状态：先装好新 revision，再翻 tag（</span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">istioctl tag set --revision X</span></span><span leaf=""> 还会校验 revision 存在）。换句话说，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">「改 label」这个动作把「声明」和「实现」耦合在了一次操作里，顺序很容易做错。</span></span>
+    </p>
+
+  </section>
+
+  <!-- 10. 第 06 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">06</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">版本前提：旧控制面必须已带修复</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">ISSUE 59959 · 看起始版本，不看目标版本</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">上一章解释了「为什么 tag 更好」。这一章讲清那个前提 —— </span><strong style="color:#059669;"><span leaf="">它决定了第 01 章第一行的「无中断」在你的集群上能不能兑现。</span></strong>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">先记住一句话</span></span>
+    </p>
+
+    <section style="background:#F0FDF4;padding:12px 16px;border-radius:8px;border:1px solid #BBF7D0;margin-bottom:20px;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;text-align:justify;">
+        <strong style="color:#059669;"><span leaf="">决定你会不会踩到配置清空 bug 的，是你当前正在跑的旧 istiod 版本，不是新装的那个。</span></strong>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">因为把 Gateway 从配置快照里剔除、向旧 Pod 推空 xDS 的，是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">旧控制面</span></span><span leaf="">。新控制面修没修，救不了旧控制面正在做的事。所以判断方法是看</span><strong style="color:#059669;"><span leaf="">起始版本</span></strong><span leaf="">：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">起始版本（你正在跑的旧 istiod）</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">含修复</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">翻 tag 升级会怎样</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">1.28.x 及更早</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">会断</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">1.29.0 – 1.29.4</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">会断</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">1.29.5+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">不会断</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">1.30.0 / 1.30.1</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">会断</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">1.30.2+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">不会断</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">1.31.0+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">不会断</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">实测数据点：</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">1.30.0 → 1.30.3 会断，1.30.2 → 1.30.3 不会断</span></span><span leaf=""> —— 差异全部来自起始版本。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">这个 bug 是什么</span></span>
+    </p>
+
+    <section style="margin:0 0 24px;background:#ECFDF5;border-radius:0 10px 10px 0;border-left:4px solid #059669;padding:16px 20px;">
+      <p style="font-size:14px;color:#374151;margin:0;line-height:1.8;text-align:justify;">
+        <span leaf="">在 1.25 ~ 1.30.1 之间，只要一个 Gateway 的归属控制面发生变化，旧控制面会立刻把该 Gateway 从配置快照里剔除，并向仍在服务的旧 gateway Pod </span><strong style="color:#059669;"><span leaf="">推送一份空 xDS 配置</span></strong><span leaf=""> —— listener 和 route 全部删除。旧 Pod 还在 Service endpoints 里继续接收 LB 流量，于是表现为连接立即被拒，直到新的 gateway Pod 起来，约 30 秒。</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">关键的一点是：</span><strong style="color:#059669;"><span leaf="">你不需要手动改 Gateway 的 label 就会触发。</span></strong>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">四条触发途径，其中三条完全不碰 Gateway</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">判定依据是「这个 label 值</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">当前解析到哪个 revision</span></span><span leaf="">」，而不是「label 有没有被改过」：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">途径</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">碰 Gateway？</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">典型场景</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">改 Gateway 自己的 istio.io/rev label</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">会</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">手动把一个网关切到新 revision</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">翻 Gateway 引用的 tag 的指向</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">不会</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">istioctl tag set canary --revision &lt;新&gt; --overwrite</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">翻 default tag 的指向</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">不会</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">istioctl tag set default --revision &lt;新&gt; —— 原始 issue 就是这个</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">改 Gateway 所在 namespace 的 istio.io/rev</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">不会</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Gateway 自己没写 label 时会继承 namespace 的</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">②③④ 才是 revision 升级的正常路径。</span></strong><span leaf=""> 这也解释了为什么这个 bug 影响面这么大：在未修复的版本上，</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">连第 01 章推荐的那套姿势都躲不开它</span></span><span leaf="">。上游 issue #59959 的报告者，做的动作只有一条：</span>
+    </p>
+
+    <section style="padding:6px 0 4px;margin-bottom:24px;">
+      <p style="margin-bottom:6px;font-size:12px;font-weight:700;color:#9CA3AF;letter-spacing:1px;">
+        <span style="color:rgb(255,76,0);"><span leaf="">！真正的坑 🕳</span></span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span style="color:rgb(136,136,136);font-weight:bold;"><span leaf="">istioctl tag set default --revision 1-29-2 --overwrite。他一根手指都没碰过 Gateway 对象。</span></span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">再补一层：如果 Gateway 自己没写 label、所在 namespace 也没写，selectedTag 会是空字符串，判定落到 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">myTags.Contains("default")</span></span><span leaf=""> —— 也就是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">该网关跟着 default revision 走</span></span><span leaf="">。这解释了为什么翻 default tag 会把一批没写 label 的网关一起搬走。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">故障链的五个环节</span></span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">环 1：一个多余且致命的过滤器</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">从 1.25 起（PR #54465，为修 #54458），GatewayCollection() 与 ListenerSetCollection() 的回调开头有这么一段 —— 见下面的代码。这</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">不是「不写 status」</span></span><span leaf="">：在 krt 里返回 nil 意味着「这个 key 没有输出」，等价于发出 delete，Gateway 从整个配置快照中消失。</span>
+      </p>
+    </section>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">go</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">if !tagWatcher.Get(ctx).IsMine(obj.ObjectMeta) {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　return nil, nil</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+      </section>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">环 2：IsMine 的判定方式</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">就是第 05 章那段代码。只要这个值当前解析到的不再是旧 istiod，旧 istiod 立刻 IsMine=false。而这个值可以来自 Gateway 自己，也可以来自它所在的 namespace；label 本身甚至可以</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">一个字节都没变</span></span><span leaf=""> —— 变的是 myTags（它引用的 tag 被翻走了）。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">环 3：旧 Pod 无法「漂移」过去</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">gateway Pod 的 CA_ADDR 是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">硬编码在 Pod spec 里</span></span><span leaf="">的，旧 Pod 一生只连 istiod-1-28-6，label 改了它也不会自动切到新控制面。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">环 4：空推，而流量还在（真正的断点）</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">旧 istiod 把 Gateway 丢掉 → 给仍在连它的旧 gateway Pod </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">推送空 xDS</span></span><span leaf="">（listener / route 全删）。而旧 Pod 依然在 Service endpoints 里继续接收 LB 流量 → 表现为连接被拒。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">环 5：新 Pod 需要 20~30 秒</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">新 istiod 要接管 webhook、改写 Deployment、滚出新 Pod，新 Pod 还要过 startupProbe（最长 30×1s）与 readinessProbe（15s 周期）。这段窗口里</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">没有任何 Pod 能服务</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">两条通道的状态是错位的：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">text</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">同一瞬间，两条通道状态错位：</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">旧 Pod ──▶ istiod-1-28-6 ──▶ 推空 xDS，立刻断供</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">新 Pod ──▶ istiod-1-29-2 ──▶ 配置完整，20~30s 才就绪</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">旧通道断了，新通道还没建好 —— 这就是那 30 秒。</span></p>
+      </section>
+    </section>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <strong style="color:#059669;"><span leaf="">关键认知：</span></strong><span leaf="">这不是「滚动更新造成的」，而是「</span><strong style="color:#059669;"><span leaf="">旧控制面把配置清空</span></strong><span leaf="">」×「</span><strong style="color:#059669;"><span leaf="">新 Pod 还没就绪</span></strong><span leaf="">」的叠加。滚动更新本身有 startupProbe / readinessProbe 保护，是安全的。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">一个常见的误判方向</span></span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">issue 里有人说「被清空的是 HTTPRoute 的 status」，并把线索指向 PR #58292。但 #58292 只改 status 写入（在 pilot/pkg/status/collections.go 的 RegisterStatus 里加 IsMine 过滤），</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">完全不碰 xDS 配置生成</span></span><span leaf="">。status 变空只是同一个根因的旁证 —— Gateway 被丢掉后，route 找不到 parent，于是 status 也空了。</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">顺着 status 这条线查会走偏。</span></span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">为什么不用 revision 的集群没事</span></span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">不用 revision 时，配置过滤走 LabelsInRevision，而</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">没有 label 的对象是 global object</span></span><span leaf="">（第 02 章那段代码），所有 istiod 都会生成配置。这也解释了 issue 里报告者的另一个观察：不用 revision、纯 istioctl install -f values.yaml 跨版本升级反而一切正常。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">修复：删掉那个过滤器</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">修复非常干脆 —— 直接删掉 config-emission 层的 IsMine 过滤，因为它在另外两处已经是冗余的：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">关注点</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">过滤器位置</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">修复后</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">配置生成</span></strong><span leaf="">（listener / route）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">gateway_collection.go</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">删除</span></strong><span leaf=""> —— 所有 revision 都为自己的 Pod 生成配置</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">status 写入</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">status/collections.go</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">保留</span></strong><span leaf=""> —— 只有 owner 写，避免多控制面互相覆盖</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">Deployment 管理</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">deploymentcontroller.go:356</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">保留</span></strong><span leaf=""> —— 只有 owner 管，避免重复接管</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">修复代码自己的注释，比 release note 写得清楚：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">go</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// pilot/pkg/config/kube/gateway/gateway_collection.go · ListenerSetCollection</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">//</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// Note: tagWatcher.IsMine() is intentionally not filtered at this config-emission layer. Filtering</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// here caused a temporary outage when a Gateway's or ListenerSet's istio.io/rev label was changed:</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// the prior owning control plane immediately dropped the resource and pushed empty xDS config to</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// pods still running on the old revision (see https://github.com/istio/istio/issues/59959).</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">被否决的替代方案</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">另一条路线是在提前返回之前调用 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">ctx.DiscardResult()</span></span><span leaf="">，让 krt 保留上一次的输出而不是发 delete：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">diff</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　if !tagWatcher.Get(ctx).IsMine(obj.ObjectMeta) {</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">+　　 ctx.DiscardResult()</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　 return nil, nil</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　}</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">维护者 howardjohn 的两条否决理由，恰好解释了为什么最终方案是「删掉」而不是「打补丁」：</span>
+    </p>
+
+    <section style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:justify;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.6;">
+        <span leaf="">我们改了一条代码路径，但可能还有 100 条路径对 revision 有隐性依赖并会生成错误配置，很难确信补全了所有正确的地方。</span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:8px 0 0;line-height:1.6;">
+        <span leaf="">这个方案依赖存在 last known config。想象一个新起的 istiod 副本 —— 我们又会回到坏配置的状态。</span>
+      </p>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这个 PR（#59583）于 2026-05-09 被 stale bot 关闭，</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">从未合并</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">还有一半没修：HTTPRoute</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">pilot/pkg/config/kube/gateway/controller.go:494</span></span><span leaf=""> 的 buildClient()：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">go</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">filter := kclient.Filter{</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　ObjectFilter: kubetypes.ComposeFilters(kc.ObjectFilter(), c.inRevision),</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">// all other types are filtered by revision, but for gateways we need to select tags as well</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">if res == gvr.KubernetesGateway {          // ← 只有这一个 GVR 被豁免</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　　filter.ObjectFilter = kc.ObjectFilter()</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">}</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">看调用点（controller.go:213-235）：Gateways 被豁免，但 </span><strong style="color:#059669;"><span leaf="">HTTPRoutes / GRPCRoutes / TLSRoutes / TCPRoutes / BackendTLSPolicies / ListenerSets 全都没有</span></strong><span leaf="">。而 LabelsInRevision 只在对象</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">没有 label 时</span></span><span leaf="">才返回 true：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">HTTPRoute 上的 label</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">老 istiod 的 informer</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">结果</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">不带 istio.io/rev</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">看得见</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">安全</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">带了 istio.io/rev: 1-28-6</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">根本没有这条 route</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">同类中断</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">修它需要豁免所有 route GVR，对应 PR </span><span style="border-bottom:2px solid #FECACA;"><span leaf="">#59565 被关闭、未合并</span></span><span leaf="">。所以 issue #58840 至今只修了一半。</span>
+    </p>
+
+    <section style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
+      <p style="font-size:13px;color:#92400E;margin:0;font-weight:700;">
+        <span leaf="">HTTPRoute 不要打 istio.io/rev。这是目前唯一仍未修复的坑。</span>
+      </p>
+    </section>
+
+  </section>
+
+  <!-- 11. 第 07 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">07</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">为什么改 revision 名会断 30 秒</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">THE OTHER 30s · 候选与结论边界</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第 06 章的 bug 在修复版本上不复现了。但</span><strong style="color:#059669;"><span leaf="">即使两侧控制面都已修复，改 Gateway 的 revision 名这条路依然会断 30 秒</span></strong><span leaf=""> —— 这是另一条完全独立的机制，也是「只写 tag」为什么是硬性要求的直接答案。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">一个令人困惑的实验结果</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">环境是多 revision 并存多个 istiod（1.30.0 / 1.30.2 / 1.30.3），ingress 使用 Kubernetes Gateway API 的 Gateway 资源 + istio 的 GatewayClass。观测手段是 Gateway 前面挂 LB，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">循环 curl 打 LB 地址，记录失败窗口</span></span><span leaf="">：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">&nbsp;</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">写 revision 名（patch label）</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">写 tag（翻 tag）</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Gateway 的 istio.io/rev</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">1.30.0 → patch 成 1.30.2 → patch 成 1.30.3</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">恒为 stable，整个生命周期不变</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">切换动作</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">kubectl patch Gateway label</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">istioctl tag set stable --revision ...</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">1.30.0 → 1.30.2</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">约 30s 中断</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">1.30.2 → 1.30.3</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">约 30s 中断</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">无中断</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">最后一行是问题所在。1.30.2 → 1.30.3 两侧的 istiod </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">都已经带了第 06 章的修复</span></span><span leaf="">，所以「旧控制面把 Gateway 剔除、推空 xDS」这个根因</span><span style="border-bottom:2px solid #FECACA;"><span leaf="">在这一步并不成立</span></span><span leaf=""> —— 中断另有来源。</span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">两种方式的共同现象是：Gateway 对应的 Deployment 都正常滚动，新 Pod 也能正常起来。差异在于 patch label 这条路在滚动窗口内有约 30 秒的连续失败。关键特征是「</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">新 Pod 是好的，老 Pod 也没崩，但流量就是断的</span></span><span leaf="">」。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">差异集合只有 4 项</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">两种方式下 pod template 都会变（CA_ADDR 那段），所以差别不在「滚不滚」。把 patch label 独有的写入逐个拿出来判断：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">只有 patch label 会发生的写入</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">能否作用于连接</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">判断</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">Gateway 对象本身被改写</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">唤醒所有 Gateway watcher，istio 自身不会因此断流</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">放大器，不是直接原因</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">Service（LB）metadata.labels 被改写</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">会</span></strong><span leaf=""> —— 它是流量入口对象</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">首要嫌疑</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">pod template 的 rev label 从 1.30.2 变 1.30.3</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">仅当集群里有东西以该 label 为选择器（NetworkPolicy / 自研 controller / 监控规则）</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">需要自查</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">ServiceAccount / HPA / PDB 的 labels 被改写</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">无直接影响</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">排除</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">30s 这个数字本身也是线索</span></span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">它同时吻合 startupProbe 的预算（30×1s）与 terminationGracePeriodSeconds 的 k8s 默认值 30s。所以更可能的形态是「</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">入口对象被改写</span></span><span leaf="">」与「</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">Pod 滚动</span></span><span leaf="">」</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">两个窗口叠加</span></span><span leaf="">，而不是某个单一对象。</span>
+    </p>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">必须诚实标注的置信度</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">这部分结论分两档，写清楚比写好看重要。</span>
+    </p>
+
+    <section style="background:#F0FDF4;padding:12px 16px;border-radius:8px;border:1px solid #BBF7D0;margin-bottom:16px;">
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;text-align:justify;">
+        <strong style="color:#059669;"><span leaf="">已确定（代码直读）</span></strong><span leaf="">：写入集合的差异。patch label 真实改写 6 个对象，翻 tag 只改写 1 个。</span>
+      </p>
+    </section>
+
+    <section style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
+      <p style="font-size:13px;color:#92400E;margin:0;font-weight:700;">
+        <span leaf="">未确定：Service 的 metadata 改写是否就是那 30 秒的直接原因。metadata-only 的 Service 更新对多数 LB 控制器（含 AWS CCM）是 no-op —— 单靠它解释 30 秒偏弱，需要实测。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">两个可以自己跑的决定性实验</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">实验一：把 label 复制链关掉。</span></strong><span leaf=""> 既然差异已经定位到这条复制链，就直接把它切断：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 给 istiod 加环境变量后重启</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># helm 等价于 --set pilot.env.PILOT_ENABLE_GATEWAY_API_COPY_LABELS_ANNOTATIONS=false</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">PILOT_ENABLE_GATEWAY_API_COPY_LABELS_ANNOTATIONS=false</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 然后原样重跑：patch gateway label 1.30.2 → 1.30.3</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">中断消失 → 机制确定，就是这条复制链。再往下缩一环：看 LB 侧 </span><span style="background:#F3F4F6;color:#1F2937;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:600;"><span leaf="">kubectl -n &lt;ns&gt; get svc &lt;gw&gt;-istio -w</span></span><span leaf="">，观察 EXTERNAL-IP / 端口是否瞬闪；同时看有没有东西按 istio.io/rev 选 Pod：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get networkpolicy,pdb -A -o json \</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　| jq '.. | objects | select(.matchLabels?) | .matchLabels | select(has("istio.io/rev"))'</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">中断还在 → </span><span style="border-bottom:2px solid #FECACA;"><span leaf="">这条链被证伪</span></span><span leaf="">，做实验二。</span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <strong style="color:#059669;"><span leaf="">实验二：确认翻 tag 那一路里 gateway 有没有真的迁移过去。</span></strong><span leaf=""> 因为两种方式下 pod template 都该变，若翻 tag 后 Deployment 根本没滚，那「无中断」只是「什么都没发生」：</span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">NS=&lt;ns&gt;; GW=&lt;gateway-name&gt;</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl -n "$NS" get deploy "$GW-istio" -o jsonpath=\</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">'{.metadata.generation}{"  "}{.spec.template.spec.containers[?(@.name=="istio-proxy")].image}{"\n"}{.spec.template.spec.containers[?(@.name=="istio-proxy")].env[?(@.name=="CA_ADDR")].value}{"\n"}'</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl proxy-status | grep "$GW"     # 最后一列应指向 istiod-1.30.3-xxx</span></p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">如果 CA_ADDR / proxy-status 仍停在 istiod-1.30.2，则翻 tag 的对比前提不成立，需要重做。</span>
+    </p>
+
+  </section>
+
+  <!-- 12. 第 08 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">08</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">零停机升级清单</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">CHECKLIST · 照着做就行</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">把前面所有结论收敛成一份可以直接照着做的流程：</span>
+    </p>
+
+    <section style="margin-bottom:24px;">
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">1</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">先确认旧控制面版本。</span></strong><span leaf=""> 起始版本必须 ≥ 1.29.5 / 1.30.2 / 1.31.0。这是第 06 章的前提，也是唯一一个「做不到就没法零停机」的硬条件 —— 如果旧版本更低，先升到修复版本，再做后续步骤。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">2</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">装新 revision，并确认就绪。</span></strong><span leaf=""> istioctl install --set revision=1-30-3，等到 istiod-1-30-3 全部 Ready 再进入下一步。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">3</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">Gateway 的 istio.io/rev 只写 tag，永不写具体 revision 名。</span></strong><span leaf=""> 例如固定写 canary，让这个值在整个生命周期内不变。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">4</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">翻 tag 完成切换。</span></strong><span leaf=""> istioctl tag set canary --revision 1-30-3 --overwrite —— 一次原子切换，Gateway CR 完全不动。之后 gateway Deployment 会自动滚动，这是预期行为。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">5</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">HTTPRoute 不要打 istio.io/rev。</span></strong><span leaf=""> 这是目前唯一仍未修复的坑。</span>
+        </p>
+      </section>
+      <section style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:50%;flex-shrink:0;margin-top:2px;"><span leaf="">6</span></span>
+        <p style="font-size:14px;color:#374151;margin:0;line-height:1.9;flex:1;">
+          <strong style="color:#059669;"><span leaf="">给 gateway Deployment 足够的安全边际。</span></strong><span leaf=""> 至少 2 副本 + PodDisruptionBudget + strategy.rollingUpdate.maxUnavailable: 0。</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">排障命令</span></span>
+    </p>
+
+    <section style="margin:0 0 20px;border-radius:8px;overflow:hidden;background:#1E293B;box-shadow:0 4px 16px -8px rgba(15,23,42,0.4);">
+      <section style="display:flex;align-items:center;padding:9px 14px;background:#0F172A;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF5F56;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFBD2E;margin-right:7px;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27C93F;font-size:0;line-height:0;overflow:hidden;">.</span>
+        <span style="margin-left:12px;font-size:12px;color:#64748B;font-family:Consolas,Monaco,monospace;letter-spacing:1px;"><span leaf="">bash</span></span>
+      </section>
+      <section style="padding:11px 14px;">
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 1. 确认所有控制面版本（重点看 istiod，不是 client）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl version</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 2. 确认待升级对象的 revision 名真实存在</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">istioctl tag list</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get mutatingwebhookconfiguration -l istio.io/tag</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 3. 确认 route 上有没有 revision label（第 06 章的残留那一半）</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl get httproute,grpcroute,tcproute,tlsroute -A -o json \</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">　| jq '.items[] | select(.metadata.labels["istio.io/rev"]) | .metadata'</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 4. 看副本数与滚动策略</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl -n &lt;ns&gt; get deploy &lt;gw&gt; -o jsonpath='{.spec.replicas}{"\n"}{.spec.strategy}{"\n"}'</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""> </span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf=""># 5. 滚动期间盯 endpoints 会不会掉到 0</span></p>
+        <p style="margin:0;font-family:'SF Mono',Consolas,Monaco,monospace;font-size:13px;line-height:1.6;color:#E2E8F0;"><span leaf="">kubectl -n &lt;ns&gt; get endpoints &lt;gw&gt; -w</span></p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">场景速查：到底该选哪种</span></span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">场景</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">建议</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">生产、不能接受中断</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">Revision + tag</span></strong></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">需要跨 2 个 minor 升级</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">只能用 revision</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">需要灰度验证新控制面</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">只能用 revision</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">单节点 / 开发集群 / 资源紧张</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">In-place 可以接受，但要配 ≥2 istiod 副本 + PDB</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">想省事、一次升完</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">In-place，但避开业务高峰</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">Gateway API 网关 + 零停机</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">Revision + tag，且 Gateway 的 istio.io/rev 只写 tag</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </section>
+
+  <!-- 13. 第 09 章 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">09</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">PART</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">版本速查与结论边界</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">VERSIONS · 哪些是确定的</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">一张表自查你的集群</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">起始版本（</span><strong style="color:#059669;"><span leaf="">你正在跑的旧 istiod</span></strong><span leaf="">）与 #59959 修复的对照 —— 经 GitHub compare API 做 </span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">commit ancestry 校验</span></span><span leaf="">，不是只读 release note 文本：</span>
+    </p>
+
+    <section style="margin-bottom:24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">起始版本区间</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">含修复</span></th>
+            <th style="background:#059669;color:#fff;font-weight:700;padding:8px 12px;text-align:left;"><span leaf="">PR / commit</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">1.28.x 及更早</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">未 backport</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">1.29.0 – 1.29.4</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">1.29.5+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">#60627 · 17c24702</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">1.30.0 / 1.30.1</span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span style="border-bottom:2px solid #FECACA;"><span leaf="">否</span></span></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">1.30.2+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;"><span leaf="">#60624 · 9076b316</span></td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">1.31.0+</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><strong style="color:#059669;"><span leaf="">是</span></strong></td>
+            <td style="padding:8px 12px;border-bottom:1px solid #E5E7EB;color:#374151;background:#F9FAFB;"><span leaf="">#60158 · 4e5bcf3f（master 继承）</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">注意两件事：</span>
+    </p>
+
+    <section style="margin-bottom:14px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">看起始版本，不看目标版本</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">1.30.0 → 1.30.3 会断，1.30.2 → 1.30.3 不会断。</span>
+      </p>
+    </section>
+
+    <section style="margin-bottom:24px;">
+      <p style="margin:0 0 6px;">
+        <span style="display:inline-block;font-size:13px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);padding:3px 10px;border-radius:999px;"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:5px;vertical-align:middle;"><span leaf=""><br></span></span><span leaf="">修复版本 ≠ 一定不断</span></span>
+      </p>
+      <p style="font-size:13px;color:#4B5563;margin:0;line-height:1.7;text-align:justify;">
+        <span leaf="">1.30.2 → 1.30.3 这类两侧都已修复的升级，如果走的是「改 Gateway 的 revision 名」这条路，仍然可能有约 30 秒中断 —— 那是第 07 章的机制，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">与版本无关</span></span><span leaf="">。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">结论边界</span></span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">写技术笔记最忌讳把推断当结论，所以明确标一下这篇的可信度分层。</span>
+    </p>
+
+    <section style="background:#F0FDF4;padding:12px 16px;border-radius:8px;border:1px solid #BBF7D0;margin-bottom:16px;">
+      <p style="font-size:13px;color:#374151;margin:0 0 8px;line-height:1.7;">
+        <strong style="color:#059669;"><span leaf="">已确定（代码直读 + commit ancestry 校验）</span></strong>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0 0 4px;line-height:1.7;">
+        <span leaf="">· 配置清空 Bug 的根因、修复方式、落入版本</span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0 0 4px;line-height:1.7;">
+        <span leaf="">· IsMine 对 tag 名与 revision 名一视同仁</span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0 0 4px;line-height:1.7;">
+        <span leaf="">· CA_ADDR 取 owner istiod 自己的 revision，tag 从不进入 Pod spec</span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0 0 4px;line-height:1.7;">
+        <span leaf="">· EnableGatewayAPICopyLabelsAnnotations 默认 true，导致 Gateway 的 label 被复制到 6 个生成对象</span>
+      </p>
+      <p style="font-size:13px;color:#374151;margin:0;line-height:1.7;">
+        <span leaf="">· patch label 改写 6 个对象、翻 tag 只改写 1 个</span>
+      </p>
+    </section>
+
+    <section style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
+      <p style="font-size:13px;color:#92400E;margin:0 0 8px;font-weight:700;">
+        <span leaf="">尚未验证（按可能性排序的候选）</span>
+      </p>
+      <p style="font-size:13px;color:#92400E;margin:0;line-height:1.7;">
+        <span leaf="">· 那 30 秒的直接原因是哪一次写入。首要嫌疑是 LoadBalancer Service 的 metadata 被改写，但 metadata-only 的 Service 更新对多数 LB 控制器是 no-op，需要实测。</span>
+      </p>
+    </section>
+
+    <p style="font-size:15px;font-weight:900;color:#111827;margin-top:32px;margin-bottom:16px;">
+      <span style="background:linear-gradient(180deg,transparent 65%,#FDE68A 65%);padding:0 4px;"><span leaf="">参考资料</span></span>
+    </p>
+
+    <p style="margin-bottom:8px;font-size:13px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">上游 issue 与 PR</span></span>
+    </p>
+    <p style="margin-bottom:16px;font-size:13px;line-height:1.9;text-align:justify;">
+      <span leaf="">Issue #59959 · PR #60158 · PR #60624 · PR #60627 · PR #59583（已关闭）· PR #59565（已关闭）· Issue #58840</span>
+    </p>
+
+    <p style="margin-bottom:8px;font-size:13px;line-height:1.9;text-align:justify;">
+      <span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">官方文档</span></span>
+    </p>
+    <p style="margin-bottom:24px;font-size:13px;line-height:1.9;text-align:justify;">
+      <span leaf="">Canary Upgrades · In-place Upgrades · Upgrading gateways（istio.io/latest/docs/setup/upgrade/）</span>
+    </p>
+
+  </section>
+
+  <!-- 14. 写在最后 -->
+  <section style="margin-top:48px;margin-bottom:32px;padding:0 20px;">
+    <section style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <section style="text-align:center;flex-shrink:0;">
+        <p style="margin:0;font-size:28px;font-weight:900;color:#059669;line-height:1;letter-spacing:-2px;">
+          <span leaf="">///</span>
+        </p>
+        <p style="margin:0;font-size:8px;font-weight:700;color:#D1D5DB;letter-spacing:2px;">
+          <span leaf="">LAST</span>
+        </p>
+      </section>
+      <span style="width:1px;height:36px;background:#E5E7EB;flex-shrink:0;"><span leaf=""><br></span></span>
+      <section>
+        <p style="margin:0 0 1px;font-size:17px;font-weight:900;color:#111827;letter-spacing:0.3px;">
+          <span leaf="">写在最后</span>
+        </p>
+        <p style="margin:0;font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:1.5px;">
+          <span leaf="">SUMMARY · 三个判断</span>
+        </p>
+      </section>
+    </section>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">回顾整篇，三个最值得记住的判断。</span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第一，</span><strong style="color:#059669;"><span leaf="">revision 升级只有一种姿势是对的：Gateway 永远写 tag，升级时只翻 tag 的指向</span></strong><span leaf="">。翻 tag 之后 Deployment 会自动滚动，这是预期行为，而且是干净的 —— 因为除了 pod template，</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">没有任何对象被改写</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="margin-bottom:16px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第二，</span><strong style="color:#059669;"><span leaf="">「只写 tag」不是风格偏好，是硬性的</span></strong><span leaf="">。写 revision 名会让 6 个生成对象被改写（含 LoadBalancer Service），写 tag 只改写 1 个。这不是 6 倍的书写量，是</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">6 倍的爆炸半径</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">第三，</span><strong style="color:#059669;"><span leaf="">这套姿势有一个版本前提</span></strong><span leaf="">：旧控制面必须已经带上 #59959 的修复（起始版本 ≥ 1.29.5 / 1.30.2 / 1.31.0）。1.25 ~ 1.30.1 上，连翻 tag 都会把 Gateway 配置清空。</span><span style="border-bottom:2px solid #A7F3D0;font-weight:600;"><span leaf="">升级前先确认旧版本，比什么都重要</span></span><span leaf="">。</span>
+    </p>
+
+    <p style="font-size:14px;margin-bottom:20px;text-align:center;color:#059669;font-weight:700;letter-spacing:1px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;padding:12px 0;">
+      <span leaf="">升级的坑，从来不在命令里，在机制里</span>
+    </p>
+
+  </section>
+
+  <!-- 15. 签名 + 三连 -->
+  <section style="padding:0 20px;">
+    <p style="margin-bottom:24px;font-size:14px;line-height:1.9;text-align:justify;">
+      <span leaf="">我是 {{作者名}}，{{一句话简介}}。如果你觉得今天这篇有收获，欢迎点赞、在看、转发三连，我们下篇见。</span>
+    </p>
+  </section>
+
+  <section style="background:radial-gradient(circle at center,#F9FAFB 0%,#FFFFFF 100%);border:1px solid #E5E7EB;border-radius:16px;padding:32px 20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin:0 20px 24px;">
+    <p style="font-size:13px;font-weight:bold;color:#111827;margin-bottom:20px;line-height:1.6;">
+      <span leaf="">既然看到这里了，如果觉得有用，随手点个赞、在看、转发三连吧。</span>
+    </p>
+    <section style="display:flex;justify-content:center;gap:24px;margin-bottom:16px;">
+      <section style="text-align:center;cursor:pointer;color:#4B5563;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">点赞</span></span>
+      </section>
+      <section style="text-align:center;cursor:pointer;color:#4B5563;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);border:1px solid #F3F4F6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">在看</span></span>
+      </section>
+      <section style="text-align:center;cursor:pointer;color:#059669;">
+        <section style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;background:#ECFDF5;border-radius:12px;box-shadow:0 2px 4px rgba(5,150,105,0.15);border:1px solid #A7F3D0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18v-4a8 8 0 0 1 8-8h8"></path><polyline points="16 2 20 6 16 10"></polyline></svg>
+        </section>
+        <span style="font-size:10px;font-weight:600;"><span leaf="">转发</span></span>
+      </section>
+    </section>
+    <p style="font-size:10px;color:#9CA3AF;letter-spacing:1px;margin:0;">
+      <span leaf="">THANKS FOR READING</span>
+    </p>
+  </section>
+
+</section>

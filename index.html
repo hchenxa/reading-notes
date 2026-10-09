@@ -39,25 +39,32 @@
         // mermaid 的 ESM 包约 3.5MB，所以不做全站预加载：只有当前页真的出现
         // ```mermaid 代码块时才动态 import，没有图表的页面完全不付这个成本。
         function (hook) {
+          // docsify 的代码块渲染器输出的是 <pre data-lang="mermaid"><code class="lang-mermaid">,
+          // 即 lang-* 而不是 Prism 惯用的 language-*。两种都匹配，免得选择器落空(图静默不渲染)。
+          var SELECTOR = '.markdown-section pre > code.lang-mermaid, .markdown-section pre > code.language-mermaid';
           hook.doneEach(function () {
             // 先查一次，没有图表就直接返回，连 import 都不触发
-            if (!document.querySelector('.markdown-section pre > code.language-mermaid')) return;
+            if (!document.querySelector(SELECTOR)) return;
             var ready = window.mermaid
               ? Promise.resolve(window.mermaid)
               : import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')
                   .then(function (m) { window.mermaid = m.default; return m.default; });
             ready.then(function (mermaid) {
               // 异步加载期间用户可能已经切页，所以这里重新查询，不复用旧节点引用
-              var blocks = document.querySelectorAll('.markdown-section pre > code.language-mermaid');
+              var blocks = document.querySelectorAll(SELECTOR);
               if (!blocks.length) return;
               mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
               Array.prototype.forEach.call(blocks, function (code) {
                 var div = document.createElement('div');
                 div.className = 'mermaid';
+                // Prism 对未知语言会退回 markup 语法并插入高亮 span，但 textContent 仍是原始代码
                 div.textContent = code.textContent;
                 if (code.parentElement) code.parentElement.replaceWith(div);
               });
-              mermaid.run({ querySelector: '.markdown-section .mermaid:not([data-processed])' });
+              return mermaid.run({ querySelector: '.markdown-section .mermaid:not([data-processed])' });
+            }).catch(function (err) {
+              // import 失败或语法错误:打日志,别让图表静默消失(err 可能是 Error 或 mermaid 的报错对象)
+              console.error('[mermaid] 渲染失败:', (err && (err.message || err.str)) || err);
             });
           });
         }

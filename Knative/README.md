@@ -209,7 +209,26 @@ NAME                    STATUS   ROLES           AGE   VERSION   INTERNAL-IP   E
 knative-control-plane   Ready    control-plane   21s   v1.34.8   172.18.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.8.0-117-generic   containerd://2.3.1
 ```
 
-顺手验证节点能不能真的拉外网镜像(这一层不通的话后面全是白费)。
+等节点 Ready(刚建好时有十几秒 `NotReady`,是 CNI 在起):
+
+```sh
+for i in $(seq 1 40); do
+  s=$(kubectl --context kind-knative get node knative-control-plane \
+        -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+  [ "$s" = "True" ] && { echo "Ready after ~$((i*3))s"; break; }
+  sleep 3
+done
+kubectl --context kind-knative get nodes -o wide
+```
+
+顺手确认 3.3 那份代理配置真的落进了节点——**这一步能省掉后面所有的"为什么镜像拉不动"**:
+
+```sh
+docker exec knative-control-plane cat /etc/systemd/system/kubelet.service.d/http-proxy.conf \
+  | grep -c host.docker.internal     # 期望非 0
+```
+
+再验证节点能不能真的拉外网镜像(这一层不通的话后面全是白费)。
 镜像已在本地时 `crictl` 直接回一句 `Image is up to date for <id>`;首次拉取时
 进度打在 stderr,同样以这一行收尾:
 
@@ -337,8 +356,8 @@ EOF
 > Knative 会给每个 revision pod 注入一个 **queue-proxy** sidecar,所以
 > revision pod 是 `2/2`,`kubectl get pods` 里看到两个容器:
 > `user-container` + `queue-proxy`。它的镜像
-> `gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:...`
-> **也要能拉到**,预拉镜像时别漏(<https://github.com/knative/serving/issues/12642>)。
+> `gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:...` **也要能拉到**,
+> 预拉镜像时别漏——真正的 digest 在「9.2 需要预拉的镜像清单」里给出。
 
 ## 七、观测 activator 的 scale 动作
 
@@ -511,8 +530,13 @@ kubectl --context kind-knative scale deploy -n knative-serving \
 kubectl --context kind-knative scale deploy -n kourier-system \
   3scale-kourier-gateway --replicas=0
 
-# 2. 在节点里串行拉(镜像清单见 9.2)
-docker exec knative-control-plane crictl pull <image>
+# 2. 把 9.2 的清单落到文件,然后逐个串行拉(一次只跑一个,别并行)
+kubectl --context kind-knative get deploy -A \
+  -o jsonpath='{range .items[*]}{range .spec.template.spec.containers[*]}{.image}{"\n"}{end}{end}' \
+  | grep -E "knative-releases|envoyproxy|helloworld|curlimages" > /tmp/images.txt
+while IFS= read -r img; do
+  docker exec knative-control-plane crictl pull "$img"
+done < /tmp/images.txt
 
 # 3. 放回去
 kubectl --context kind-knative scale deploy -n knative-serving \
@@ -525,23 +549,35 @@ kubectl --context kind-knative scale deploy -n kourier-system \
 
 ### 9.2 需要预拉的镜像清单
 
-```
-gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:...
-gcr.io/knative-releases/knative.dev/serving/cmd/webhook@sha256:...
-gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:...
-gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:...
-gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:...        # queue-proxy,注入到业务 pod
-gcr.io/knative-releases/knative.dev/net-kourier/cmd/kourier@sha256:...
-docker.io/envoyproxy/envoy:v1.37-latest                                 # kourier 网关
-ghcr.io/knative/helloworld-go:latest                                    # 实验服务
-curlimages/curl:latest                                                  # 实验客户端
-```
-
-具体的 digest 直接从工作负载上取,不用手抄:
+不用手抄,直接从集群里生成。注意 **queue-proxy 不在任何 Deployment 里**——它是控制器在
+创建 revision 时注入的,镜像地址放在 `config-deployment` 的 `queue-sidecar-image`:
 
 ```sh
-kubectl --context kind-knative get deploy -n knative-serving \
-  -o jsonpath='{range .items[*]}{range .spec.template.spec.containers[*]}{.image}{"\n"}{end}{end}'
+kubectl --context kind-knative get deploy -A \
+  -o jsonpath='{range .items[*]}{range .spec.template.spec.containers[*]}{.image}{"\n"}{end}{end}' | sort -u
+
+kubectl --context kind-knative get configmap config-deployment -n knative-serving \
+  -o jsonpath='{.data.queue-sidecar-image}{"\n"}'
+```
+
+跑出来是这样(`knative-v1.23.0` 下的实测值;`local-path-provisioner` 和 `coredns` 是 kind
+自带的,不用管):
+
+```console
+docker.io/envoyproxy/envoy:v1.37-latest
+gcr.io/knative-releases/knative.dev/net-kourier/cmd/kourier@sha256:eedfe3938f1efa93230863099f96400a0567909d383a585021f8727fa3a6cf0b
+gcr.io/knative-releases/knative.dev/serving/cmd/activator@sha256:e5ab46f3b73fa2e3898fe47f6a3a0c2bd765596f4fb36ceb4c28c35d0a74b2e5
+gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:879da127b23db65d862cafa6b23fb987381d0e44150f0027d44e1f5aee83bde2
+gcr.io/knative-releases/knative.dev/serving/cmd/controller@sha256:ca5062ece0329d002a81940cf4268d7898866434d70049bb93f27d3a786d3292
+gcr.io/knative-releases/knative.dev/serving/cmd/queue@sha256:a3cc71ce80dbc6df8781f15eac2cf3531a4c9815271799afd8776bef9e6aeaf2
+gcr.io/knative-releases/knative.dev/serving/cmd/webhook@sha256:3846e9a416665c5b9ec2e4de246cfcb5c4ab0d01ba19348aa008caf30144b650
+```
+
+再加上 demo 自己的两个(不预拉也能起控制面,只是 demo 跑不起来):
+
+```console
+ghcr.io/knative/helloworld-go:latest    # 实验服务
+curlimages/curl:latest                  # 实验客户端
 ```
 
 ### 9.3 `kind load docker-image` 在 containerd 镜像存储下会报错

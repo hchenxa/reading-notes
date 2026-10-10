@@ -80,7 +80,9 @@ ambient 把 mesh 拆成两层:
 最直接的证据是 pod 里有哪些容器:
 
 ```console
-$ kubectl --context kind-knative-istio get pod -n demo <revision-pod> \
+$ REV=$(kubectl --context kind-knative-istio get pods -n demo --no-headers \
+          | grep helloworld | awk '{print $1}' | head -1)
+$ kubectl --context kind-knative-istio get pod -n demo "$REV" \
     -o jsonpath='{range .spec.containers[*]}  - {.name}{"\n"}{end}'
   - user-container
   - queue-proxy
@@ -132,6 +134,15 @@ EOF'
 docker exec $N systemctl restart containerd
 ```
 
+重启后**必须确认 CRI 插件还活着**——9.2 那个 `mirrors` / `config_path` 互斥的坑就会在这里露出来:
+
+```sh
+docker exec $N crictl images      # 能列出来就说明 CRI 正常
+docker exec $N journalctl -u containerd --no-pager -n 30 | grep -c "failed to load plugin"   # 期望 0
+```
+
+镜像站是否真的生效,会在第五章装 Knative 时第一次拉取直接体现出来。
+
 效果对比(同一台机器、同一条代理链路):
 
 | 拉取路径 | 实测 |
@@ -164,8 +175,11 @@ kubectl --context kind-knative-istio apply --server-side -f \
 ### 4.4 Istio:ambient profile + **手动打开入口网关**
 
 ```sh
-curl -sL https://istio.io/downloadIstioctl | sh -    # 装到 ~/.istioctl/bin
+# 钉住版本 —— 不设 ISTIO_VERSION 会装成 latest,而本文实测的是 1.31.1
+curl -sL https://istio.io/downloadIstioctl -o /tmp/dl_istioctl
+ISTIO_VERSION=1.31.1 sh /tmp/dl_istioctl              # 装到 ~/.istioctl/bin
 export PATH="$HOME/.istioctl/bin:$PATH"
+istioctl version --remote=false                       # client version: 1.31.1
 
 istioctl install --context kind-knative-istio \
   --set profile=ambient \
@@ -173,6 +187,18 @@ istioctl install --context kind-knative-istio \
   --set 'components.ingressGateways[0].name=istio-ingressgateway' \
   --skip-confirmation
 ```
+
+> 上面这条 `istioctl install` 是**一条命令同时装 ambient 和入口网关**。它是否真的会生成
+> 网关,不用起集群也能验:
+>
+> ```sh
+> istioctl manifest generate --set profile=ambient \
+>   --set 'components.ingressGateways[0].enabled=true' \
+>   --set 'components.ingressGateways[0].name=istio-ingressgateway' \
+>   | grep -c "name: istio-ingressgateway"      # 实测 17
+> ```
+>
+> (拆成两步——先 `--set profile=ambient`,再加网关参数跑第二次——同样可行,本文第一次就是这么装的。)
 
 **`--set components.ingressGateways[0].enabled=true` 不能省。** ambient profile 的定义里
 明确把这个网关关掉了:
@@ -393,6 +419,20 @@ Hello Knative on kind + Istio ambient!
 
 空闲后自动缩容(节奏和 Kourier 那篇一致,说明**网关换掉不影响 scale-to-zero**):
 
+```sh
+# 每 10s 打一次状态,只在有变化时输出
+last=""
+for i in $(seq 1 16); do
+  np=$(kubectl --context kind-knative-istio get pods -n demo --no-headers | grep -c helloworld)
+  pa=$(kubectl --context kind-knative-istio get podautoscaler -n demo --no-headers \
+        | awk '{print "desired="$2" actual="$3}')
+  sm=$(kubectl --context kind-knative-istio get sks -n demo --no-headers | awk '{print $2}')
+  l="revPods=$np $pa sks=$sm"
+  [ "$l" != "$last" ] && { echo "[t=$((i*10))s] $l"; last="$l"; }
+  sleep 10
+done
+```
+
 ```console
 [t=10s] revPods=1 desired=1 actual=1 sks=Proxy
 [t=30s] revPods=1 desired=0 actual=0 sks=Proxy
@@ -574,6 +614,40 @@ $ istioctl install --set components.ingressGateways[0].enabled=true ...
 3. **`third_party/istio` 那三个资源要手动 apply**(第六章)——net-gateway-api 不会替你建 Gateway。
 
 漏掉任何一个,现象都是 KService 一直 `NotReady`,而 Knative 侧不一定给出指向真正原因的报错。
+
+## 十、清理
+
+按"删到什么程度"分三档,按需取用。
+
+**只删实验负载,保留整套环境**(想再跑一遍 demo 就用这个):
+
+```sh
+kubectl --context kind-knative-istio delete namespace demo
+```
+
+**卸掉 Istio,保留集群**(想换个网络层/数据面再试):
+
+```sh
+export PATH="$HOME/.istioctl/bin:$PATH"
+istioctl uninstall --context kind-knative-istio --purge -y
+kubectl --context kind-knative-istio delete namespace istio-system   # --purge 不会删命名空间
+```
+
+**整个删掉**:
+
+```sh
+kubectl --context kind-knative-istio delete namespace demo
+kind delete cluster --name knative-istio
+```
+
+两点说明:
+
+- **Gateway API 的 CRD 是集群级的**,`istioctl uninstall` 不会带走它们。想一并清掉就删掉
+  当初 apply 的那份 bundle(`kubectl delete -f .../v1.6.0/experimental-install.yaml`)——
+  如果它卡住不返回,那是因为还有对象在引用这些 CRD。
+- `kind delete cluster` 会连节点容器一起删,所以第四章对节点 containerd 做的镜像站改动
+  也随之一并消失,不用手动回收。colima 里那份 dockerd 代理 drop-in 和
+  [`kubernetes/kind/`](../kubernetes/kind/) 里的修复文件则要留着,下次建集群直接复用。
 
 ## 相关
 

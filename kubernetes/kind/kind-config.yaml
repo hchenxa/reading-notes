@@ -4,16 +4,19 @@
 # 但节点里的 127.0.0.1 指的是节点自己的 loopback，不是 mac，所以报
 # "proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused"。
 #
-# 解决：给节点内的 containerd 和 kubelet 注入指向宿主网关的代理配置。
-# kind 会在加载时把 __HOST_IP__ 替换成节点里可达的宿主地址（host.docker.internal）。
+# 解决：给节点内的 containerd 和 kubelet 注入指向 host.docker.internal 的代理配置
+# （Docker Desktop / colima 都提供这个别名；Podman Machine 用 host.containers.internal）。
+# 注意 kind **不会**替换 __HOST_IP__ 之类的占位符。
 #
-# 用法：kind create cluster --config kind-config.yaml
+# 用法（hostPath 是相对当前工作目录解析的，必须在 kubernetes/kind/ 下执行）：
+#   cd kubernetes/kind
+#   kind create cluster --config kind-config.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
     extraMounts:
-      # containerd 的拉镜像代理（kind 内置入口会自动把 __HOST_IP__ 替换成宿主 IP）
+      # containerd 的拉镜像代理
       - hostPath: kind-proxy.conf
         containerPath: /etc/systemd/system/containerd.service.d/http-proxy.conf
       # kubelet 的代理（kubelet 环境变量从 PID 1 继承，必须单独覆盖，

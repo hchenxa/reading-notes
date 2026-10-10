@@ -161,7 +161,7 @@ HTTP_PROXY=http://host.lima.internal:7890
 ### 3.3 代理第二层:kind 节点里的 containerd / kubelet(拉业务镜像)
 
 节点容器内看到的 `127.0.0.1` 是节点自己的 loopback,不是 mac。修复文件在
-[`kubernetes/kind/`](../kind/):`kind-config.yaml` + `kind-proxy.conf`,
+[`kubernetes/kind/`](../kubernetes/kind/):`kind-config.yaml` + `kind-proxy.conf`,
 建集群时通过 `extraMounts` 把 drop-in 挂进节点,代理指向 `host.docker.internal`。
 
 **这里有一个曾经的 bug,已修**:原来的 `kind-proxy.conf` 里写的是占位符
@@ -598,7 +598,8 @@ kind v0.32.0 发布了 `kindest/node` 的 v1.33 / v1.34 / v1.35 / v1.36 镜像,
 
 ## 相关
 
-- [`kubernetes/kind/`](../kind/) —— kind 集群配置与节点内代理修复文件
+- [`kubernetes/kind/`](../kubernetes/kind/) —— kind 集群配置与节点内代理修复文件
+- [Knative Serving + Istio:把网络层换成 Gateway API,数据面用 ambient](Istio-GatewayAPI与Ambient.md) —— 同样是 kind 上的实测,换掉网络层与数据面的那一套
 - [Knative Serving 安装文档](https://knative.dev/docs/install/yaml-install/serving/install-serving-with-yaml/)
 - [net-kourier](https://github.com/knative-extensions/net-kourier)
 - [Private Services(cluster-local 默认域名)](https://knative.dev/docs/serving/services/private-services/)

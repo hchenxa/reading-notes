@@ -1,10 +1,13 @@
 # Knative
 
-> 这个目录是 Knative Serving 在本地 kind 集群上的实操记录。
-> 两篇走的是**同一条主线**:装好 Serving,从集群内部发 curl,观察 activator 把 revision
-> 从 0 拉到 1、再缩回 0。区别只在**网络层**和**数据面**选了什么。
+> 这个目录是 Knative Serving 在本地 kind 集群上的记录:**两篇动手实验** + **两篇拆解机制 / 迁移的参考**。
 
-## 两篇实验
+## 四篇文档
+
+### 动手跑:两篇实验
+
+同一条主线 —— 装好 Serving,从集群内部发 curl,观察 activator 把 revision 从 0 拉到 1、
+再缩回 0。区别只在**网络层**和**数据面**选了什么。
 
 | 文档 | 网络层 | Gateway 谁提供 | 数据面 |
 |---|---|---|---|
@@ -15,6 +18,15 @@
 Scale-to-Zero 的机制(ServerlessService / activator / 冷启动)、以及**本机 kind 的全部环境坑**
 (colima 资源不够、两层代理、`DOCKER_HOST` 指向 podman、gcr.io 拉取慢到病态)都在那一篇。
 Istio 篇假设你已读过它的第三章,不再重复。
+
+### 拆开看:两篇参考
+
+| 文档 | 讲什么 |
+|---|---|
+| [对象模型](对象模型.md) | 写一个 KService 之后集群里多出什么:10 个对象各自归谁、Revision 的基数 / 回收 / 命名、请求路径,以及"怎么访问它 / 怎么知道请求落在哪个 Revision / 换个网络层这棵树哪里变"这些实操问答 |
+| [从 Deployment(+HPA) 迁移到 KService](从Deployment迁移到KService.md) | 拿现有应用动手迁:字段映射表、**会静默改变行为**的东西(`readinessProbe` 被吞掉、客户端写死的地址失效)、Service 类型怎么办,以及什么时候不该迁(有状态服务) |
+
+推荐顺序:**Kourier 篇 → 对象模型 → 迁移篇**;要换 Istio 那套再看 Istio 篇。
 
 ## 一个共同的前提:Knative 必须有网络层
 

@@ -629,13 +629,24 @@ $ istioctl install --set components.ingressGateways[0].enabled=true ...
 
 ## 十、清理
 
-按"删到什么程度"分三档,按需取用。
+按"删到什么程度"分四档,按需取用。
 
 **只删实验负载,保留整套环境**(想再跑一遍 demo 就用这个):
 
 ```sh
 kubectl --context kind-knative-istio delete namespace demo
 ```
+
+**暂时停掉整个集群,环境全留着**(省内存;两套集群并存时用它切换):
+
+```sh
+# 在仓库根目录执行（第四章让你 cd 过 kubernetes/kind，注意切回来）
+kubernetes/kind/scripts/knative-cluster.sh stop knative-istio
+```
+
+下次 `... start knative-istio` 会回来并等到组件就绪。注意**别直接 `docker stop`**:
+kind 节点退不干净会被 SIGKILL(退出码 137),默认的 `on-failure` 策略会把它立刻拉回来。
+细节见 [`kubernetes/kind/scripts/knative-cluster.sh`](../kubernetes/kind/scripts/knative-cluster.sh)。
 
 **卸掉 Istio,保留集群**(想换个网络层/数据面再试):
 

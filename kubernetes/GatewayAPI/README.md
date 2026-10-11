@@ -45,32 +45,45 @@ Gateway API **不是** Ingress 的 v2 字段升级,而是按"**每类参与者�
 
 ### 对象模型总览
 
-```
-┌───────────────────────── 集群级(基础设施提供方创建) ─────────────────────────┐
-│  GatewayClass  controllerName: 实现域名/名字    ← "用哪家实现"                 │
-└──────────────────────────────────────────────────────────────────────────────┘
-        │ 1:N(spec.gatewayClassName 引用)
-┌───────────────────────── 命名空间级(平台/集群操作员创建) ─────────────────────┐
-│  Gateway   listeners[]: {port, protocol, hostname, tls, allowedRoutes}      │
-│            ← "开哪些门":每个 listener ≈ 数据面上的一个监听端点(LB 端口)        │
-│  (ListenerSet: 把多个 Gateway 的 listener 合并到共享数据面,v1.5 GA)          │
-└──────────────────────────────────────────────────────────────────────────────┘
-        │ 1:N(parentRefs 挂载,可跨命名空间,由 allowedRoutes 控制)
-┌───────────────────────── 命名空间级(应用团队创建) ────────────────────────────┐
-│  HTTPRoute / GRPCRoute / TLSRoute / TCPRoute / UDPRoute                     │
-│            ← "门里的流量往哪走":hostname+path 匹配 + filters + backendRefs   │
-│  ReferenceGrant        ← 授权跨命名空间引用(如 route 跨 ns 指 Service)        │
-│  BackendTLSPolicy      ← 网关→后端这段的 TLS/mTLS(挂 Service 上)              │
-└──────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    classDef infra fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+    classDef plat  fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef app   fill:#fdecea,stroke:#c0392b,color:#7b241c
+
+    subgraph L1["集群级 —— 基础设施提供方创建"]
+        GC["GatewayClass<br/>controllerName：实现域名 / 名字<br/>←「用哪家实现」"]:::infra
+    end
+    subgraph L2["命名空间级 —— 平台 / 集群操作员创建"]
+        GW["Gateway<br/>listeners[]: {port, protocol, hostname, tls, allowedRoutes}<br/>←「开哪些门」：每个 listener ≈ 数据面上的一个监听端点（LB 端口）<br/>ListenerSet：把多个 Gateway 的 listener 合并到共享数据面（v1.5 GA）"]:::plat
+    end
+    subgraph L3["命名空间级 —— 应用团队创建"]
+        RT["HTTPRoute / GRPCRoute / TLSRoute / TCPRoute / UDPRoute<br/>←「门里的流量往哪走」：hostname+path 匹配 + filters + backendRefs<br/>ReferenceGrant：授权跨命名空间引用（如 route 跨 ns 指 Service）<br/>BackendTLSPolicy：网关→后端这段的 TLS/mTLS(挂 Service 上)"]:::app
+    end
+
+    L1 -->|"1:N（spec.gatewayClassName 引用）"| L2
+    L2 -->|"1:N（parentRefs 挂载，可跨命名空间，由 allowedRoutes 控制）"| L3
 ```
 
 一条完整链路的流量顺序(**记牢,排障全靠它**):
 
-```
-客户端 → LB/网关地址:port ─(端口+SNI/Host)→ 选定 Listener
-        → 挂在该 listener 上、hostnames 与 listener.hostname 相交的 Route 们
-        → 按匹配优先级选中恰好一条 rule → filters 加工 → backendRefs 负载均衡
-        → Service:port → Pod(端点)
+```mermaid
+flowchart TB
+    classDef io   fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+    classDef hop  fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef bk   fill:#fdecea,stroke:#c0392b,color:#7b241c
+
+    C(["客户端"]):::io
+    L["选定 Listener<br/>（按 端口 + SNI/Host）"]:::hop
+    R["挂在该 listener 上、<br/>hostnames 与 listener.hostname 相交的 Route 们"]:::hop
+    RU["按匹配优先级选中恰好一条 rule"]:::hop
+    F["filters 加工"]:::hop
+    B["backendRefs 负载均衡"]:::hop
+    S["Service:port"]:::bk
+    P(["Pod（端点）"]):::bk
+
+    C -->|"LB / 网关地址:port"| L
+    L --> R --> RU --> F --> B --> S --> P
 ```
 
 - 没有 Route 挂上去时,listener 依然可以 `Accepted=True`——"开了门但没人用"是合法状态;

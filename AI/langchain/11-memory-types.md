@@ -4,20 +4,17 @@
 
 Agent 的记忆系统借鉴了认知科学的分类，分为三个层次：
 
-```
-                    ┌───────────────────────┐
-                    │   Procedural Memory    │  "怎么做" — 技能/规则/流程
-                    │  System Prompt + Tool  │
-                    │  + Graph 结构          │
-                    ├───────────────────────┤
-                    │   Semantic Memory      │  "是什么" — 事实/知识/偏好
-                    │  InMemoryStore         │
-                    │  + langmem             │
-                    ├───────────────────────┤
-                    │   Episodic Memory      │  "发生了什么" — 对话历史
-                    │  MemorySaver           │
-                    │  (checkpointer)        │
-                    └───────────────────────┘
+```mermaid
+flowchart TB
+    classDef top fill:#fdecea,stroke:#c0392b,color:#7b241c
+    classDef mid fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+    classDef bot fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+
+    P["Procedural Memory<br/>「怎么做」— 技能 / 规则 / 流程<br/>System Prompt + Tool + Graph 结构"]:::top
+    S["Semantic Memory<br/>「是什么」— 事实 / 知识 / 偏好<br/>InMemoryStore + langmem"]:::mid
+    E["Episodic Memory<br/>「发生了什么」— 对话历史<br/>MemorySaver（checkpointer）"]:::bot
+
+    P --- S --- E
 ```
 
 越往下越具体、越自动；越往上越抽象、需要手动管理。

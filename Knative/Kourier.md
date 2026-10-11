@@ -58,24 +58,22 @@ http://helloworld-go.demo.svc.cluster.local
 
 这是本实验最值得先搞清楚的一张图:
 
-```
-client pod (demo/http-client)
-    │  curl http://helloworld-go.demo.svc.cluster.local
-    ▼
-K8s Service "helloworld-go"  (demo 命名空间, 类型是 ExternalName)
-    │  CNAME -> kourier-internal.kourier-system.svc.cluster.local
-    ▼
-kourier-internal (ClusterIP) -> kourier gateway (Envoy)
-    │
-    │  实测这一跳之后流量**始终**经过 activator:
-    │  ServerlessService 的 MODE 是 Proxy(min-scale=0 时就是这样),
-    │  revision 活跃与否都绕不开它
-    ▼
-activator (knative-serving)
-    │  revision 缩到 0: 先把请求挂住、触发扩容,等 pod ready 再转发
-    │  revision 已就绪: 直接转发
-    ▼
-revision pod (user-container + queue-proxy 两个容器)
+```mermaid
+flowchart TB
+    classDef user    fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef k8s     fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+    classDef knative fill:#fdecea,stroke:#c0392b,color:#7b241c
+
+    C(["client pod<br/>demo/http-client"]):::user
+    SVC["Service helloworld-go<br/>类型是 ExternalName，没有 endpoints"]:::k8s
+    KOU["kourier-internal（ClusterIP）<br/>kourier gateway（Envoy）"]:::k8s
+    ACT["activator<br/>knative-serving"]:::knative
+    REV(["revision pod<br/>user-container + queue-proxy"]):::user
+
+    C -->|"curl http://helloworld-go.demo.svc.cluster.local"| SVC
+    SVC -->|"CNAME"| KOU
+    KOU -->|"始终经过，revision 活跃与否都一样"| ACT
+    ACT -->|"缩到 0 先挂住请求；已就绪就直接转发"| REV
 ```
 
 两个容易踩的认知点,实测确认:

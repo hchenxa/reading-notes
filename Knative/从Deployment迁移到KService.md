@@ -547,6 +547,36 @@ $ curl http://helloworld-go.demo.svc.cluster.local/        → 200   ← 路由�
   (`<ksvc>.<ns>.svc.cluster.local`;实测从 pod 里 curl → 200),**不能**用 Gateway API 的
   backendRef 指 Service(上面 (b) 的两种都试过)。
 
+### 7.6 如果你的 listener 在 ListenerSet 里(实测)
+
+如果你的 Gateway 把 listener 放在 **ListenerSet** 里(自己的 `listeners[]` 里没有那一条),这里有个必须提前知道的坑。
+
+**原因**:net-gateway-api 生成 HTTPRoute 时,`parentRefs` 的 kind 是**写死的 `Gateway`**
+(源码里就是 `Kind: ptr.To("Gateway")`)—— 它只会把路由挂到 Gateway 上,根本不知道 ListenerSet 的存在。
+而**挂在 Gateway 上的路由,不会落到"只存在于 ListenerSet 里"的 listener 上**。
+
+实测(按你的形态复现:Gateway 不带 `addresses`、listener 只放在 ListenerSet 里):
+
+| 谁挂的路由 | 结果 |
+|---|---|
+| 你自己的路由 → `parentRefs: ListenerSet` | ✅ `Accepted=True`,listener `attachedRoutes=1` |
+| Knative 生成的路由 → `parentRefs: Gateway` | ❌ `False/NoMatchingListenerHostname`,listener `attachedRoutes=0` |
+| 把同一条 listener **加到 Gateway 自己的 `listeners[]`** 之后 | ✅ Knative 那条变 `Accepted=True`、`attachedRoutes=1`,端到端 **200** |
+
+最后一行要**把 listener 挪过去**,而不是两边都留一份:两边同名、同端口、同 hostname 时,
+ListenerSet 会被判 `Accepted=False/ListenersNotValid`(实测),由 Gateway 那份胜出。
+
+**同一次实测里撞见的两个操作细节**:
+
+- **改完 `config-gateway` 不会立刻改挂 HTTPRoute。** 入口 Service 的 ExternalName 会**马上**跟着变,
+  但生成的那条 HTTPRoute 还挂在老 Gateway 上 —— 于是有一段"入口指向新网关、路由还在老网关"的窗口,
+  这期间请求是 **404**。我重启 `net-gateway-api-controller`(并触发一次 KIngress 变化)之后它才改挂。
+- **Gateway 不带 `addresses` 时,Istio 会给它单独起一套数据面**(实测生成了
+  `user-shape-gateway-istio` 的 Deployment + Service)。在 kind 上因为拿不到 LoadBalancer 地址,
+  Gateway 和 ListenerSet 的状态都是 `Programmed=False/AddressNotAssigned` —— 但**路由照样能通**,
+  和 [Istio 篇 9.1](Istio-GatewayAPI与Ambient.md) 是同一个道理:net-gateway-api 靠 `config-gateway`
+  里的 `service:` 找数据面,不看 Gateway 的 status。
+
 ## 八、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。

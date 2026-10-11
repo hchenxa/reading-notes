@@ -298,8 +298,7 @@ spec:
 
 ## 5. Gateway:开门(命名空间级,平台团队创建)
 
-Gateway 是整族 API 的"触发器"——文档原话:**"A Gateway is 1:1 with the lifecycle of the
-configuration of infrastructure"**。创建后,匹配的控制器会:调云 API 建 LB / 拉起软件网关实例 /
+Gateway 是整族 API 的"触发器"——文档原话:"**A Gateway is 1:1 with the lifecycle of the configuration of infrastructure**"。创建后,匹配的控制器会:调云 API 建 LB / 拉起软件网关实例 /
 向既有 LB 加配置段(实现决定)。短名 `gtw`。
 
 ### 5.1 spec 顶层字段
@@ -494,7 +493,7 @@ status:
 ### 6.3 hostnames[](可省略,≤16)
 
 - 匹配请求的 Host 头(忽略端口);**禁止 IP**;允许首 label 单通配符 `*.`(纯后缀匹配:
-  `*.example.com` 匹配 `a.example.com` 和 `a.b.example.com`,**不匹配裸 `example.com`**)。
+  `*.example.com` 匹配 `a.example.com` 和 `a.b.example.com`,**不匹配裸** `example.com`)。
 - 与 listener.hostname 的**交集**关系决定能否附着:
   - listener=`test.example.com` ⇐ 可挂:hostnames 为空,或含 `test.example.com`/`*.example.com` 的 route;
   - listener=`*.example.com` ⇐ 可挂:hostnames 为空,或含 `*.example.com`/`test.example.com`/`foo.test.example.com`;
@@ -598,7 +597,7 @@ rules:
 
 ### 6.8 规则优先级与多 Route 合并(v1.6 模型,与 Ingress 完全不同的确定性)
 
-规范模型是 **"每个请求恰好命中一条 rule + 全确定性优先级"**,不是"多条规则同时生效再拼装":
+规范模型是 "**每个请求恰好命中一条 rule + 全确定性优先级**",不是"多条规则同时生效再拼装":
 
 1. 候选:请求先锁定 **listener**(端口+SNI/Host),再收集挂在该 listener 上、hostnames 相交的 Routes;
    **"本 listener 没匹配上"不会落到别的 listener**,直接 404。
@@ -1250,7 +1249,7 @@ spec:
     kind: Service              # 可加 name: xxx 收紧到指定 Service
 ```
 
-同时,跨 ns 的 backendRefs 里**必须显式写 `namespace:`**(不写默认本 ns,照样找不到)。
+同时,跨 ns 的 backendRefs 里**必须显式写** `namespace:`(不写默认本 ns,照样找不到)。
 
 常见错误:① RG 建到了 route 的 ns 而不是目标资源的 ns;② `from`/`to` 的 group 写错(HTTPRoute 的
 group 是 `gateway.networking.k8s.io`,Service 的 group 是空 `""`);③ 忘记跨 ns Secret 也要 RG;
@@ -1283,12 +1282,12 @@ HTTPRoute 默认以明文 HTTP 转发到后端,想加密到后端就上 BackendT
 
 ### 11.1 模型
 
-"给某个对象附加设置"用**元资源(policy)**表达,不用注解(Gateway API 明确**不推荐**在自身资源上
+"给某个对象附加设置"用**元资源（policy）**表达,不用注解(Gateway API 明确**不推荐**在自身资源上
 用注解做扩展;扩展点只有三个:extensionRef/自定义后端、实现自己的 CRD、Policy 附件):
 
 - **Direct Policy Attachment**:只影响被指向的那一个对象(如 BackendTLSPolicy 挂 Service,
   "所有指向该 Service 的 Route 都应遵守");
-- **Inherited(继承)**:挂到祖先,影响整棵对象树(实验概念,GEP-713,整体仍标 Experimental);
+- **Inherited（继承）**:挂到祖先,影响整棵对象树(实验概念,GEP-713,整体仍标 Experimental);
 - **Defaults/Overrides** 机制仍在设计中——**当前已落地的官方策略都没有 defaults/overrides**,
   别指望"父策略强制覆盖子配置",策略尽量挂到最贴近目标的资源上;
 - 同一目标多个策略:实现裁决只让一个生效,其余置 `Accepted=False, reason=Conflicted`;优先级规则
@@ -1493,7 +1492,7 @@ curl http://localhost:8080/productpage
 
 ### 15.1 铁律与命令序列
 
-1. **永远先看 `status.conditions`**,且先核对 `observedGeneration == metadata.generation`
+1. **永远先看** `status.conditions`,且先核对 `observedGeneration == metadata.generation`
    (不等 = 控制器没跟上,状态过期);
 2. **"没有状态"本身是线索**:parentRef 无效 / 对象不在该实现的管辖 scope 内时,实现不写状态;
 3. 跨 ns 问题先查 ReferenceGrant;证书问题先看 Secret 的 key 名(`tls.crt`/`tls.key`)与类型。

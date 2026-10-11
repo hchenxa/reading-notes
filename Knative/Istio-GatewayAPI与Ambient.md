@@ -18,7 +18,7 @@
 | 数据面 | 无 mesh | **Istio ambient**(ztunnel,**没有 sidecar**) |
 | `ingress-class` | `kourier.ingress.networking.knative.dev` | `gateway-api.ingress.networking.knative.dev` |
 
-注意这里**没有用 `net-istio`**。`net-istio` 和 `net-gateway-api` 是 Knative 两个并列的网络层实现:
+注意这里**没有用** `net-istio`。`net-istio` 和 `net-gateway-api` 是 Knative 两个并列的网络层实现:
 前者让 Knative 直接写 Istio 的 `Gateway`/`VirtualService`(CRD),后者让 Knative 只写标准的
 Gateway API 对象(`Gateway`/`HTTPRoute`),由 Istio 的 Gateway API 控制器去消费。
 **本篇走的是后者**——Knative 侧不出现任何 Istio 专有 CRD。
@@ -542,7 +542,7 @@ access	connection complete	src.addr=10.244.0.15:36406 src.workload="http-client"
 
 这一行同时说明了两件事:
 
-- **ztunnel 确实在接管 `http-client`**(`src.workload="http-client"`,连接由它记录)——ambient 生效了,
+- **ztunnel 确实在接管** `http-client`(`src.workload="http-client"`,连接由它记录)——ambient 生效了,
   而且这个 pod 里没有 sidecar。
 - **这一跳没有封 HBONE**:目标是 `10.244.0.8:8081`,网关 Pod 的**真实端口**。若目的端也在
   ambient 里,ztunnel 会把流量封到对端 ztunnel 的 **15008**(HBONE 端口)上;走 8081
@@ -622,7 +622,7 @@ $ istioctl install --set components.ingressGateways[0].enabled=true ...
 ### 9.4 反例:这套组合里最容易漏的三步
 
 1. **Gateway API CRDs 必须在 Istio 之前装**(4.3)。
-2. **ambient profile 不装入口网关,必须 `--set components.ingressGateways[0].enabled=true`**(4.4)。
+2. **ambient profile 不装入口网关,必须显式加** `--set components.ingressGateways[0].enabled=true`(4.4)。
 3. **`third_party/istio` 那三个资源要手动 apply**(第六章)——net-gateway-api 不会替你建 Gateway。
 
 漏掉任何一个,现象都是 KService 一直 `NotReady`,而 Knative 侧不一定给出指向真正原因的报错。
@@ -690,7 +690,7 @@ kubectl --context kind-knative-istio delete namespace demo
 kubernetes/kind/scripts/knative-cluster.sh stop knative-istio
 ```
 
-下次 `... start knative-istio` 会回来并等到组件就绪。注意**别直接 `docker stop`**:
+下次 `... start knative-istio` 会回来并等到组件就绪。注意**别直接** `docker stop`:
 kind 节点退不干净会被 SIGKILL(退出码 137),默认的 `on-failure` 策略会把它立刻拉回来。
 细节见 [`kubernetes/kind/scripts/knative-cluster.sh`](../kubernetes/kind/scripts/knative-cluster.sh)。
 

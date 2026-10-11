@@ -627,6 +627,52 @@ $ istioctl install --set components.ingressGateways[0].enabled=true ...
 
 漏掉任何一个,现象都是 KService 一直 `NotReady`,而 Knative 侧不一定给出指向真正原因的报错。
 
+### 9.5 park 之后 start 回来,数据面起不来(inotify 限额)
+
+**现象**:`stop` → `start` 之后集群看着是好的(knative-serving 全绿、Route 也 Ready),
+但 `demo/http-client` 里连 DNS 都不通 —— `curl` 报 **exit 6**,`nslookup` 说
+`write to 10.96.0.10: Connection refused`;`istio-system` 里 `ztunnel` 和 `istio-cni-node`
+在 `CrashLoopBackOff`。
+
+**根因**:colima VM 的 `fs.inotify.max_user_instances` 默认 **128**,而**两个 kind 集群一起跑**
+会把它占满(实测 root 名下 135 个 inotify 实例:两套 kubelet / apiserver / controller-manager,
+再加 systemd、pilot-agent…)。两个组件倒在同一个系统调用上:
+
+```console
+ztunnel:     failed to create root cert watcher: Too many open files (os error 24)
+istio-cni:   couldn't initialize inotify: too many open files
+```
+
+于是数据面处于"半死"状态:CNI 先前写下的重定向规则还在(pod 流量仍被导给 ztunnel),
+但 ztunnel 没起来 —— 连接被 RST,DNS 表现为 Connection refused。
+
+**修复**:
+
+```console
+# 1. 调大限额(运行时 + 持久化进 VM,colima 重启也不掉)
+colima ssh -- sudo sysctl -w fs.inotify.max_user_instances=8192
+colima ssh -- sudo bash -c 'echo "fs.inotify.max_user_instances = 8192" \
+    > /etc/sysctl.d/99-kind-inotify.conf'
+
+# 2. 让崩掉的两个 DaemonSet 重来（删 pod 即可，DS 会重建）
+kubectl --context kind-knative-istio -n istio-system delete pod -l app=ztunnel
+kubectl --context kind-knative-istio -n istio-system delete pod -l k8s-app=istio-cni-node
+```
+
+验证:两个 pod 回到 `1/1 Running` 后,
+
+```console
+$ kubectl --context kind-knative-istio exec -n demo http-client -- \
+    curl -s -o /dev/null -w "%{http_code}\n" http://helloworld-go.demo.svc.cluster.local
+200
+$ # 冷启动也照旧（实测 0.92s）
+```
+
+ztunnel 日志里会重新出现 8.4 那种 access 记录(`src.workload="http-client" … direction="outbound"`)。
+
+> 这就是"两个集群都留着、随时切"的代价:它们共享同一台 VM 的内核参数。
+> 只留一个集群在跑,基本撞不到。
+
 ## 十、清理
 
 按"删到什么程度"分四档,按需取用。

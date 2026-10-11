@@ -6,7 +6,7 @@
 >
 > **本文所有命令与输出均为本机真实输出**(2026-10-10 实跑)。
 >
-> 承接基础篇 [`README.md`](README.md)(Kourier 版)。本篇把网络层换成
+> 承接基础篇 [`Kourier.md`](Kourier.md)(Kourier 版)。本篇把网络层换成
 > Gateway API、把 Istio 作为 GatewayClass 的实现,数据面用 ambient 而不是 sidecar。
 
 ## 一、和 Kourier 那篇的三个不同点
@@ -651,7 +651,7 @@ kind delete cluster --name knative-istio
 
 ## 相关
 
-- [`README.md`](README.md) —— Kourier 版,以及 kind 代理、gcr.io 拉取慢等环境问题的完整记录
+- [`Kourier.md`](Kourier.md) —— Kourier 版,以及 kind 代理、gcr.io 拉取慢等环境问题的完整记录
 - [`kubernetes/kind/`](../kubernetes/kind/) —— kind 集群配置与节点内代理修复文件
 - [net-gateway-api](https://github.com/knative-extensions/net-gateway-api) —— `third_party/istio/` 的来源
 - [Istio ambient 安装](https://istio.io/latest/docs/ambient/install/) / [Gateway API 入口](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/)

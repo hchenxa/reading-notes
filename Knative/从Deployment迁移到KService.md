@@ -252,6 +252,14 @@ $ kubectl get deploy t-probe2-00001-deployment -n migrate -o json \
 **`readinessProbe` 被直接丢掉了。** 就绪判定由 queue-proxy 负责(它探自己的 8012 端口),
 所以你的探针没有意义 —— 但它**不会告诉你**,只是消失。`livenessProbe` 则原样保留、有效。
 
+**⚠️ 客户端写死的地址会失效 —— 至少要写成 `<name>.<ns>`**
+
+入口 Service 的名字确实等于 KService 名字(同名即可),但**裸短名不在网关的 Host 白名单里**:
+同命名空间里 `curl http://myapp` 会拿到网关回的 `404: server: envoy`(不是 DNS 错误,
+连接是通的),只有 `http://myapp.migrate` / `…migrate.svc` / 完整 FQDN 才是 200;
+端口也只认入口那层的 80(`:8080` 直接连不上)。也就是说**客户端要改地址(改配置,不是改代码)**。
+详见 [对象模型 9.1](对象模型.md)。
+
 **❌ 直接报错 —— 好在这类至少会说话**
 
 | 你写的 | 报错 |

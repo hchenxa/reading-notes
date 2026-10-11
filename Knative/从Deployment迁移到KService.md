@@ -84,7 +84,9 @@ spec:
 | **多个端口**(跨所有容器) | ❌ 被拒:`Only a single port is allowed across all containers` |
 | **`spec.replicas`** | ❌ 被拒:`unknown field "spec.template.spec.replicas"`——副本数归 KPA 管 |
 | `spec.strategy`(滚动更新策略) | 没有对应物——由 Revision 的创建与流量切分取代 |
-| `spec.selector` / `spec.template.metadata.labels` | 没有对应物——由 Knative 自己打标签(如 `serving.knative.dev/revisionUID`) |
+| `spec.selector` | 没有对应物——由 Knative 自己打标签(`serving.knative.dev/revisionUID`) |
+| `spec.template.metadata.labels` / `annotations` | **原样保留**,而且这是唯一能传到 pod 的地方(见[对象模型](对象模型.md) 第八节) |
+| Deployment **自身**的 `metadata.labels` / `annotations` | 放到 KService 的 metadata 下 —— 但那样**只到 Configuration / Route**,到不了 pod |
 | `containers[].readinessProbe` | ⚠️ **静默丢弃,不报错**(见第五节) |
 | `containers[].livenessProbe` | 透传,有效 |
 | `Service.spec.selector` / `ports` | 自动生成(见[对象模型](对象模型.md) 4.4/4.5),**但名字会被占用** |

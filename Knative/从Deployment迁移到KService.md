@@ -213,7 +213,7 @@ Error from server (BadRequest): admission webhook "validation.webhook.serving.kn
   spec.template.metadata.annotations.autoscaling.knative.dev/metric
 ```
 
-`memory` 同样被拒。**合法取值只有 `concurrency` 和 `rps`**。
+`memory` 同样被拒。**合法取值只有 `concurrency` 和 `rps` 两种**。
 
 ### 那你原来按 CPU 扩缩的服务怎么办
 
@@ -231,7 +231,7 @@ Error from server (BadRequest): admission webhook "validation.webhook.serving.kn
    autoscaling.knative.dev/target: "70"
    ```
    这个注解组合**能通过校验**(实测),但要注意两个代价:
-   - **需要额外装 `serving-hpa.yaml`**。没装的话 —— 实测 —— KService 创建成功但
+   - **需要额外装** `serving-hpa.yaml`。没装的话 —— 实测 —— KService 创建成功但
      Revision 会一直卡在 `READY=Unknown / Deploying`,不会有任何指向真正原因的报错。
    - **HPA class 不能缩到 0**(HPA 的 `minReplicas` 最小就是 1),Knative 最值钱的那个
      特性就没了。
@@ -260,7 +260,7 @@ $ kubectl get deploy t-probe2-00001-deployment -n migrate -o json \
 入口 Service 的名字确实等于 KService 名字(同名即可),但**裸短名不在网关的 Host 白名单里**:
 同命名空间里 `curl http://myapp` 会拿到网关回的 `404: server: envoy`(不是 DNS 错误,
 连接是通的),只有 `http://myapp.migrate` / `…migrate.svc` / 完整 FQDN 才是 200;
-端口也只认入口那层的 80(`:8080` 直接连不上)。也就是说**客户端要改地址(改配置,不是改代码)**。
+端口也只认入口那层的 80(`:8080` 直接连不上)。也就是说**客户端要改地址（改配置,不是改代码）**。
 详见 [对象模型 9.1](对象模型.md)。
 
 **❌ 直接报错 —— 好在这类至少会说话**

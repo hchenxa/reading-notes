@@ -31,6 +31,35 @@ Knative Serving **自己不做数据面**,它只定义 KIngress 规范,路由必
 不装任何实现,`Ingress` 资源没人处理,KService 会永远 `NotReady`——**没有"不装网络层"这个选项**。
 所以"不用 Istio"的正确做法是换一个别家的实现,而不是不装。
 
+### 这个值配在哪、能不能按 Route 单独指定
+
+配在 **`knative-serving` 命名空间的 `config-network`** 里 —— 安装步骤里那条 `kubectl patch` 就是它:
+
+```console
+$ kubectl get cm config-network -n knative-serving -o json | jq -r '.data["ingress-class"]'
+kourier.ingress.networking.knative.dev
+```
+
+三个容易误解的点(都实测过):
+
+- **值写的是全名** `<实现>.ingress.networking.knative.dev`,不是 `kourier` 三个字母。
+- **没有 `IngressClass` 这种对象可以建。** 这个版本里 Knative 已经没有那个 CRD
+  (`kubectl api-resources | grep -i ingress` 只剩 `ingresses`),它纯粹是"配置里的字符串"
+  和"控制器监听哪个字符串"之间的约定。写错了**不报错**,只是没人处理:
+- **可以按 Route 覆盖,但只在创建时生效。** 在 KService 自己的 metadata 上写
+  `networking.knative.dev/ingress-class`(dash),它会传到 Route 并决定这条 Route 用哪个 class:
+
+  ```console
+  $ kubectl get route classtest -n migrate -o json \
+      | jq -r '.status.conditions[]|select(.type=="Ready")|"\(.status) \(.reason)"'
+  Unknown IngressNotConfigured     ← 指到一个没装控制器的 class,就是这个下场
+  ```
+
+  反过来,**往一个已经存在的 Route 上事后加同一注解是无效的**(dash / dot 两种写法都试过,
+  KIngress 里记的还是老值,Route 照样 Ready)。因为 class 在 Route **创建时**就被解析好、
+  盖在 KIngress 上了 —— 记在 KIngress 的 `networking.knative.dev/ingress.class`(这里是 dot),
+  这也正是 `config-network` 里那句"对已有 Route 改 class 会 undefined behavior"的含义。
+
 ## 不管选哪个网络层,下面这些都不变
 
 - KService 的 URL 默认就是集群内域名 `<name>.<namespace>.svc.cluster.local`(Knative ≥ v1.8)。

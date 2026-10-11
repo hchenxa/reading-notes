@@ -249,8 +249,11 @@ $ kubectl get deploy t-probe2-00001-deployment -n migrate -o json \
 { "name": "queue-proxy", "readinessProbe": {…K-Network-Probe…} }          ← 就绪探针在它身上
 ```
 
-**`readinessProbe` 被直接丢掉了。** 就绪判定由 queue-proxy 负责(它探自己的 8012 端口),
-所以你的探针没有意义 —— 但它**不会告诉你**,只是消失。`livenessProbe` 则原样保留、有效。
+**`readinessProbe` 从用户容器上被移走了 —— 但它并没有被丢掉,而是交给 queue-proxy 执行**
+(规格原样进 `SERVING_READINESS_PROBE`)。所以"写探针没用"是个误解;**真正该注意的是默认行为**:
+不写探针时,queue-proxy 只对 `127.0.0.1:8080` 做一次 **TCP 检查** —— 端口开着就算 ready,
+应用还没初始化完也会被送流量。`livenessProbe` 则原样留在用户容器上,有效。
+机制、实测和卡住时怎么查,见 [对象模型 4.2](对象模型.md)。
 
 **⚠️ 客户端写死的地址会失效 —— 至少要写成 `<name>.<ns>`**
 

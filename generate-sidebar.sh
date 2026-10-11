@@ -34,8 +34,9 @@ for dir in $(find "$ROOT" -maxdepth 1 -type d | sort); do
   fi
 
   echo "" >> "$SIDEBAR"
-  echo "* **$title**" >> "$SIDEBAR"
-  echo "  * [概览](/$dirname/)" >> "$SIDEBAR"
+  # 主题标题本身就是入口:点它就直接显示该目录的 README(也就是"概览"内容)。
+  # 不再单独出一行「概览」—— 概览本来就是介绍这个目录的,不该和目录分家。
+  echo "* [**$title**](/$dirname/)" >> "$SIDEBAR"
 
   # Find sub-pages (non-README .md files and subdirectory READMEs)
   for md in $(find "$dir" -name "*.md" ! -name "README.md" -maxdepth 1 | sort); do

@@ -277,7 +277,98 @@ $ kubectl get deploy t-multi-00001-deployment -n migrate \
 要迁的 Deployment 里如果有 sidecar(日志收集、服务网格代理之类),把端口留给主容器即可。
 注意网格 sidecar 通常没必要——用 ambient 那种`ztunnel` 就不进 pod(见 [Istio 篇](Istio-GatewayAPI与Ambient.md))。
 
-## 六、什么时候不该迁
+## 六、Service 类型:原来那个 LoadBalancer / NodePort 怎么办
+
+### Knative 生成的 Service,类型是写死的
+
+迁过来之后你不再创建 Service。控制器建的那三个,类型固定:
+
+```console
+$ kubectl get svc -n demo -o custom-columns='NAME:.metadata.name,TYPE:.spec.type,TARGET:.spec.ports[*].targetPort,SELECTOR:.spec.selector'
+NAME                          TYPE           TARGET                                      SELECTOR
+helloworld-go                 ExternalName   80                                          <none>          ← 入口,指向网关
+helloworld-go-00002           ClusterIP      8012,8112                                   <none>          ← 端点由 SKS 写
+helloworld-go-00002-private   ClusterIP      8012,8112,http-autometric,http-usermetric   map[serving.knative.dev/revisionUID:…]
+```
+
+**没有一个是 LoadBalancer**,而且你改不了 —— 它们由控制器创建并持续调和。
+
+### Knative 里的 "LoadBalancer" 是共享的,不是每个服务一个
+
+整个集群只有一个:
+
+```console
+$ kubectl get svc -A --field-selector spec.type=LoadBalancer
+NAMESPACE        NAME      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)
+kourier-system   kourier   LoadBalancer   10.96.84.113   <pending>     80:31655/TCP,443:31378/TCP
+```
+
+所有 KService 共用这一个网关,**靠 Host 区分**(`helloworld-go.demo.svc.cluster.local` 就是那个 host,
+不用你自己写路由)。所以"每个服务一个专属外部 IP"这个模型在 KService 这一层没有了。
+
+### 自己挂一个 NodePort / LoadBalancer 指向 pod:能通,但会打断缩容
+
+revision pod 上有现成的 label 可以选:
+
+```console
+$ kubectl get pod <revision-pod> -n demo -o json | jq -r '.metadata.labels | keys[]'
+app
+pod-template-hash
+serving.knative.dev/configuration
+serving.knative.dev/revision          ← 用它做 selector
+serving.knative.dev/revisionUID
+serving.knative.dev/service
+```
+
+于是你可以自己挂一个:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata: { name: myapp-nodeport, namespace: demo }
+spec:
+  type: NodePort
+  selector: { serving.knative.dev/revision: helloworld-go-00002 }
+  ports: [{ name: http, port: 80, targetPort: 8012 }]
+```
+
+**pod 在的时候它能通**(targetPort 写 `8080` 打用户容器、写 `8012` 打 queue-proxy,实测都可以)。
+但 **revision 缩到 0 之后它就死了**,而且死得很安静:
+
+```console
+$ # revision 缩到 0 之后
+$ kubectl get endpointslice -n demo -l kubernetes.io/service-name=t-np \
+    -o jsonpath='{.items[*].endpoints[*].addresses[0]}'
+                                          ← 空,没有任何端点
+
+$ kubectl exec -n demo http-client -- curl -s -m 10 http://t-np.demo.svc.cluster.local
+command terminated with exit code 7       ← 连不上
+
+$ # 同一时刻,走 Knative 的路径:
+$ kubectl exec -n demo http-client -- curl -s -o /dev/null \
+    -w '%{http_code} in %{time_total}s\n' http://helloworld-go.demo.svc.cluster.local
+200 in 0.505637s                          ← activator 把它从 0 拉起来了
+```
+
+**根本原因:它绕过了 activator。** activator 就是"把请求挂住、触发扩容"的那一环,
+它挂在 Knative 自己的路径上 —— `<rev>` 那个**没有 selector** 的 Service,端点由 SKS 写
+(见[对象模型](对象模型.md) 4.4)。
+
+> 还有一个更隐蔽的:**绕开 queue-proxy 的流量不被计数**。KPA 的并发数来自 queue-proxy,
+> 所以直连 `:8080` 的请求它看不见 —— 可能正服务着就把副本缩了。走 `:8012` 至少计数还在,
+> 但依然绕过 activator。(这条是推理:两个前提都实测过,组合起来的结果我没跑。)
+
+### 那原来需要 LoadBalancer 的需求怎么落地
+
+| 你原来想要 | Knative 里对应什么 |
+|---|---|
+| 一个固定外部 IP,按 host / path 分流 | **共享网关 + host 路由**。KService 的域名就是 host,不用自己写路由规则 |
+| 每个服务一个专属 IP | KService 这一层没有。要么给每个服务单独起 Gateway(net-gateway-api / Istio 那套,见 [Istio 篇](Istio-GatewayAPI与Ambient.md)),要么接受共享 |
+| 只想集群内可达 | **什么都不用做**——Knative 默认就是集群内,比原来更安全 |
+| 自定义域名 | `DomainMapping`,把域名指到 KService |
+| 想让 `kourier` 那个 LoadBalancer 真拿到 IP(kind 上) | 需要 LoadBalancer 实现:cloud-provider-kind 或 MetalLB |
+
+## 七、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。
 - **按 CPU/内存扩缩是硬需求**:见第四节,那要付 HPA class 的代价(装组件 + 失去缩容到 0)。

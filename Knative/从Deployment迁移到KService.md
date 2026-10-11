@@ -377,6 +377,29 @@ $ kubectl exec -n demo http-client -- curl -s -o /dev/null \
 - **需要自定义滚动更新策略 / PodDisruptionBudget 之类**:这些是 Deployment 层的东西,
   KService 那一层不暴露。
 
+### 具体的反例:StatefulSet 那类有状态服务
+
+"想给一个 StatefulSet 的 DB 设 `min-scale: 3`,但没法自定义 Service" —— 这个场景
+**Knative Serving 处理不了**。而且不是"差一个功能",是几条设计前提直接对不上:
+
+| 你需要的 | Knative 的情况 | 实测证据 |
+|---|---|---|
+| **TCP / 自有协议** | 数据面只认 HTTP。KIngress 的规则就是 `hosts + http.paths[]`(按 HTTP 路径匹配),没有 TCP 那一支;入口链路是 网关 → activator → **queue-proxy(HTTP 反向代理)** → 你的容器 | `kubectl explain ingresses.networking.internal.knative.dev.spec.rules` |
+| **多个端口**(DB + 健康检查) | 跨所有容器只允许一个端口 | ❌ `Only a single port is allowed across all containers` |
+| **headless Service** | 生成的 Service 归控制器;headless 在 k8s 层面就不可能 | ❌ `spec.clusterIPs[0]: may not change once set` |
+| **自定义 Service 形状** | 加 label 会留下,改 `ports` 会被控制器改回去 | 实测:label 保留;ports 改完 25s 后仍是原样 |
+| **稳定的 Pod 标识**(`db-0` / `db-1`) | 没有。pod 名是 `<ksvc>-00002-deployment-<hash>-<rand>`,副本之间可互换、无序号。`min-scale: 3` 只保证"有 3 个",不保证"哪 3 个" | 见[对象模型](对象模型.md) |
+| **改配置不重造实例** | 改一个字段就生成 `db-00002`,而旧的那套对象**不会被删**("每 Revision 一棵树")。对无状态服务这是秒回滚,对 DB 就是同时出现两份实例 | [对象模型](对象模型.md) 第五节 |
+| **PVC / `volumeClaimTemplate`** | PVC 默认是**关的**(要先开 `kubernetes.podspec-persistent-volume-claim`);而开了也只是"能挂一个卷",上面几条一条都没解决 | ❌ `Persistent volume claim support is disabled` |
+
+**所以这个场景就用 StatefulSet + headless Service,别用 Knative。**
+Knative Serving 的定义就是"无状态、请求驱动的 HTTP 工作负载"——有状态服务要的排序、稳定标识、
+有序启停,它一样都不提供。
+
+更实际的落地方式通常是**把有状态的留在外面,只把应用侧迁进来**:DB 继续用 StatefulSet(或托管
+数据库),跑 HTTP 的业务服务迁成 KService。Knative 的收益(缩到 0、Revision 灰度、不用管副本数)
+本来就在无状态那一侧。
+
 反过来说,如果这个服务是**HTTP、单端口、流量有波峰波谷**,那迁移的收益最直接:
 不用管副本数、空闲不花钱、发布/回滚由 Revision 天然管住。
 

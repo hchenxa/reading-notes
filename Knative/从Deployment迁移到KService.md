@@ -406,7 +406,7 @@ Error: validation failed: Port name https is not allowed: spec.template.spec.con
 
 - **gRPC** ✅ —— 把容器端口命名为 `h2c`,其余和普通 HTTP 服务一样:照样能缩到 0、能按 Host 路由。
 - **裸 TCP(MySQL / Redis / 自研二进制协议)** ❌ —— Knative 的 KIngress 本身就是 HTTP 层的路由,
-  没有"透传 TCP"这个选项。和 [第七节](#七什么时候不该迁) 的有状态服务属于同一类:不该迁。
+  没有"透传 TCP"这个选项。和第八节「什么时候不该迁」提到的那类有状态服务一样:不该迁。
 - **HTTPS** 要分两种意思,一种支持、一种不支持:
   - **"入口要 HTTPS"** ✅ 但 **TLS 在网关注解,你的应用保持明文**。开关在 `config-network`:
     `external-domain-tls`(新键名;旧的 `auto-tls` 在该 ConfigMap 里已标注 deprecated,默认
@@ -420,7 +420,164 @@ Error: validation failed: Port name https is not allowed: spec.template.spec.con
 2. **自己写一个 Service 指向 revision 的 pod** —— 端口随你写(见上一节那个例子),
    代价是绕开了 KIngress:按 Host 路由、缩到 0 再拉起这套,对那个端口都不适用了。
 
-## 七、什么时候不该迁
+## 七、带着 Istio / Gateway API 的资源一起迁
+
+上面的场景是"裸 Deployment + Service + HPA"。如果你的应用是**跑在 Istio 上、由 Gateway API 暴露**
+的 —— Deployment + Service + 手写的 HTTPRoute + DestinationRule,外层还有一个由 GatewayClass
+创建、配了 ListenerSet 的 Gateway —— 迁移面大一圈,但**网关那一层基本不用推倒重来**。
+
+### 7.1 一张对照表
+
+| 你现在的资源 | 迁到 Knative 之后 | 你要做什么 |
+|---|---|---|
+| Deployment | KService 的 `spec.template` → 每个 Revision 一个 Deployment | 搬 pod 模板(容器 / env / resources / 探针) |
+| HPA | PodAutoscaler(KPA) | 语义变了:按并发或 RPS,不是 CPU(见第四节) |
+| Service(你的应用) | Knative 自动生成三个:`<ksvc>`(ExternalName 入口)、`<ksvc>-<rev>`、`<ksvc>-<rev>-private` | **别自己建**;KService 起同名,集群内调用方只改端口(→ 80)。注意同名会和旧 Service 撞(§3.3) |
+| 手写的 HTTPRoute | Knative **自动生成**(net-gateway-api:每个 KService × 每个 Gateway 一条) | **删掉手写的那条**,否则同 host 上会有两条路由打架 |
+| Gateway / GatewayClass | **保留** | 让 `config-gateway` 指向它(见 7.2 第 2 步),不要新建 |
+| ListenerSet | **保留** | Knative 只按名字引用 Gateway,不关心里面的 listener 怎么定义;但要保证 hostname 能接纳 KService 的域名(7.3) |
+| DestinationRule | **没有整体对应物** | 按功能拆开处理(7.4) |
+
+关键一句:Knative 在这里是"**一个会自己写 HTTPRoute 的租户**",接进你现有的 Gateway 里。
+这也是选 `net-gateway-api` 而不是 `net-istio` 的原因 —— 前者只写标准 Gateway API 对象,
+不在你的集群里塞 Istio 专有 CRD(见 [Istio 篇](Istio-GatewayAPI与Ambient.md))。
+
+### 7.2 迁移顺序
+
+1. **装 Knative Serving + net-gateway-api**,把 `config-network` 的 `ingress-class` 指到
+   `gateway-api.ingress.networking.knative.dev`。
+2. **让 Knative 用你现有的 Gateway**:改 `knative-serving/config-gateway` 里的
+   `local-gateways` / `external-gateways` —— `gateway:` 填你的 `namespace/name`,
+   `service:` 填它背后那个 Service(net-gateway-api 用这个字段探测数据面,不看 Gateway 的
+   `status.addresses`,见 [Istio 篇](Istio-GatewayAPI与Ambient.md) 9.1)。
+3. **域名对齐**:KService 的域名 = `config-domain` + `<name>.<namespace>`,默认落在
+   `*.svc.cluster.local`。要对上你 Gateway listener 里写的 hostname(比如 `myapp.example.com`),
+   就把 `config-domain` 设成你的域名,再给这个 KService 挂一个 `DomainMapping` 拿到干净主机名。
+4. **搬工作负载**:Deployment 的 pod 模板 → KService 的 `spec.template`。三处语义变化先看一遍:
+   `readinessProbe` 会交给 queue-proxy 执行(默认只做 TCP 检查,见 [对象模型 4.2](对象模型.md))、
+   `replicas` 不让写、多容器只能有一个端口(§五)。
+5. **起同名的 KService**(集群内地址不变,只改端口)。
+6. **先只在集群内验证**:冷启动、缩容、路由都对。
+7. **切流量,再删旧资源**:手写的 HTTPRoute、原 Deployment、原 Service、以及按 7.4 处理过的
+   DestinationRule。
+
+### 7.3 三个必须先确认的点
+
+**① 你的 HTTPRoute 是不是只做"域名 → 服务"?**
+Knative 生成的那条 HTTPRoute 只有三样东西:hostnames(KService 的域名)、一条 `path: /` 的匹配、
+后端指向某个 Revision 的 Service(实测见 [对象模型 第十节](对象模型.md))。所以:
+
+- **只是域名 → 服务**:Knative 完全接管,手写那条删掉即可。
+- **还有 path / header 匹配**(`/api` → A、`/web` → B 这种):**Knative 表达不了** ——
+  它的路由模型只有"host + 按百分比/tag 分给多个 Revision",没有路径和请求头匹配。
+  这种要么把路径路由留在网关层(按 path 拆成多个 KService,再用你自己的 HTTPRoute 指过去),
+  要么把 Knative 放在这层路由**后面**。
+
+**② Gateway listener 的 hostname 能接纳 KService 的域名吗?**
+Knative 生成的 HTTPRoute 的 hostnames 直接来自 KService 域名。listener 里如果写死了
+`hostname: myapp.example.com`,KService 的域名就必须也是它 —— 也就是第 3 步的
+`config-domain` + `DomainMapping`,否则路由挂不上去或匹配不到。
+
+**③ DestinationRule 里你到底用了什么?** 见下节。
+
+### 7.4 DestinationRule 怎么处理
+
+DestinationRule 是三件事的集合,在 Knative 里要拆开看:
+
+| DestinationRule 里的东西 | 迁移后 |
+|---|---|
+| `subsets`(按版本分流) | **删掉** —— 用 Revision + `Route.spec.traffic` 的百分比 / tag 替代,后者更直接(见 [对象模型 §九](对象模型.md)) |
+| `trafficPolicy.tls`(mTLS 模式) | **删掉** —— 交给网络层(ambient 下是 ztunnel;而且实测网关那一跳是明文,见 [Istio 篇 8.5](Istio-GatewayAPI与Ambient.md)) |
+| `connectionPool` / `outlierDetection` / `loadBalancer` | **没有对应物** —— 二选一:换成 Knative 自己的并发控制(`containerConcurrency` + `autoscaling.knative.dev/target`),或者保留一份 DestinationRule 指向 Knative 生成的 Service |
+
+最后一格有个现实问题:Knative 生成的 revision Service 名字里带版本号(`<ksvc>-00007`),
+每发一版就变。所以 DestinationRule 的 `host` 不能写死某个版本 —— 只能写通配
+(例如 `*.demo.svc.cluster.local`,注意它会把这个命名空间里别的 Service 也一起匹配上),
+或者接受"每次发布都更新一次 DestinationRule"。
+
+> **这一格没有实测**(要开 Istio 集群验证 DestinationRule 对 Knative 生成的 Service 是否生效)。
+> 用之前先在测试环境确认一遍。
+
+### 7.5 你自己的路由配置怎么表达(全部实测)
+
+先说清一件事:**Knative 生成的那条 HTTPRoute 是它的产物,不是你配置路由的地方。**
+
+**① 能通过 Knative 表达的**
+
+| 你想配的 | 往哪儿写 |
+|---|---|
+| 域名 / host | `config-domain`(全局)+ `DomainMapping`(单个服务) |
+| 流量给哪个后端、按比例分 | `Route.spec.traffic`(百分比 / tag) —— Knative 会把它写成生成 HTTPRoute 里的 `backendRefs[].weight` |
+| 超时 | Revision 的 `spec.timeoutSeconds`(net-gateway-api 会写进生成 HTTPRoute 的 `timeouts.request`;实测那条是 `"0s"`) |
+
+**② 表达不了的**:path / header 匹配、`filters`(重定向、URL 重写、CORS、请求镜像)、`retries` ——
+Knative 的 API 里没有对应字段。
+
+**③ 两条"别走"的路(都实测过)**
+
+**(a) 直接手改 Knative 生成的那条 HTTPRoute。** 改完确实会留下,但代价是:
+
+```console
+$ # 把它改成只匹配 /hacked 之后
+$ curl http://helloworld-go.demo.svc.cluster.local/        → 404   ← 正常路径直接没了
+$ curl http://helloworld-go.demo.svc.cluster.local/hacked  → 503
+$ # 再在 Knative 侧做一次真正的变更(把流量改回 latestRevision)
+$ curl http://helloworld-go.demo.svc.cluster.local/        → 200   ← 路由被重写,手改消失
+```
+
+也就是:手改会**先打断流量**,然后在 Knative 侧下一次真变更时被无声覆盖。
+
+**(b) 自己再挂一条 HTTPRoute 指回 Knative 的 Service。** 挂是挂得上的
+(`Accepted=True`、`ResolvedRefs=True`),但打不通:
+
+| 你的 backendRef 指向 | 结果 |
+|---|---|
+| 入口 Service `<ksvc>`(ExternalName) | **503**,由 `istio-envoy` 返回 —— 网关不解析 ExternalName 后端 |
+| revision 的 Service `<ksvc>-<rev>` | **404**,来自 queue-proxy 那一跳(响应头里没有 `istio-envoy`,是普通 Go 服务回的) |
+
+第二条的原因我只定位到"queue-proxy 那一跳"为止(推测是 Host 不是它认的域名,没继续挖)。
+顺带排除一个干扰:**这个 app 本身对任何路径都返回 200**(直接打 revision Service,`/`、`/healthz`、
+`/foo`、任意路径都 200),所以那个 404 不是应用行为。
+
+**④ 所以定制路由只能落在两个地方**
+
+- **拆成多个 KService,用 host 区分** —— 每个 KService 的域名就是一个路由维度,Knative 为每个
+  各生成一条 HTTPRoute。"同一个 host 下再按 path/header 分"这种需求,Knative 给不了。
+- **把定制路由放在 Knative 前面** —— 但前置层发请求时必须用 **KService 的集群内 DNS 名**
+  (`<ksvc>.<ns>.svc.cluster.local`;实测从 pod 里 curl → 200),**不能**用 Gateway API 的
+  backendRef 指 Service(上面 (b) 的两种都试过)。
+
+### 7.6 如果你的 listener 在 ListenerSet 里(实测)
+
+如果你的 Gateway 把 listener 放在 **ListenerSet** 里(自己的 `listeners[]` 里没有那一条),这里有个必须提前知道的坑。
+
+**原因**:net-gateway-api 生成 HTTPRoute 时,`parentRefs` 的 kind 是**写死的 `Gateway`**
+(源码里就是 `Kind: ptr.To("Gateway")`)—— 它只会把路由挂到 Gateway 上,根本不知道 ListenerSet 的存在。
+而**挂在 Gateway 上的路由,不会落到"只存在于 ListenerSet 里"的 listener 上**。
+
+实测(按你的形态复现:Gateway 不带 `addresses`、listener 只放在 ListenerSet 里):
+
+| 谁挂的路由 | 结果 |
+|---|---|
+| 你自己的路由 → `parentRefs: ListenerSet` | ✅ `Accepted=True`,listener `attachedRoutes=1` |
+| Knative 生成的路由 → `parentRefs: Gateway` | ❌ `False/NoMatchingListenerHostname`,listener `attachedRoutes=0` |
+| 把同一条 listener **加到 Gateway 自己的 `listeners[]`** 之后 | ✅ Knative 那条变 `Accepted=True`、`attachedRoutes=1`,端到端 **200** |
+
+最后一行要**把 listener 挪过去**,而不是两边都留一份:两边同名、同端口、同 hostname 时,
+ListenerSet 会被判 `Accepted=False/ListenersNotValid`(实测),由 Gateway 那份胜出。
+
+**同一次实测里撞见的两个操作细节**:
+
+- **改完 `config-gateway` 不会立刻改挂 HTTPRoute。** 入口 Service 的 ExternalName 会**马上**跟着变,
+  但生成的那条 HTTPRoute 还挂在老 Gateway 上 —— 于是有一段"入口指向新网关、路由还在老网关"的窗口,
+  这期间请求是 **404**。我重启 `net-gateway-api-controller`(并触发一次 KIngress 变化)之后它才改挂。
+- **Gateway 不带 `addresses` 时,Istio 会给它单独起一套数据面**(实测生成了
+  `user-shape-gateway-istio` 的 Deployment + Service)。在 kind 上因为拿不到 LoadBalancer 地址,
+  Gateway 和 ListenerSet 的状态都是 `Programmed=False/AddressNotAssigned` —— 但**路由照样能通**,
+  和 [Istio 篇 9.1](Istio-GatewayAPI与Ambient.md) 是同一个道理:net-gateway-api 靠 `config-gateway`
+  里的 `service:` 找数据面,不看 Gateway 的 status。
+
+## 八、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。
 - **按 CPU/内存扩缩是硬需求**:见第四节,那要付 HPA class 的代价(装组件 + 失去缩容到 0)。

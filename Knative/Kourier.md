@@ -502,6 +502,23 @@ http-client                                       1/1     Running       0       
 
 ## 八、清理
 
+按"删到什么程度"分两档。
+
+**暂时停掉,整套环境都留着**(想再跑一遍就用这个;现在两套集群并存,没必要让它们
+同时占内存):
+
+```sh
+# 在仓库根目录执行（第四章让你 cd 过 kubernetes/kind，注意切回来）
+kubernetes/kind/scripts/knative-cluster.sh stop knative
+```
+
+下次 `... start knative` 就回来了,而且会等到 `knative-serving` 全部就绪再返回。
+注意**别直接 `docker stop`**:kind 节点退不干净会被 SIGKILL(退出码 137),而它默认是
+`on-failure` 策略,容器会被立刻拉回来——脚本里先改了重启策略再停。细节见
+[`kubernetes/kind/scripts/knative-cluster.sh`](../kubernetes/kind/scripts/knative-cluster.sh)。
+
+**整个删掉**:
+
 ```sh
 kubectl --context kind-knative delete namespace demo
 kind delete cluster --name knative

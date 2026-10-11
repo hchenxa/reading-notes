@@ -406,7 +406,7 @@ Error: validation failed: Port name https is not allowed: spec.template.spec.con
 
 - **gRPC** ✅ —— 把容器端口命名为 `h2c`,其余和普通 HTTP 服务一样:照样能缩到 0、能按 Host 路由。
 - **裸 TCP(MySQL / Redis / 自研二进制协议)** ❌ —— Knative 的 KIngress 本身就是 HTTP 层的路由,
-  没有"透传 TCP"这个选项。和 [第七节](#七什么时候不该迁) 的有状态服务属于同一类:不该迁。
+  没有"透传 TCP"这个选项。和第八节「什么时候不该迁」提到的那类有状态服务一样:不该迁。
 - **HTTPS** 要分两种意思,一种支持、一种不支持:
   - **"入口要 HTTPS"** ✅ 但 **TLS 在网关注解,你的应用保持明文**。开关在 `config-network`:
     `external-domain-tls`(新键名;旧的 `auto-tls` 在该 ConfigMap 里已标注 deprecated,默认
@@ -420,7 +420,85 @@ Error: validation failed: Port name https is not allowed: spec.template.spec.con
 2. **自己写一个 Service 指向 revision 的 pod** —— 端口随你写(见上一节那个例子),
    代价是绕开了 KIngress:按 Host 路由、缩到 0 再拉起这套,对那个端口都不适用了。
 
-## 七、什么时候不该迁
+## 七、带着 Istio / Gateway API 的资源一起迁
+
+上面的场景是"裸 Deployment + Service + HPA"。如果你的应用是**跑在 Istio 上、由 Gateway API 暴露**
+的 —— Deployment + Service + 手写的 HTTPRoute + DestinationRule,外层还有一个由 GatewayClass
+创建、配了 ListenerSet 的 Gateway —— 迁移面大一圈,但**网关那一层基本不用推倒重来**。
+
+### 7.1 一张对照表
+
+| 你现在的资源 | 迁到 Knative 之后 | 你要做什么 |
+|---|---|---|
+| Deployment | KService 的 `spec.template` → 每个 Revision 一个 Deployment | 搬 pod 模板(容器 / env / resources / 探针) |
+| HPA | PodAutoscaler(KPA) | 语义变了:按并发或 RPS,不是 CPU(见第四节) |
+| Service(你的应用) | Knative 自动生成三个:`<ksvc>`(ExternalName 入口)、`<ksvc>-<rev>`、`<ksvc>-<rev>-private` | **别自己建**;KService 起同名,集群内调用方只改端口(→ 80)。注意同名会和旧 Service 撞(§3.3) |
+| 手写的 HTTPRoute | Knative **自动生成**(net-gateway-api:每个 KService × 每个 Gateway 一条) | **删掉手写的那条**,否则同 host 上会有两条路由打架 |
+| Gateway / GatewayClass | **保留** | 让 `config-gateway` 指向它(见 7.2 第 2 步),不要新建 |
+| ListenerSet | **保留** | Knative 只按名字引用 Gateway,不关心里面的 listener 怎么定义;但要保证 hostname 能接纳 KService 的域名(7.3) |
+| DestinationRule | **没有整体对应物** | 按功能拆开处理(7.4) |
+
+关键一句:Knative 在这里是"**一个会自己写 HTTPRoute 的租户**",接进你现有的 Gateway 里。
+这也是选 `net-gateway-api` 而不是 `net-istio` 的原因 —— 前者只写标准 Gateway API 对象,
+不在你的集群里塞 Istio 专有 CRD(见 [Istio 篇](Istio-GatewayAPI与Ambient.md))。
+
+### 7.2 迁移顺序
+
+1. **装 Knative Serving + net-gateway-api**,把 `config-network` 的 `ingress-class` 指到
+   `gateway-api.ingress.networking.knative.dev`。
+2. **让 Knative 用你现有的 Gateway**:改 `knative-serving/config-gateway` 里的
+   `local-gateways` / `external-gateways` —— `gateway:` 填你的 `namespace/name`,
+   `service:` 填它背后那个 Service(net-gateway-api 用这个字段探测数据面,不看 Gateway 的
+   `status.addresses`,见 [Istio 篇](Istio-GatewayAPI与Ambient.md) 9.1)。
+3. **域名对齐**:KService 的域名 = `config-domain` + `<name>.<namespace>`,默认落在
+   `*.svc.cluster.local`。要对上你 Gateway listener 里写的 hostname(比如 `myapp.example.com`),
+   就把 `config-domain` 设成你的域名,再给这个 KService 挂一个 `DomainMapping` 拿到干净主机名。
+4. **搬工作负载**:Deployment 的 pod 模板 → KService 的 `spec.template`。三处语义变化先看一遍:
+   `readinessProbe` 会交给 queue-proxy 执行(默认只做 TCP 检查,见 [对象模型 4.2](对象模型.md))、
+   `replicas` 不让写、多容器只能有一个端口(§五)。
+5. **起同名的 KService**(集群内地址不变,只改端口)。
+6. **先只在集群内验证**:冷启动、缩容、路由都对。
+7. **切流量,再删旧资源**:手写的 HTTPRoute、原 Deployment、原 Service、以及按 7.4 处理过的
+   DestinationRule。
+
+### 7.3 三个必须先确认的点
+
+**① 你的 HTTPRoute 是不是只做"域名 → 服务"?**
+Knative 生成的那条 HTTPRoute 只有三样东西:hostnames(KService 的域名)、一条 `path: /` 的匹配、
+后端指向某个 Revision 的 Service(实测见 [对象模型 第十节](对象模型.md))。所以:
+
+- **只是域名 → 服务**:Knative 完全接管,手写那条删掉即可。
+- **还有 path / header 匹配**(`/api` → A、`/web` → B 这种):**Knative 表达不了** ——
+  它的路由模型只有"host + 按百分比/tag 分给多个 Revision",没有路径和请求头匹配。
+  这种要么把路径路由留在网关层(按 path 拆成多个 KService,再用你自己的 HTTPRoute 指过去),
+  要么把 Knative 放在这层路由**后面**。
+
+**② Gateway listener 的 hostname 能接纳 KService 的域名吗?**
+Knative 生成的 HTTPRoute 的 hostnames 直接来自 KService 域名。listener 里如果写死了
+`hostname: myapp.example.com`,KService 的域名就必须也是它 —— 也就是第 3 步的
+`config-domain` + `DomainMapping`,否则路由挂不上去或匹配不到。
+
+**③ DestinationRule 里你到底用了什么?** 见下节。
+
+### 7.4 DestinationRule 怎么处理
+
+DestinationRule 是三件事的集合,在 Knative 里要拆开看:
+
+| DestinationRule 里的东西 | 迁移后 |
+|---|---|
+| `subsets`(按版本分流) | **删掉** —— 用 Revision + `Route.spec.traffic` 的百分比 / tag 替代,后者更直接(见 [对象模型 §九](对象模型.md)) |
+| `trafficPolicy.tls`(mTLS 模式) | **删掉** —— 交给网络层(ambient 下是 ztunnel;而且实测网关那一跳是明文,见 [Istio 篇 8.5](Istio-GatewayAPI与Ambient.md)) |
+| `connectionPool` / `outlierDetection` / `loadBalancer` | **没有对应物** —— 二选一:换成 Knative 自己的并发控制(`containerConcurrency` + `autoscaling.knative.dev/target`),或者保留一份 DestinationRule 指向 Knative 生成的 Service |
+
+最后一格有个现实问题:Knative 生成的 revision Service 名字里带版本号(`<ksvc>-00007`),
+每发一版就变。所以 DestinationRule 的 `host` 不能写死某个版本 —— 只能写通配
+(例如 `*.demo.svc.cluster.local`,注意它会把这个命名空间里别的 Service 也一起匹配上),
+或者接受"每次发布都更新一次 DestinationRule"。
+
+> **这一格没有实测**(要开 Istio 集群验证 DestinationRule 对 Knative 生成的 Service 是否生效)。
+> 用之前先在测试环境确认一遍。
+
+## 八、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。
 - **按 CPU/内存扩缩是硬需求**:见第四节,那要付 HPA class 的代价(装组件 + 失去缩容到 0)。

@@ -4,18 +4,23 @@
 
 Agent Loop 是 Agent 最核心的运行机制：**反复循环**直到得出最终答案。
 
-```
-用户提问
-    ↓
-┌─ THINK:  LLM 思考需要做什么（调用工具？直接回答？）
-│   ↓
-│  ACT:    执行工具调用，拿到结果
-│   ↓
-│  OBSERVE: 把工具结果放回上下文
-│   ↓
-└──→ 回到 THINK（LLM 根据最新信息再次决策）
-    ↓
-  ANSWER: LLM 认为够了，输出最终答案
+```mermaid
+flowchart TB
+    classDef io   fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+    classDef step fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef out  fill:#fdecea,stroke:#c0392b,color:#7b241c
+
+    Q(["用户提问"]):::io
+    T["THINK<br/>LLM 思考需要做什么<br/>（调用工具？直接回答？）"]:::step
+    A["ACT<br/>执行工具调用，拿到结果"]:::step
+    O["OBSERVE<br/>把工具结果放回上下文"]:::step
+    ANS(["ANSWER<br/>LLM 认为够了，输出最终答案"]):::out
+
+    Q --> T
+    T --> A
+    A --> O
+    O -->|"把结果放回上下文后，根据最新信息再次决策"| T
+    T -->|"不需要工具了"| ANS
 ```
 
 ## 手动实现 vs 框架封装

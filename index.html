@@ -35,6 +35,39 @@
       //   1 = 默认展开第一层分组(主题的下一级仍折叠)
       sidebarDisplayLevel: 0,
       plugins: [
+        // 侧栏：别把"当前页的章节目录"和"子页面列表"混在同一层。
+        //
+        // subMaxLevel 会把当前页的章节（链接带 ?id=）追加进侧栏，作为该条目下**另一个**
+        // ul。子页没有下挂条目，看着正常；但主题索引页（README 自己还有子页）上，同一个
+        // 缩进里就一半是本页章节、一半是子页面，顺序还随页面翻转 —— 视线上完全分不清。
+        //
+        // 这里只做一件事：**当某个条目下面既有子页、又有本页章节目录时，把章节目录摘掉。**
+        // 于是"有子页的页面"侧栏只列导航；长子页（没有下挂条目）照常保留章节导航。
+        function (hook) {
+          hook.doneEach(function () {
+            var nav = document.querySelector('.sidebar-nav');
+            if (!nav) return;
+            var isToc = function (a) { return (a.getAttribute('href') || '').indexOf('?id=') >= 0; };
+            // 当前页在侧栏里对应的条目：.active 有时挂在 li 上，有时挂在外层 P 上
+            var act = nav.querySelector('.active');
+            if (!act) return;
+            var entry = act.tagName === 'LI' ? act : act.closest('li');
+            if (!entry) return;
+            var self = entry.querySelector(':scope > a, :scope > p > a');
+            // 该条目下除了它自己，还有没有"真正的子页"（非 ?id= 的链接）。
+            // 注意别按 ul 的结构判断 —— 章节目录那个 ul 与子页那个 ul 的先后顺序
+            // 在实测里不稳定，而且折叠插件还往 P 里塞过 ul，结构不可靠。
+            var hasChildPages = Array.prototype.some.call(entry.querySelectorAll('a'), function (a) {
+              return a !== self && !isToc(a);
+            });
+            if (!hasChildPages) return;
+            // 有子页 → 把本页的章节目录摘掉（侧栏里同一时刻只会有当前页的那一份）
+            Array.prototype.forEach.call(nav.querySelectorAll('li'), function (li) {
+              var a = li.querySelector(':scope > a, :scope > p > a');
+              if (a && isToc(a)) li.remove();
+            });
+          });
+        },
         // mermaid 图表渲染（按需加载）。
         // mermaid 的 ESM 包约 3.5MB，所以不做全站预加载：只有当前页真的出现
         // ```mermaid 代码块时才动态 import，没有图表的页面完全不付这个成本。

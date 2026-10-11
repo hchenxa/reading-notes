@@ -379,6 +379,47 @@ $ kubectl exec -n demo http-client -- curl -s -o /dev/null \
 | 自定义域名 | `DomainMapping`,把域名指到 KService |
 | 想让 `kourier` 那个 LoadBalancer 真拿到 IP(kind 上) | 需要 LoadBalancer 实现:cloud-provider-kind 或 MetalLB |
 
+### 多端口 / 非 HTTP 协议:一个 Revision 只有一个端口
+
+**想在一个服务里暴露多个端口,在 Knative 里做不到** —— 校验直接拒绝:
+
+```console
+$ # 写了 ports: [{containerPort: 8080}, {containerPort: 9090}]
+Error: validation failed: more than one container port is set: spec.template.spec.containers[*].ports
+       Only a single port is allowed across all containers
+```
+
+**而这一个端口的"协议"也只有两种选择** —— 端口名的取值范围是空 / `h2c` / `http1`,写别的会告诉你:
+
+```console
+$ # 写了 ports: [{containerPort: 8080, name: https}]
+Error: validation failed: Port name https is not allowed: spec.template.spec.containers[0].ports
+       Name must be empty, or one of: 'h2c', 'http1'
+```
+
+| 端口名 | 含义 | 落点 |
+|---|---|---|
+| 不写 / `http1` | HTTP/1.1(默认) | `PodAutoscaler.protocolType=http1` |
+| `h2c` | HTTP/2 cleartext —— **gRPC 走这个** | 实测:`PodAutoscaler.protocolType=h2c`、`SKS.protocolType=h2c` |
+
+于是三种需求的结论:
+
+- **gRPC** ✅ —— 把容器端口命名为 `h2c`,其余和普通 HTTP 服务一样:照样能缩到 0、能按 Host 路由。
+- **裸 TCP(MySQL / Redis / 自研二进制协议)** ❌ —— Knative 的 KIngress 本身就是 HTTP 层的路由,
+  没有"透传 TCP"这个选项。和 [第七节](#七什么时候不该迁) 的有状态服务属于同一类:不该迁。
+- **HTTPS** 要分两种意思,一种支持、一种不支持:
+  - **"入口要 HTTPS"** ✅ 但 **TLS 在网关注解,你的应用保持明文**。开关在 `config-network`:
+    `external-domain-tls`(新键名;旧的 `auto-tls` 在该 ConfigMap 里已标注 deprecated,默认
+    `Disabled`),依赖 **cert-manager**(本机集群没装,所以是关的);想让 http 自动 301 跳 https
+    另有 `http-protocol: Redirected`。这一组本文没有实测(要装 cert-manager)。
+  - **"我的应用自己说 TLS"** ❌ —— 上面那条报错就是这么来的:端口名 `https` 直接被拒。
+
+**真要多个端口怎么办?** 两条路,都不是"在 KService 里写第二个端口":
+
+1. **拆成多个 KService** —— 一个端口一个服务,各自独立伸缩、各自一条路由。这是 Knative 期望的姿势。
+2. **自己写一个 Service 指向 revision 的 pod** —— 端口随你写(见上一节那个例子),
+   代价是绕开了 KIngress:按 Host 路由、缩到 0 再拉起这套,对那个端口都不适用了。
+
 ## 七、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。

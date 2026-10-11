@@ -498,6 +498,55 @@ DestinationRule 是三件事的集合,在 Knative 里要拆开看:
 > **这一格没有实测**(要开 Istio 集群验证 DestinationRule 对 Knative 生成的 Service 是否生效)。
 > 用之前先在测试环境确认一遍。
 
+### 7.5 你自己的路由配置怎么表达(全部实测)
+
+先说清一件事:**Knative 生成的那条 HTTPRoute 是它的产物,不是你配置路由的地方。**
+
+**① 能通过 Knative 表达的**
+
+| 你想配的 | 往哪儿写 |
+|---|---|
+| 域名 / host | `config-domain`(全局)+ `DomainMapping`(单个服务) |
+| 流量给哪个后端、按比例分 | `Route.spec.traffic`(百分比 / tag) —— Knative 会把它写成生成 HTTPRoute 里的 `backendRefs[].weight` |
+| 超时 | Revision 的 `spec.timeoutSeconds`(net-gateway-api 会写进生成 HTTPRoute 的 `timeouts.request`;实测那条是 `"0s"`) |
+
+**② 表达不了的**:path / header 匹配、`filters`(重定向、URL 重写、CORS、请求镜像)、`retries` ——
+Knative 的 API 里没有对应字段。
+
+**③ 两条"别走"的路(都实测过)**
+
+**(a) 直接手改 Knative 生成的那条 HTTPRoute。** 改完确实会留下,但代价是:
+
+```console
+$ # 把它改成只匹配 /hacked 之后
+$ curl http://helloworld-go.demo.svc.cluster.local/        → 404   ← 正常路径直接没了
+$ curl http://helloworld-go.demo.svc.cluster.local/hacked  → 503
+$ # 再在 Knative 侧做一次真正的变更(把流量改回 latestRevision)
+$ curl http://helloworld-go.demo.svc.cluster.local/        → 200   ← 路由被重写,手改消失
+```
+
+也就是:手改会**先打断流量**,然后在 Knative 侧下一次真变更时被无声覆盖。
+
+**(b) 自己再挂一条 HTTPRoute 指回 Knative 的 Service。** 挂是挂得上的
+(`Accepted=True`、`ResolvedRefs=True`),但打不通:
+
+| 你的 backendRef 指向 | 结果 |
+|---|---|
+| 入口 Service `<ksvc>`(ExternalName) | **503**,由 `istio-envoy` 返回 —— 网关不解析 ExternalName 后端 |
+| revision 的 Service `<ksvc>-<rev>` | **404**,来自 queue-proxy 那一跳(响应头里没有 `istio-envoy`,是普通 Go 服务回的) |
+
+第二条的原因我只定位到"queue-proxy 那一跳"为止(推测是 Host 不是它认的域名,没继续挖)。
+顺带排除一个干扰:**这个 app 本身对任何路径都返回 200**(直接打 revision Service,`/`、`/healthz`、
+`/foo`、任意路径都 200),所以那个 404 不是应用行为。
+
+**④ 所以定制路由只能落在两个地方**
+
+- **拆成多个 KService,用 host 区分** —— 每个 KService 的域名就是一个路由维度,Knative 为每个
+  各生成一条 HTTPRoute。"同一个 host 下再按 path/header 分"这种需求,Knative 给不了。
+- **把定制路由放在 Knative 前面** —— 但前置层发请求时必须用 **KService 的集群内 DNS 名**
+  (`<ksvc>.<ns>.svc.cluster.local`;实测从 pod 里 curl → 200),**不能**用 Gateway API 的
+  backendRef 指 Service(上面 (b) 的两种都试过)。
+
 ## 八、什么时候不该迁
 
 - **需要常驻、不能容忍冷启动**:把 `min-scale` 设成正数就能留热副本,但要接受它不再缩到 0。

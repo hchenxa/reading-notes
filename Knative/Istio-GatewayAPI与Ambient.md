@@ -25,21 +25,33 @@ Gateway API 对象(`Gateway`/`HTTPRoute`),由 Istio 的 Gateway API 控制器去
 
 ## 二、对象关系
 
-```
-GatewayClass "istio"                    (Istio 装的,controllerName=istio.io/gateway-controller)
-   ▲ 引用
-   │
-Gateway istio-system/knative-gateway          ← 外部入口,绑到 istio-ingressgateway 这个 Service
-Gateway istio-system/knative-local-gateway    ← 集群内入口,绑到同名 ClusterIP Service
-   ▲ 被引用
-   │
-config-gateway (ConfigMap, knative-serving)   ← 告诉 Knative 用上面这两个 Gateway
-   ▲
-   │
-KIngress → HTTPRoute                          ← net-gateway-api 生成
-   ▲
-   │
-KService helloworld-go → Route(URL: helloworld-go.demo.svc.cluster.local)
+```mermaid
+flowchart TB
+    classDef istio fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef kn    fill:#fdecea,stroke:#c0392b,color:#7b241c
+    classDef k8s   fill:#eef2f7,stroke:#8fa3b8,color:#33475b
+
+    KSVC["KService helloworld-go<br/>URL: helloworld-go.demo.svc.cluster.local"]:::k8s
+    KI["KIngress → HTTPRoute<br/>net-gateway-api 生成"]:::kn
+    CG["ConfigMap config-gateway（knative-serving）"]:::kn
+
+    subgraph is["istio-system"]
+        direction LR
+        G1["Gateway knative-gateway<br/>外部入口（本实验没用到）"]:::istio
+        G2["Gateway knative-local-gateway<br/>集群内入口"]:::istio
+        SVC["Service istio-ingressgateway<br/>两个 Gateway 共用同一份 Envoy"]:::istio
+        G1 --- SVC
+        G2 --- SVC
+    end
+
+    GC["GatewayClass istio<br/>controllerName = istio.io/gateway-controller"]:::istio
+
+    KSVC -->|"Route"| KI
+    KI -->|"HTTPRoute 落到"| G2
+    CG -->|"指定这两个 Gateway 分别是谁"| G1
+    CG --> G2
+    G1 -.->|"gatewayClassName"| GC
+    G2 -.->|"gatewayClassName"| GC
 ```
 
 `net-gateway-api` 装好后会创建 `config-gateway`,**它内置的默认值就是 Istio 形状**——

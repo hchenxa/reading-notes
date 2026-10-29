@@ -11,6 +11,7 @@ This is a collection of my learning notes on various technologies.
 | [Python](python/) | Python basics, data types, functions |
 | [JavaScript](javascript/) | JavaScript fundamentals, DOM, events |
 | [AI](AI/) | AI/ML concepts, LoRA, fine-tuning |
+| [Argo CD](ArgoCD/) | Argo CD 一周掌握计划:GitOps 模型、同步机制、ApplicationSet、多集群与生产化 |
 | [Ansible](ansible/) | Ansible automation |
 | [Appium](appium/) | Appium mobile testing framework |
 | [Kubernetes](kubernetes/) | Kubernetes internals, Pod scheduling |

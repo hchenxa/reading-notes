@@ -287,6 +287,46 @@ deployment.apps/guestbook-helm-guestbook   1/1     1            1           31s
 > 本仓库 `ArgoCD/labs/guestbook` 的清单推到 GitHub 后,把 Application 的 source
 > 换过去,Day 2 的 `kubectl scale deployment guestbook` 才对应 lab 里的名字。
 
+### 4.8 team-a + ApplicationSet 实测(2026-10-29)
+
+把 [资源关系入门](资源关系入门.md) 里的 00 / 01 / 04 真跑了一遍,仓库用本仓库的
+`docs/argocd-one-week-plan` 分支:
+
+- AppProject `team-a`:sourceRepos 只允许 `https://github.com/hchenxa/reading-notes.git`;
+  destinations 是 `in-cluster` 的 `team-a-dev` / `team-a-prod`;clusterResourceWhitelist 放行 Namespace。
+- Repository Secret `repo-team-a`:label `secret-type: repository`,url 指向同一个仓库。
+- ApplicationSet `guestbook-envs`:List generator 生成 dev / prod 两个 Application。
+
+```console
+$ argocd app list
+NAME                   CLUSTER     NAMESPACE    PROJECT  STATUS  HEALTH   ...
+argocd/guestbook-dev   in-cluster  team-a-dev   team-a   Synced  Healthy  ...
+argocd/guestbook-prod  in-cluster  team-a-prod  team-a   Synced  Healthy  ...
+
+$ kubectl -n argocd get application guestbook-dev \
+    -o jsonpath='{.metadata.ownerReferences[0].kind}/{.metadata.ownerReferences[0].name}{"\n"}'
+ApplicationSet/guestbook-envs
+
+$ kubectl -n team-a-dev get deploy,svc,pod
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES
+deployment.apps/guestbook   1/1     1            1           7s    guestbook    nginx:1.27-alpine
+
+NAME                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/guestbook   ClusterIP   10.96.72.155   <none>        80/TCP    7s
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/guestbook-864f75649c-p8z5r   1/1     Running   0          7s
+```
+
+`team-a-prod` 里也是同样一组资源。两个 Application 都是普通的 Application,同样受 `team-a`
+的 `sourceRepos` / `destinations` 约束;只是多了 ownerReference。
+
+这个实验顺带验证了三件事:
+
+- `destination.name: in-cluster` 可用。
+- `CreateNamespace=true` 会创建 Namespace 对象,AppProject 必须放行 `group: "", kind: Namespace`。
+- repo-server 在 Pod 里要单独注入代理,见第十一节第 5 条。
+
 ## 五、Day 2:Application 生命周期与状态机
 
 ### 5.1 要回答的问题
@@ -947,7 +987,7 @@ flowchart TB
 - 研究大规模部署:controller 分片、repo-server 缓存、ApplicationSet 的 progressive sync。
 - 把生产环境的 Argo CD 做成 bootstrap 仓库:Argo CD 管理自己。
 
-## 十一、本机环境:kind + colima 的四个坑
+## 十一、本机环境:kind + colima 的五个坑
 
 1. **两个集群会打满 inotify**。colima VM 的 `fs.inotify.max_user_instances` 是 128,
    两套 kind 集群 + Istio / Knative 的 watcher 很容易占满,表现是组件崩、Pod 里 DNS 不通。
@@ -959,6 +999,22 @@ flowchart TB
    kind 相关命令前先 `export DOCKER_HOST=unix:///Users/hchenxa/.colima/default/docker.sock`。
 4. **gcr.io 经代理慢到病态**。Argo CD 自己的镜像主要在 quay.io,相对好一些;lab 应用用
    Docker Hub 的 `nginx:1.27-alpine`,避开 gcr.io。
+5. **Pod 出网不会自动走节点代理**。`kind-proxy.conf` 只修了节点里的 containerd / kubelet;
+   repo-server 在 Pod 里直接连 GitHub 会报 `context deadline exceeded`。需要给 repo-server
+   注入代理(指向 `host.docker.internal:7890`),并把集群网段放进 `NO_PROXY`:
+
+   ```console
+   $ PROXY=http://host.docker.internal:7890
+   $ NO_PROXY='localhost,127.0.0.1,.svc,.svc.cluster.local,10.0.0.0/8,10.244.0.0/16,10.96.0.0/16,172.16.0.0/12,192.168.0.0/16'
+   $ kubectl -n argocd set env deployment/argocd-repo-server \
+       HTTP_PROXY="$PROXY" HTTPS_PROXY="$PROXY" http_proxy="$PROXY" https_proxy="$PROXY" \
+       NO_PROXY="$NO_PROXY" no_proxy="$NO_PROXY"
+   $ kubectl -n argocd rollout status deployment/argocd-repo-server
+   ```
+
+   验证:在 Pod 里 `curl -I https://github.com` 直连会超时,带上 `HTTPS_PROXY` 就通。
+   首次 clone 一个比较大的仓库(本仓库 `.git` 约 50 MiB)可能超过 15 秒,报一次
+   `ComparisonError`;等 repo-server 缓存好后再 hard refresh 一次即可。
 
 资源不够时的清理:
 

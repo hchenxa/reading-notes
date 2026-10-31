@@ -1,0 +1,10 @@
+# 给 team-a 增加 project role：developer
+# 用法：
+#   kubectl -n argocd patch appproject team-a --type merge --patch-file team-a-roles-patch.yaml
+spec:
+  roles:
+    - name: developer
+      description: read and sync team-a applications
+      policies:
+        - p, proj:team-a:developer, applications, get, team-a/*, allow
+        - p, proj:team-a:developer, applications, sync, team-a/*, allow

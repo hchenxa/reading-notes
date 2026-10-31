@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: team-b
+  namespace: argocd
+spec:
+  sourceRepos:
+    - https://github.com/hchenxa/reading-notes.git
+  destinations:
+    - name: in-cluster
+      namespace: team-b-dev
+    - name: in-cluster
+      namespace: team-b-prod
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  roles:
+    - name: viewer
+      description: read-only team-b applications
+      policies:
+        - p, proj:team-b:viewer, applications, get, team-b/*, allow

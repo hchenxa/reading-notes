@@ -1,0 +1,19 @@
+# 负向测试：project=team-a，但 destination 指向 team-b-dev。
+# 预期：Application 状态为 InvalidSpecError，不能 sync。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook-cross-tenant
+  namespace: argocd
+spec:
+  project: team-a
+  source:
+    repoURL: https://github.com/hchenxa/reading-notes.git
+    targetRevision: main
+    path: ArgoCD/labs/guestbook
+  destination:
+    name: in-cluster
+    namespace: team-b-dev
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

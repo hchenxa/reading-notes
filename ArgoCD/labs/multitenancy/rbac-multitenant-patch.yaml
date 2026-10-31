@@ -1,0 +1,25 @@
+# 多租户 RBAC patch
+# 用法：
+#   kubectl -n argocd patch configmap argocd-rbac-cm --type merge --patch-file rbac-multitenant-patch.yaml
+#
+# 关键：policy.default 必须是 no-access，不能是 role:readonly。
+# role:readonly 会让所有已登录用户看到所有项目，破坏租户隔离。
+data:
+  policy.default: role:no-access
+  scopes: '[groups]'
+  policy.csv: |
+    g, admin, role:admin
+    g, hchenxa-org:argo-admin, role:admin
+
+    # 全局 RBAC：tenant-a 只读用户
+    p, role:tenant-a-viewer, applications, get, team-a/*, allow
+    p, role:tenant-a-viewer, projects, get, team-a, allow
+    p, role:tenant-a-viewer, logs, get, team-a/*, allow
+    g, tenant-a-viewer, role:tenant-a-viewer
+    g, hchenxa-org:argo-viewer, role:tenant-a-viewer
+
+    # project role：tenant-b viewer（只读 team-b）
+    g, tenant-b-viewer, proj:team-b:viewer
+
+    # project role：team-a developer（可同步 team-a）
+    g, tenant-a-developer, proj:team-a:developer

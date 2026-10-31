@@ -527,7 +527,8 @@ LDAP 不经过外网;如果 LDAP 在 Mac 宿主上,Dex Pod 里的 `127.0.0.1` �
 ### 6.4 实测结果(2026-10-31)
 
 - GitHub OAuth App + Dex GitHub connector 登录成功。
-- 当前限制:`orgs: hchenxa-org` + `teams: argo-admin`,`teamNameField: slug`。
+- 当前限制:`orgs: hchenxa-org` + `teams: argo-admin, argo-viewer`,`teamNameField: slug`;
+  `argo-viewer` 的租户只读映射见 [08-多租户RBAC](08-多租户RBAC.md)。
 - Dex 日志:`login successful`,`preferred_username=hchenxa`,`groups=["hchenxa-org:argo-admin"]`。
 - `argocd-server` 日志:`Web login successful`,`username=hchenxa`,issuer `https://localhost:8080/api/dex`。
 - RBAC 只保留 `g, hchenxa-org:argo-admin, role:admin`(另保留本地 admin);admin-only 的

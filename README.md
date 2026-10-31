@@ -19,3 +19,12 @@ This is a collection of my learning notes on various technologies.
 | [Istio](Istio/) | Istio 服务网格：升级方式与中断排查、Gateway 配置相关问题 |
 | [TLS](TLS/) | TLS/mTLS 握手与双向认证、代理终结/透传/桥接、证书签发与管理 |
 | [signer-sample](signer-sample/) | Ed25519 数字签名示例：签名服务端与验签客户端 |
+
+## Documentation
+
+所有笔记遵循 [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md)。新文档从 `docs/templates/` 选择一种类型开始写;
+提交前运行:
+
+```bash
+python3 scripts/check_docs.py <改动的文件>
+```

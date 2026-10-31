@@ -4,6 +4,7 @@
 > 这一篇把"清单从哪里来"讲全:Helm、Kustomize、多源仓库,以及用 ApplicationSet 批量生成 Application。
 >
 > 状态:路线 + 实验设计,Helm / 多源部分尚未逐条实测。
+> 所有源类型(含 OCI、CMP 插件、Terraform 等 IaC 的接法)见 [06-源类型全解与扩展](06-源类型全解与扩展.md)。
 
 ## 一、要回答的问题
 
@@ -77,8 +78,9 @@ spec:
 
 ## 四、Kustomize
 
-Kustomize 类型支持 `path`、`images`、`replicas`、`commonAnnotations` 等覆盖,
-以及 `kustomize.buildOptions`(比如 `--load-restrictor LoadRestrictionsNone`)。
+Kustomize 类型支持 `path`、`images`、`replicas`、`commonAnnotations` 等覆盖。
+注意 `kustomize.buildOptions`(比如 `--load-restrictor LoadRestrictionsNone`)**不是
+Application 字段**,只能配在 `argocd-cm` 的全局配置里,改完要重启 repo-server。
 版本要固定,避免本地 `kustomize build` 和 repo-server 渲染结果不一致。
 
 01 里的 `ArgoCD/labs/guestbook` 就是 Kustomize:Argo CD 看到 `kustomization.yaml`,
@@ -164,4 +166,5 @@ spec:
 ## 七、下一步
 
 - [04-多集群与多租户](04-多集群与多租户.md)
+- [06-源类型全解与扩展](06-源类型全解与扩展.md) —— 全部源类型、OCI、CMP 扩展、Terraform 等 IaC 的接法
 - [00-概念与架构](00-概念与架构.md) 6.3 与第三节

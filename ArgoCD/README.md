@@ -5,8 +5,8 @@
 >
 > - 版本基线:**Argo CD v3.5.6**(2026-10 当前 stable;v3.6 还在 RC,这周不跟)
 > - 环境基线:macOS + colima(4 vCPU / 6 GiB)+ kind
-> - 已实测:00 的概念整理、01 的安装与 `team-a` + ApplicationSet 验证
-> - 未逐条实测:02-05 是路线和实验设计,跑完把真实输出补进对应章节
+> - 已实测:00 的概念整理、01 的安装与 `team-a` + ApplicationSet 验证、07 的 GitHub org/team SSO
+> - 未逐条实测:02-05 是路线和实验设计;07 的 LDAP 未测,跑完把真实输出补进对应章节
 
 ## 一、文件索引
 
@@ -18,8 +18,10 @@
 | [03-清单来源与ApplicationSet](03-清单来源与ApplicationSet.md) | Helm、Kustomize、多源、ApplicationSet | 路线 |
 | [04-多集群与多租户](04-多集群与多租户.md) | Cluster Secret、AppProject、RBAC、SSO | 路线 |
 | [05-生产化与排障](05-生产化与排障.md) | HA、通知、监控、备份、升级、故障表 | 路线 |
+| [06-源类型全解与扩展](06-源类型全解与扩展.md) | Directory/Helm/Kustomize/OCI、CMP 扩展框架、Terraform/Pulumi/Ansible 的接入 | 已整理(实验待做) |
+| [07-SSO与Dex](07-SSO与Dex.md) | Dex 原理、GitHub / LDAP 连接器、RBAC、本地 kind 实验 | 已整理(GitHub org/team 已实测;LDAP 未实测) |
 
-**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。**
+**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。** 06 是源类型扩展篇,07 是 SSO 专题,按需查阅。
 
 如果只有一天:先读 00 的第一至五节,再跑 01。概念没建立起来之前,不要急着做实验;
 否则 `Synced / OutOfSync`、`Healthy / Degraded`、`prune / selfHeal` 很容易混。
@@ -61,7 +63,7 @@
 **这周不深入**:
 
 - Argo Rollouts(渐进式发布)、Argo Workflows / Events;
-- 自定义 CMP 插件开发、Source Hydrator / Impersonation(3.5 的 beta 特性);
+- 自定义 CMP 插件开发、Source Hydrator / Impersonation(3.5 的 beta 特性;CMP 原理和最小实验见 [06](06-源类型全解与扩展.md));
 - 上万 Application 的规模调优、Argo CD Agent 的拉模式。
 
 ## 四、当前实验环境
@@ -84,6 +86,9 @@
 | Helm | [helm](https://argo-cd.readthedocs.io/en/stable/user-guide/helm/) | 03 |
 | Kustomize | [kustomize](https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/) | 03 |
 | Multiple Sources | [multiple_sources](https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/) | 03 |
+| OCI 制品源 | [oci](https://argo-cd.readthedocs.io/en/stable/user-guide/oci/) | 06 |
+| Config Management Plugins | [config-management-plugins](https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/) | 06 |
+| Source Hydrator | [source-hydrator](https://argo-cd.readthedocs.io/en/stable/user-guide/source-hydrator/) | 06 |
 | ApplicationSet | [applicationset](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/) | 03 |
 | Cluster Management | [cluster-management](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-management/) | 04 |
 | Projects | [projects](https://argo-cd.readthedocs.io/en/stable/user-guide/projects/) | 04 |
@@ -102,6 +107,7 @@
 
 - [00-概念与架构](00-概念与架构.md)
 - [01-环境搭建与首个应用](01-环境搭建与首个应用.md)
+- [文档写作规范](../docs/STYLE_GUIDE.md) —— 所有笔记的类型、元信息与章节格式
 - [kubernetes/kind](../kubernetes/kind/) —— kind 集群配置与节点代理修复
 - [Knative](../Knative/) —— 同样在本机 kind 上踩过资源 / 代理 / inotify 的坑
 - [Istio](../Istio/) —— 多集群、Gateway 相关笔记

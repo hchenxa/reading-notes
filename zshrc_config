@@ -1,0 +1,72 @@
+# Zsh completion
+autoload -Uz compinit && compinit
+
+# Interactive menu: show list immediately when there are multiple matches
+zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ''
+
+# Case-insensitive matching
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# Don't auto-insert the first match — show the menu instead
+zstyle ':completion:*' insert-unambiguous false
+
+# Completer: just basic complete + file expansion
+zstyle ':completion:*' completer _complete
+
+# Always list ambiguous completions
+setopt autolist
+setopt listambiguous
+
+alias ll='ls -lahG'
+alias la='ls -A'
+alias ls='ls -lG'
+
+# Brew configuration
+export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
+export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
+export HOMEBREW_INSTALL_FROM_API=1
+
+# DeepSeek configuration
+export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
+export ANTHROPIC_AUTH_TOKEN=
+export ANTHROPIC_MODEL=deepseek-flash[1m]
+export ANTHROPIC_DEFAULT_OPUS_MODEL=deepseek-flash[1m]
+export ANTHROPIC_DEFAULT_SONNET_MODEL=deepseek-flash[1m]
+export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-flash
+export CLAUDE_CODE_SUBAGENT_MODEL=deepseek-flash
+export CLAUDE_CODE_EFFORT_LEVEL=max
+export CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432
+
+# HTTP proxy (for kind, curl, etc.)
+export HTTP_PROXY=http://127.0.0.1:7890
+export HTTPS_PROXY=http://127.0.0.1:7890
+export NO_PROXY=localhost,127.0.0.1,10.0.0.0/8,10.244.0.0/16,10.96.0.0/16,.svc,.svc.cluster,.svc.cluster.local
+
+# Disable the claude code auto update
+export DISABLE_AUTOUPDATER=1
+eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+export PATH=$PATH:/opt/homebrew/bin/:/Users/hchenxa/.local/bin
+
+#GO env
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:/opt/homebrew/Cellar/terraform/1.15.7/bin/
+
+export GH_TOKEN=
+
+# Use the podman by default for kind (via docker-compatible socket;
+# workaround for kind + podman6 labels bug, see kind PR #4203)
+unset KIND_EXPERIMENTAL_PROVIDER  # stale env from older shells would force kind's broken podman path
+if PODMAN_SOCK=$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2>/dev/null) && [[ -n "$PODMAN_SOCK" ]]; then
+    export DOCKER_HOST="unix://$PODMAN_SOCK"
+fi
+
+# Setup the vpn proxy
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7891
+
+# Plugin: zsh-autosuggestions
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Plugin: zsh-syntax-highlighting (must be last)
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

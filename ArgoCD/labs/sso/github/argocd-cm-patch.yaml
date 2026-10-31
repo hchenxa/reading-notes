@@ -1,0 +1,19 @@
+# 合并进 argocd-cm 的 patch（Merge Patch）
+# 用法：
+#   kubectl -n argocd patch configmap argocd-cm --type merge --patch-file argocd-cm-patch.yaml
+#
+# 这是本地实验版：没有配 orgs，任何 GitHub 用户都能登录；
+# 权限由 argocd-rbac-cm 的 policy.default 兜底（只读），只有指定 login 是 admin。
+# 生产环境请按 07 文档加 orgs / teams 限制。
+data:
+  url: https://localhost:8080
+  dex.config: |
+    connectors:
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: REPLACE_WITH_GITHUB_CLIENT_ID
+          clientSecret: $argocd-github-oauth:dex.github.clientSecret
+          # 让 OIDC subject 使用 GitHub login，方便按用户名映射 RBAC
+          useLoginAsID: true

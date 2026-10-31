@@ -1,0 +1,13 @@
+# 合并进 argocd-rbac-cm 的 patch（Merge Patch）
+# 用法：
+#   kubectl -n argocd patch configmap argocd-rbac-cm --type merge --patch-file argocd-rbac-cm-patch.yaml
+#
+# 本地实验：所有 SSO 用户默认只读；把你的 GitHub login 映射成 admin。
+# 因为 argocd-cm 里设了 useLoginAsID: true，这里的 subject 就是 GitHub login。
+data:
+  policy.default: role:readonly
+  scopes: '[groups]'
+  policy.csv: |
+    # 保留本地 admin，避免 SSO 配好后把自己锁在外面
+    g, admin, role:admin
+    g, REPLACE_WITH_GITHUB_LOGIN, role:admin

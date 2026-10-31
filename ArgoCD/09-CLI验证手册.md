@@ -280,7 +280,38 @@ argocd app delete guestbook-cross-tenant --yes --cascade=false
 
 ---
 
-## 六、本地账号管理
+## 六、一键回归脚本
+
+labs 里提供了 `verify.sh`,把三个本地账号的 `account can-i` 矩阵做成回归测试:
+
+```bash
+export TENANT_A_VIEWER_PASSWORD='<password>'
+export TENANT_B_VIEWER_PASSWORD='<password>'
+export TENANT_A_DEVELOPER_PASSWORD='<password>'
+
+./ArgoCD/labs/multitenancy/verify.sh
+```
+
+它会登录三个账号,执行 8 条断言:
+
+```text
+PASS  tenant-a-viewer      get      applications team-a/guestbook-dev           => yes
+PASS  tenant-a-viewer      sync     applications team-a/guestbook-dev           => no
+PASS  tenant-a-viewer      get      applications team-b/guestbook-team-b-dev    => no
+PASS  tenant-b-viewer      get      applications team-b/guestbook-team-b-dev    => yes
+PASS  tenant-b-viewer      get      applications team-a/guestbook-dev           => no
+PASS  tenant-a-developer   get      applications team-a/guestbook-dev           => yes
+PASS  tenant-a-developer   sync     applications team-a/guestbook-dev           => yes
+PASS  tenant-a-developer   sync     applications team-b/guestbook-team-b-dev    => no
+All RBAC checks passed.
+```
+
+前置条件:port-forward 正在运行,三个本地账号已按 lab README 创建。
+脚本只从环境变量读取密码,不会把密码写进文件。
+
+---
+
+## 七、本地账号管理
 
 ```bash
 # 列出
@@ -306,7 +337,7 @@ argocd account delete-token --account tenant-a-viewer <token-id>
 
 ---
 
-## 七、SSO group 怎么不用第二个账号也能测
+## 八、SSO group 怎么不用第二个账号也能测
 
 没有第二个 GitHub 账号时,可以分两层验证:
 
@@ -331,7 +362,7 @@ argocd account delete-token --account tenant-a-viewer <token-id>
 
 ---
 
-## 八、限制与注意事项
+## 九、限制与注意事项
 
 - `admin settings rbac can` 只读全局 `argocd-rbac-cm`,**不展开 AppProject project role**;
   判断当前用户请用 `account can-i`。
@@ -345,7 +376,7 @@ argocd account delete-token --account tenant-a-viewer <token-id>
 
 ---
 
-## 九、参考
+## 十、参考
 
 - [08-多租户RBAC](08-多租户RBAC.md)
 - [07-SSO与Dex](07-SSO与Dex.md)

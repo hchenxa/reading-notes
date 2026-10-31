@@ -20,6 +20,7 @@
 | `rbac-multitenant-patch.yaml` | 全局 RBAC + project role 绑定 |
 | `local-accounts-cm-patch.yaml` | 开启三个本地实验账号 |
 | `local-accounts-secret.example.yaml` | bcrypt 密码占位文件 |
+| `verify.sh` | 三个账号的 `account can-i` 回归测试 |
 
 ## 1. 创建 team-b
 
@@ -84,7 +85,20 @@ argocd --config /tmp/a-dev.yaml app sync <team-a-app> --dry-run
 | `tenant-b-viewer` | 只有 team-b | 否 |
 | `tenant-a-developer` | team-a | 是（team-a） |
 
-## 5. 跨租户拒绝测试
+## 5. 一键回归
+
+```bash
+export TENANT_A_VIEWER_PASSWORD='<password>'
+export TENANT_B_VIEWER_PASSWORD='<password>'
+export TENANT_A_DEVELOPER_PASSWORD='<password>'
+
+./verify.sh
+```
+
+脚本会分别登录三个本地账号,执行 8 条 `account can-i` 断言,
+包括 team-a/team-b 的 get/sync 和跨租户拒绝。
+
+## 6. 跨租户拒绝测试
 
 ```bash
 kubectl -n argocd apply -f cross-tenant-app.yaml
@@ -100,7 +114,7 @@ InvalidSpecError: application destination server 'in-cluster' and namespace 'tea
 do not match any of the allowed destinations in project 'team-a'
 ```
 
-## 6. 清理
+## 7. 清理
 
 ```bash
 kubectl -n argocd delete application guestbook-team-b-dev --wait=false

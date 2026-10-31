@@ -5,7 +5,7 @@
 >
 > - 版本基线:**Argo CD v3.5.6**(2026-10 当前 stable;v3.6 还在 RC,这周不跟)
 > - 环境基线:macOS + colima(4 vCPU / 6 GiB)+ kind
-> - 已实测:00 的概念整理、01 的安装与 `team-a` + ApplicationSet 验证、07 的 GitHub org/team SSO
+> - 已实测:00 的概念整理、01 的安装与 `team-a` + ApplicationSet 验证、07 的 GitHub org/team SSO、08 的本地多租户 RBAC
 > - 未逐条实测:02-05 是路线和实验设计;07 的 LDAP 未测,跑完把真实输出补进对应章节
 
 ## 一、文件索引
@@ -20,8 +20,9 @@
 | [05-生产化与排障](05-生产化与排障.md) | HA、通知、监控、备份、升级、故障表 | 路线 |
 | [06-源类型全解与扩展](06-源类型全解与扩展.md) | Directory/Helm/Kustomize/OCI、CMP 扩展框架、Terraform/Pulumi/Ansible 的接入 | 已整理(实验待做) |
 | [07-SSO与Dex](07-SSO与Dex.md) | Dex 原理、GitHub / LDAP 连接器、RBAC、本地 kind 实验 | 已整理(GitHub org/team 已实测;LDAP 未实测) |
+| [08-多租户RBAC](08-多租户RBAC.md) | AppProject 硬隔离、全局 RBAC、project roles、租户权限实验 | 已整理(本地用户已实测;SSO viewer 未实测) |
 
-**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。** 06 是源类型扩展篇,07 是 SSO 专题,按需查阅。
+**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。** 06 是源类型扩展篇,07 是 SSO 专题,08 是多租户 RBAC 实验,按需查阅。
 
 如果只有一天:先读 00 的第一至五节,再跑 01。概念没建立起来之前,不要急着做实验;
 否则 `Synced / OutOfSync`、`Healthy / Degraded`、`prune / selfHeal` 很容易混。

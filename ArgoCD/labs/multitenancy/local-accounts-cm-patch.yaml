@@ -1,0 +1,8 @@
+# 本地实验账号：开启 login/api 能力。
+# 注意：Argo CD 的账号能力写在 accounts.<name> 的值里，不是 accounts.<name>.capabilities。
+# 用法：
+#   kubectl -n argocd patch configmap argocd-cm --type merge --patch-file local-accounts-cm-patch.yaml
+data:
+  accounts.tenant-a-viewer: "api, login"
+  accounts.tenant-b-viewer: "api, login"
+  accounts.tenant-a-developer: "api, login"

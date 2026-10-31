@@ -276,6 +276,7 @@ kubectl -n argocd patch appproject team-a --type json \
 - 给 `argo-viewer` 加第二个 GitHub 账号,验证真实 SSO group 登录;
 - 把 `team-a` / `team-b` 的 `namespaceResourceWhitelist` 收窄到实际需要的资源类型;
 - 用 ApplicationSet 批量生成"每租户一套 Application";
+- 用 [09-CLI验证手册](09-CLI验证手册.md) 把权限验证变成命令和脚本,不依赖 UI;
 - 阅读 [04-多集群与多租户](04-多集群与多租户.md) 的 AppProject / Cluster Secret 部分。
 
 ## 九、参考
@@ -284,4 +285,5 @@ kubectl -n argocd patch appproject team-a --type json \
 - [Argo CD Projects](https://argo-cd.readthedocs.io/en/stable/user-guide/projects/)
 - [Argo CD User Management(Dex)](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/)
 - [07-SSO与Dex](07-SSO与Dex.md)
+- [09-CLI验证手册](09-CLI验证手册.md)
 - [多租户 lab 清单](labs/multitenancy/README.md)

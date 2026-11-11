@@ -23,8 +23,9 @@
 | [08-多租户RBAC](08-多租户RBAC.md) | AppProject 硬隔离、全局 RBAC、project roles、租户权限实验 | 已整理(本地用户已实测;SSO viewer 未实测) |
 | [09-CLI验证手册](09-CLI验证手册.md) | SSO / RBAC / project role / Application 的 CLI 验证命令 | 已整理(核心命令已实测) |
 | [10-仓库组织与生产布局](10-仓库组织与生产布局.md) | 应用仓 / 配置仓拆分、chart 制品、values 布放与环境晋级 | 未实测(基于官方文档整理) |
+| [11-ApplicationSet跨仓库删除排障](11-ApplicationSet跨仓库删除排障.md) | matrix 多仓库 generator 下，cluster 仓删/加 values.yaml 后 Application 不增删的排障记录 | 部分实测(2026-11-11) |
 
-**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。** 06 是源类型扩展篇,07 是 SSO 专题,08 是多租户 RBAC 实验,09 是 CLI 验证手册,10 是生产仓库布局,按需查阅。
+**推荐顺序:00 → 01 → 02 → 03 → 04 → 05。** 06 是源类型扩展篇,07 是 SSO 专题,08 是多租户 RBAC 实验,09 是 CLI 验证手册,10 是生产仓库布局,11 是 ApplicationSet 跨仓库删除排障,按需查阅。
 
 如果只有一天:先读 00 的第一至五节,再跑 01。概念没建立起来之前,不要急着做实验;
 否则 `Synced / OutOfSync`、`Healthy / Degraded`、`prune / selfHeal` 很容易混。
